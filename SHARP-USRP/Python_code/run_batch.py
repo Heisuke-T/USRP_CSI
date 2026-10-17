@@ -15,6 +15,10 @@
       python run_batch.py a.mat b.mat --label W
       python run_batch.py "D:\\IQ_csi\\*.mat" --resample nudft
 
+      # セッションごとのフォルダをまとめて回す
+      python run_batch.py "E:/Dataset_CSI/S1/*.mat" "E:/Dataset_CSI/S2/*.mat" \
+                          "E:/Dataset_CSI/S3/*.mat" --noise_level -3.0 --despike
+
     Copyright (C) 2026 Heisuke Takeda
     Released under the GNU GPL v3 (see LICENSE).
 """
@@ -25,6 +29,7 @@ import os
 import sys
 import time
 import traceback
+from collections import Counter
 from datetime import datetime
 
 import usrp_to_sharp
@@ -97,9 +102,40 @@ def expand_inputs(patterns):
     return out
 
 
-def run_one(in_path, args):
+def derive_names(files, prefix_parent=False):
+    """各入力ファイルの出力名を決める。
+
+    出力名はファイル名の部分だけから作るため、セッションごとのフォルダに
+    同じファイル名で入っている構成 (E:/Dataset_CSI/S1/W_antenna1.mat と
+    E:/Dataset_CSI/S2/W_antenna1.mat) では名前が衝突する。衝突すると後の
+    ファイルが前のファイルの出力を上書きし、さらに「完了済み (PNG がある)」
+    判定に引っ掛かって 2 つ目以降が黙って飛ばされる。
+
+    そこで名前が重なるときは親フォルダ名を前に付けて区別する
+    (S1_W_antenna1, S2_W_antenna1)。prefix_parent=True なら常に付ける。
+    """
+    stems = [os.path.splitext(os.path.basename(f))[0] for f in files]
+    dup = {k for k, v in Counter(stems).items() if v > 1}
+
+    names = []
+    for f, stem in zip(files, stems):
+        if prefix_parent or stem in dup:
+            parent = os.path.basename(os.path.dirname(os.path.abspath(f)))
+            if parent:
+                stem = f'{parent}_{stem}'
+        names.append(stem)
+
+    # 親フォルダを付けてもまだ重なるなら連番で分ける (黙って上書きしない)
+    seen, unique = Counter(), []
+    for n in names:
+        seen[n] += 1
+        unique.append(n if seen[n] == 1 else f'{n}__{seen[n]}')
+    return unique
+
+
+def run_one(in_path, args, name=None):
     """1 ファイルを手順0〜5 まで通す。戻り値は結果の要約。"""
-    name = args.name or os.path.splitext(os.path.basename(in_path))[0]
+    name = name or args.name or os.path.splitext(os.path.basename(in_path))[0]
     t0 = time.time()
 
     # --- 手順0: SHARP 形式へ変換 ---
@@ -217,6 +253,9 @@ def main():
                         help='ログの出力先 (既定: ./batch_<日時>.log)')
     parser.add_argument('--redo', action='store_true',
                         help='完了済み (PNG がある) のファイルもやり直す')
+    parser.add_argument('--prefix_parent', action='store_true',
+                        help='出力名に親フォルダ名を必ず前置する。'
+                             '名前が重なる場合は指定がなくても前置する')
     args = parser.parse_args()
 
     if args.noise_level >= 0:
@@ -237,18 +276,24 @@ def main():
     tee = Tee(log_path)
     sys.stdout = tee
 
+    names = derive_names(files, prefix_parent=args.prefix_parent)
+    if args.name:
+        names = [args.name] * len(files)
+
     t_all = time.time()
     print('=' * 68)
     print(f'一括処理を開始: {datetime.now():%Y-%m-%d %H:%M:%S}')
     print(f'対象 {len(files)} ファイル / ログ {log_path}')
-    for f in files:
+    for f, name in zip(files, names):
         sz = os.path.getsize(f) / 1e6 if os.path.exists(f) else float('nan')
-        print(f'  - {f}  ({sz:.1f} MB)')
+        stem = os.path.splitext(os.path.basename(f))[0]
+        # 名前を付け替えた場合は、どの出力名になるかを見せる
+        tag = '' if name == stem else f'  -> {name}'
+        print(f'  - {f}  ({sz:.1f} MB){tag}')
     print('=' * 68)
 
     results, failures = [], []
-    for i, f in enumerate(files, 1):
-        name = args.name or os.path.splitext(os.path.basename(f))[0]
+    for i, (f, name) in enumerate(zip(files, names), 1):
         print(f'\n[{i}/{len(files)}] {name}  '
               f'({datetime.now():%H:%M:%S})')
         print('-' * 68)
@@ -263,7 +308,7 @@ def main():
             continue
 
         try:
-            r = run_one(f, args)
+            r = run_one(f, args, name=name)
             results.append(r)
             print(f'  完了 ({r["seconds"]/60:.1f} 分)')
         except Exception as e:                       # noqa: BLE001
