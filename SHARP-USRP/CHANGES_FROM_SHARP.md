@@ -399,6 +399,7 @@ SHARP は 4 コアが同じパケットを受けるので長さが常に一致�
 | `wifi_config.py` | 規格ごとの OFDM 構成の一元管理 |
 | `pipeline_meta.py` | 段間で規格・切り出し位置を引き継ぐ |
 | `run_phase_sanitization.py` | 手順0〜3 の一括実行 |
+| `run_har.py` | 手順6〜8 (`--csi` で手順0〜8) の一括実行と、正解率・混同行列のまとめ |
 | `CSI_doppler_plot.py` | ドップラーマップの描画 (軸は `_meta.json` から) |
 | `tests/test_pipeline.py` | 変換の可逆性・位相安定化の効果を VHT20/HE20 で検証 |
 | `tests/test_doppler.py` | 非等間隔サンプリングの 3 手法を比較検証 |

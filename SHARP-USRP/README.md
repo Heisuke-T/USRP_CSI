@@ -257,6 +257,69 @@ python3 CSI_doppler_computation.py ./processed_phase/ . ./doppler_traces/ 10 10 
 python3 CSI_doppler_plot.py ./doppler_traces/ ./plots/ --ylim 5
 ```
 
+**重要 — SHARP のドップラー計算をそのまま使ってはいけない理由**
+
+SHARP の `CSI_doppler_computation.py` はアルゴリズム自体 (ハン窓 → FFT →
+パワー → サブキャリア方向に加算 → 正規化) はそのまま使えるが、
+コードをそのまま流用すると次の 3 点で誤る。
+
+| # | 問題 | 症状 |
+|---|---|---|
+| 1 | `--bandwidth 20` の意味が逆転する | **エラーが出ずに誤った結果**になる |
+| 2 | `Tc = 6e-3`, `fc = 5e9` のハードコード | 速度軸の目盛りがずれる |
+| 3 | 非等間隔サンプリング | 速い動きでスペクトルがにじむ |
+
+**① `--bandwidth 20` の罠**
+
+SHARP の `--bandwidth 20` は「80MHz で取得したデータから 20MHz 幅を切り出す」
+オプションで、245 列 (80MHz 分) の配列に対する固定インデックス
+(`np.arange(0, 57)` など) である。本システムの入力はすでに 20MHz なので:
+
+- **VHT20** (57列): `--sub_band 1` はたまたま全域と一致して動くが偶然。
+  `--sub_band 2` 以降は範囲外エラー
+- **HE20** (245列): 20MHz のさらに 1/4 だけを切り出してしまう。
+  列数が SHARP の 80MHz と同じ 245 なので**エラーが出ず気付けない**
+
+本実装ではこのオプションを廃止し、既定で全サブキャリアを使う。部分帯域を
+見たい場合は `--subcarrier_range LO HI` で明示する。
+
+**② Tc と fc**
+
+本実装は手順3 が保存した `time_sec` から Tc を実測する。中心周波数は
+`--fc` で指定する (既定 5.18e9 = Ch36)。速度軸の目盛りは
+`_meta.json` に記録され、描画時に使われる。
+
+なお本実装ではビン間隔を FFT のビン数 `n_fft` から計算する
+(`Δv = c / (Tc · fc · n_fft)`)。窓長から決まるのは分解能
+(`c / (Tc · fc · 窓長)`) で、ゼロ詰めしても向上しない量なので別に表示している。
+
+**③ 非等間隔サンプリング — 実測では問題にならない**
+
+これは事前に懸念していたが、実測の時刻列 (変動係数 0.15) で検証したところ
+**そのまま等間隔とみなすのが最も素直で、補間はむしろ有害**だった。
+
+真の速度 ±4 ビンへのパワー集中度 (高いほどにじみが少ない):
+
+| ドップラー速度 | 理想(等間隔) | `none` (既定) | `nudft` | `interp` (線形補間) |
+|---|---|---|---|---|
+| 0.5 m/s | 0.595 | **0.592** | 0.547 | 0.592 |
+| 1.0 m/s | 0.330 | **0.323** | 0.303 | 0.309 |
+| 2.0 m/s | 0.330 | 0.302 | 0.302 | 0.247 |
+| 3.0 m/s | 0.330 | 0.277 | **0.306** | 0.165 |
+
+- **2 m/s 程度まで (人の歩行) は既定の `none` で理想とほぼ同等**
+- 3 m/s 付近では `none` が理想の 84% まで落ち、`nudft` (非等間隔DFT) が取り戻す。
+  走行など速い動きを見るなら `--resample nudft`
+- **線形補間による等間隔化は高速側で明確に悪化する** (補間が低域通過フィルタ
+  として働くため)。比較目的以外では使わないこと
+
+実データでも `none` と `nudft` の結果は相関 0.9996 でほぼ一致した。
+検証コードは `tests/test_doppler.py`。
+
+なお、これは「AP 側から一定レートでトラフィックを流す」必要が無いという意味
+ではない。間隔のばらつきが今回より大きい測定では `nudft` を使うか、測定側で
+レートを安定させるほうがよい。
+
 ### 活動認識の学習とテスト (手順6〜8)
 
 SHARP の学習側 (データセット作成・ネットワーク・評価) を USRP の測定に合わせて
@@ -284,37 +347,69 @@ pip install tensorflow scikit-learn matplotlib
 Windows でネイティブに入れた TensorFlow は CPU でしか動かないが、ネットワークが
 小さいので CPU で十分学習できる。
 
-**ファイルの置き方**
+**1 コマンドで全部回す (run_har.py)**
 
-セッション (S1, S2, S3) ごとにサブディレクトリを分け、ファイル名を次の形にする。
-
-```
-Python_code/doppler_traces/
-├── S1/
-│   ├── S1_E_antenna1_WAX202_aligned_CSI_stream_0.txt
-│   ├── S1_E_antenna1_WAX202_aligned_CSI_stream_0_meta.json
-│   ├── S1_E_antenna2_WAX202_aligned_CSI_stream_0.txt
-│   ├── S1_W_antenna1_WAX202_aligned_CSI_stream_0.txt
-│   └── ...
-├── S2/
-└── S3/
-```
-
-- **4 文字目** (`S1_E_...` の `E`) が活動ラベル (SHARP は `S1a_E_...` の 5 文字目)
-- `antenna1` / `antenna2` がアンテナ。アンテナ名以外が同じファイルどうしを
-  同じ測定として束ねる
-- `_meta.json` はそのまま置いておいてよい (読み込み対象から外している)
-
-`alignCSI.m` の出力をセッションごとに `run_batch.py` へ通すと、この形になる。
-ドップラー計算の設定 (`--remove_static` など) は S1〜S3 で揃えること。
+下の手順6〜8 を順に実行し、最後に正解率の表と混同行列をまとめて出す。
+活動ラベルはファイル名から集めるので指定しなくてよい。
 
 ```powershell
-python run_batch.py "D:\IQ_csi\S1_*_aligned_CSI.mat" --label S1
-python run_batch.py "D:\IQ_csi\S2_*_aligned_CSI.mat" --label S2
-python run_batch.py "D:\IQ_csi\S3_*_aligned_CSI.mat" --label S3
+cd SHARP-USRP\Python_code
+
+# ドップラーデータ (doppler_traces/) ができている場合
+python run_har.py --train S1 --test S2,S3
+
+# デコード済み CSI (E:\Dataset_CSI\S1\W_antenna1.mat など) から全部
+python run_har.py --train S1 --test S2,S3 --csi E:\Dataset_CSI --noise_level -3.0 --despike
+
+# アンテナ 2 本と 1 本の両方で回して比べる
+python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antennas antenna1
 ```
 
-**実行**
+| | |
+|---|---|
+| `outputs/har_summary_<日時>.md` | 正解率・F 値の表と混同行列 (画面にも出る) |
+| `plots/complete_different_*.png` | 混同行列の図 |
+| `har_<日時>.log` | 全工程の画面出力 |
+
+- `--csi` を付けると、その前に `run_batch.py` でドップラーデータを作る
+  (`<csi>/S1/*.mat` などを処理。完了済みのファイルは飛ばす)。run_har.py が知らない
+  オプション (`--noise_level`, `--despike` など) は run_batch.py にそのまま渡す。
+  位相サニタイゼーションに **約 5 分 / 5000 パケット** 掛かるので、CSI から始めると
+  全体で数時間になる
+- テストのセッションが複数あると、まとめた評価に加えてセッションごとにも評価する
+- どこかの工程が失敗したらその時点で止め、失敗した工程を表示する
+
+**ファイルの置き方**
+
+ドップラーデータは次のどちらの置き方でもよい。データセットはどちらの場合も
+`doppler_traces/S1/` などのサブディレクトリに書き出す。
+
+```
+Python_code/doppler_traces/                  Python_code/doppler_traces/
+├── S1_E_antenna1_stream_0.txt               ├── S1/
+├── S1_E_antenna1_stream_0_meta.json         │   ├── S1_E_antenna1_..._stream_0.txt
+├── S1_E_antenna2_stream_0.txt               │   ├── S1_E_antenna2_..._stream_0.txt
+├── S1_W_antenna1_stream_0.txt               │   └── ...
+├── ...                                      ├── S2/
+└── S3_W_antenna2_stream_0.txt               └── S3/
+```
+
+- ファイル名はセッション名 (`S1`) で始まり、**4 文字目** (`S1_E_...` の `E`) が
+  活動ラベル (SHARP は `S1a_E_...` の 5 文字目)
+- `antenna1` / `antenna2` がアンテナ。アンテナ名以外が同じファイルどうしを
+  同じ測定として束ねる
+- `_meta.json`, `_time.npy` はそのまま置いておいてよい (読み込み対象から外している)
+
+左の形は、セッションごとのフォルダ (`E:\Dataset_CSI\S1\W_antenna1.mat` など) を
+`run_batch.py` にまとめて渡すとできる (`--prefix_parent` で出力名の頭に必ず
+セッション名を付ける)。右の形は `--label S1` を付けてセッションごとに処理したもの。
+ドップラー計算の設定 (`--noise_level`, `--remove_static` など) は S1〜S3 で揃えること。
+
+```powershell
+python run_batch.py "E:\Dataset_CSI\S1\*.mat" "E:\Dataset_CSI\S2\*.mat" "E:\Dataset_CSI\S3\*.mat" --prefix_parent --noise_level -3.0 --despike
+```
+
+**段階ごとに実行する**
 
 活動ラベル `E,L,W,R,J` は例。実際に使うラベルに置き換える。
 
@@ -390,10 +485,14 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 あとは次のどちらかで実行できる。
 
 - ターミナル (`` Ctrl+@ ``) で上のコマンドを実行する
-- 「実行とデバッグ」(`Ctrl+Shift+D`) で `SHARP 1.` 〜 `SHARP 5.` を順に選んで
-  F5 (デバッグなしで速く回すなら `Ctrl+F5`)。起動時に使うアンテナと活動ラベルを
-  聞かれる。設定はリポジトリ直下の `.vscode/launch.json` にあり、データの場所や
-  セッション名を変えるときはその `args` を書き換える
+- 「実行とデバッグ」(`Ctrl+Shift+D`) で `SHARP 0. 全部まとめて実行` を選んで
+  `Ctrl+F5` (デバッグなしで実行)。段階ごとに回すなら `SHARP 1.` 〜 `SHARP 5.` を順に。
+  起動時に使うアンテナ (と活動ラベル) を聞かれる。設定はリポジトリ直下の
+  `.vscode/launch.json` にあり、データの場所やセッション名を変えるときはその
+  `args` を書き換える
+- VS Code に Claude Code の拡張機能を入れると、Claude Code が PC 上で直接
+  コマンドを実行できる。「SHARP-USRP の学習を S1 で回して S2,S3 でテストして」と
+  頼めば、リポジトリ直下の `CLAUDE.md` を読んで run_har.py を回し、結果をまとめる
 
 **表示されるが無視してよい警告**
 
@@ -401,69 +500,6 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   TensorFlow のキャッシュの既知の警告。キャッシュは正しく作られる
 - `shuffle=True was passed, but will be ignored` — データセット側でシャッフル
   しているので問題ない
-
-**重要 — SHARP のドップラー計算をそのまま使ってはいけない理由**
-
-SHARP の `CSI_doppler_computation.py` はアルゴリズム自体 (ハン窓 → FFT →
-パワー → サブキャリア方向に加算 → 正規化) はそのまま使えるが、
-コードをそのまま流用すると次の 3 点で誤る。
-
-| # | 問題 | 症状 |
-|---|---|---|
-| 1 | `--bandwidth 20` の意味が逆転する | **エラーが出ずに誤った結果**になる |
-| 2 | `Tc = 6e-3`, `fc = 5e9` のハードコード | 速度軸の目盛りがずれる |
-| 3 | 非等間隔サンプリング | 速い動きでスペクトルがにじむ |
-
-**① `--bandwidth 20` の罠**
-
-SHARP の `--bandwidth 20` は「80MHz で取得したデータから 20MHz 幅を切り出す」
-オプションで、245 列 (80MHz 分) の配列に対する固定インデックス
-(`np.arange(0, 57)` など) である。本システムの入力はすでに 20MHz なので:
-
-- **VHT20** (57列): `--sub_band 1` はたまたま全域と一致して動くが偶然。
-  `--sub_band 2` 以降は範囲外エラー
-- **HE20** (245列): 20MHz のさらに 1/4 だけを切り出してしまう。
-  列数が SHARP の 80MHz と同じ 245 なので**エラーが出ず気付けない**
-
-本実装ではこのオプションを廃止し、既定で全サブキャリアを使う。部分帯域を
-見たい場合は `--subcarrier_range LO HI` で明示する。
-
-**② Tc と fc**
-
-本実装は手順3 が保存した `time_sec` から Tc を実測する。中心周波数は
-`--fc` で指定する (既定 5.18e9 = Ch36)。速度軸の目盛りは
-`_meta.json` に記録され、描画時に使われる。
-
-なお本実装ではビン間隔を FFT のビン数 `n_fft` から計算する
-(`Δv = c / (Tc · fc · n_fft)`)。窓長から決まるのは分解能
-(`c / (Tc · fc · 窓長)`) で、ゼロ詰めしても向上しない量なので別に表示している。
-
-**③ 非等間隔サンプリング — 実測では問題にならない**
-
-これは事前に懸念していたが、実測の時刻列 (変動係数 0.15) で検証したところ
-**そのまま等間隔とみなすのが最も素直で、補間はむしろ有害**だった。
-
-真の速度 ±4 ビンへのパワー集中度 (高いほどにじみが少ない):
-
-| ドップラー速度 | 理想(等間隔) | `none` (既定) | `nudft` | `interp` (線形補間) |
-|---|---|---|---|---|
-| 0.5 m/s | 0.595 | **0.592** | 0.547 | 0.592 |
-| 1.0 m/s | 0.330 | **0.323** | 0.303 | 0.309 |
-| 2.0 m/s | 0.330 | 0.302 | 0.302 | 0.247 |
-| 3.0 m/s | 0.330 | 0.277 | **0.306** | 0.165 |
-
-- **2 m/s 程度まで (人の歩行) は既定の `none` で理想とほぼ同等**
-- 3 m/s 付近では `none` が理想の 84% まで落ち、`nudft` (非等間隔DFT) が取り戻す。
-  走行など速い動きを見るなら `--resample nudft`
-- **線形補間による等間隔化は高速側で明確に悪化する** (補間が低域通過フィルタ
-  として働くため)。比較目的以外では使わないこと
-
-実データでも `none` と `nudft` の結果は相関 0.9996 でほぼ一致した。
-検証コードは `tests/test_doppler.py`。
-
-なお、これは「AP 側から一定レートでトラフィックを流す」必要が無いという意味
-ではない。間隔のばらつきが今回より大きい測定では `nudft` を使うか、測定側で
-レートを安定させるほうがよい。
 
 ### MATLAB から変換する場合
 
@@ -704,6 +740,7 @@ SHARP-USRP/
     ├── CSI_doppler_plot.py         手順5: ドップラーマップの描画
     ├── run_phase_sanitization.py   手順0〜3の一括実行 (1ファイル)
     ├── run_batch.py                手順0〜5の一括実行 (複数ファイル)
+    ├── run_har.py                  手順6〜8 (--csi で 0〜8) の一括実行と結果のまとめ
     ├── CSI_doppler_create_dataset_train.py  手順6: 学習用データセット
     ├── CSI_doppler_create_dataset_test.py   手順6: テスト用データセット
     ├── CSI_network.py              手順7: 学習

@@ -121,7 +121,8 @@ def derive_names(files, prefix_parent=False):
     for f, stem in zip(files, stems):
         if prefix_parent or stem in dup:
             parent = os.path.basename(os.path.dirname(os.path.abspath(f)))
-            if parent:
+            # S1/S1_W_antenna1.mat のように既に付いている場合は重ねない
+            if parent and not stem.startswith(parent + '_'):
                 stem = f'{parent}_{stem}'
         names.append(stem)
 

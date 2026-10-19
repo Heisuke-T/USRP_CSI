@@ -6,8 +6,9 @@
     切り方は SHARP と同じ。
 
     ファイル名の約束:
-      <dir>/<subdir>/S1_E_antenna1_..._stream_0.txt
-        4 文字目 ('E') が活動ラベル、antenna1 / antenna2 がアンテナ
+      <dir>/S1_E_antenna1_..._stream_0.txt  または  <dir>/S1/S1_E_antenna1_..._stream_0.txt
+        セッション名 (S1) で始まり、4 文字目 ('E') が活動ラベル、
+        antenna1 / antenna2 がアンテナ。データセットは <dir>/S1/ に書く
 
     例 (S1 で学習。アンテナ 2 本):
       python CSI_doppler_create_dataset_train.py ./doppler_traces/ S1 31 1 340 30 E,W,R antenna1,antenna2
@@ -22,13 +23,14 @@
 import argparse
 import math as mt
 import os
+import sys
 
 import numpy as np
 
 from dataset_utility import (check_doppler_axes, convert_to_number,
                              create_windows_antennas, find_recordings,
-                             load_recording, parse_antennas, set_name,
-                             write_set)
+                             load_recording, parse_antennas, session_dirs,
+                             set_name, write_set)
 
 
 def main():
@@ -52,13 +54,14 @@ def main():
     gap = mt.ceil(num_packets / args.sliding)   # 分割の境目で窓が重ならないよう空ける幅
 
     for subdir in args.subdirs.split(','):
-        exp_dir = os.path.join(args.dir, subdir)
-        print(f'{exp_dir}  (アンテナ: {",".join(antennas)})')
+        trace_dir, exp_dir = session_dirs(args.dir, subdir)
+        print(f'{subdir}: {trace_dir}  (アンテナ: {",".join(antennas)})')
 
-        recordings = find_recordings(exp_dir, csi_label_dict, antennas)
+        recordings = find_recordings(trace_dir, subdir, csi_label_dict, antennas)
         if not recordings:
-            print(f'  {exp_dir}: 該当するファイルがありません')
-            continue
+            sys.exit(f'エラー: {subdir}_ で始まる {",".join(antennas)} のドップラーデータ (.txt) が '
+                     f'{exp_dir} にも {args.dir} にもありません')
+        os.makedirs(exp_dir, exist_ok=True)
 
         csi_matrices, labels, all_metas = [], [], []
         for label, files in recordings:

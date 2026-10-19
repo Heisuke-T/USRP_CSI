@@ -46,19 +46,39 @@ def set_name(kind, antennas, activities):
     return f'{kind}_{",".join(antennas)}_{activities}'
 
 
-def find_recordings(exp_dir, activities, antennas):
-    """exp_dir 内のドップラーデータを、測定ごとにアンテナを揃えて束ねる。
+def _trace_files(d, session):
+    # _meta.json, _time.npy やデータセットの出力 (labels_*.txt など) を除く
+    return [f for f in sorted(os.listdir(d))
+            if f.startswith(session + '_') and f.endswith('.txt')]
 
-    同じ測定のファイルどうしは、アンテナ名の部分だけが違う
-    (S1_E_antenna1_..._stream_0 と S1_E_antenna2_..._stream_0)。
+
+def session_dirs(base_dir, session):
+    """セッションのドップラーデータの場所と、データセットの書き出し先。
+
+    run_batch.py の使い方によって、ドップラーデータの置き場所は 2 通りある:
+      セッションのフォルダをまとめて渡した場合  doppler_traces/S1_W_antenna1_stream_0.txt
+      --label S1 を付けた場合                  doppler_traces/S1/S1_W_antenna1_stream_0.txt
+    サブディレクトリにあればそちら、無ければ直下を使う。データセットは
+    どちらの場合も doppler_traces/S1/ に書く (学習・テストのスクリプトはそこを読む)。
+
+    戻り値: (ドップラーデータのディレクトリ, データセットの書き出し先)
+    """
+    out_dir = os.path.join(base_dir, session)
+    if os.path.isdir(out_dir) and _trace_files(out_dir, session):
+        return out_dir, out_dir
+    return base_dir, out_dir
+
+
+def find_recordings(trace_dir, session, activities, antennas):
+    """セッションのドップラーデータを、測定ごとにアンテナを揃えて束ねる。
+
+    対象は trace_dir 内の <セッション>_ で始まる .txt。同じ測定のファイルどうしは
+    アンテナ名の部分だけが違う (S1_E_antenna1_..._stream_0 と S1_E_antenna2_..._stream_0)。
 
     戻り値: [(ラベル文字, [アンテナ順のファイルパス]), ...]  名前順
     """
     groups = {}
-    for f in sorted(os.listdir(exp_dir)):
-        # _meta.json やデータセットの出力 (labels_*.txt など) を除く
-        if not (f.startswith('S') and f.endswith('.txt')):
-            continue
+    for f in _trace_files(trace_dir, session):
         name = f[:-4]
         label = name[LABEL_CHAR_INDEX]
         if label not in activities:
@@ -68,7 +88,7 @@ def find_recordings(exp_dir, activities, antennas):
         if ant is None:
             continue        # 使わないアンテナ (antenna1 だけで学習するときの antenna2 など)
         key = '_'.join('*' if t == ant else t for t in tokens)
-        groups.setdefault(key, (label, {}))[1][ant] = os.path.join(exp_dir, f)
+        groups.setdefault(key, (label, {}))[1][ant] = os.path.join(trace_dir, f)
 
     recordings = []
     for key in sorted(groups):
@@ -129,6 +149,15 @@ def check_doppler_axes(metas, tolerance=0.1):
               'ドップラー計算の --sub_sampling でレートを揃えることを検討してください。')
 
 
+def detect_activities(base_dir, sessions):
+    """ドップラーデータのファイル名から、含まれている活動ラベルを集める。"""
+    labels = set()
+    for session in sessions:
+        trace_dir, _ = session_dirs(base_dir, session)
+        labels.update(f[LABEL_CHAR_INDEX] for f in _trace_files(trace_dir, session))
+    return sorted(labels)
+
+
 def reset_dir(path):
     """出力先を空にする (前回の窓のファイルが残らないように)。"""
     if os.path.exists(path):
@@ -156,6 +185,9 @@ def write_set(exp_dir, name, windows, labels, num_windows):
         with open(os.path.join(exp_dir, f'{prefix}_{name}.txt'), 'wb') as fp:
             pickle.dump(obj, fp)
     print(f'  {name}: {len(windows)} 窓')
+    if not windows:
+        print('  警告: 窓が 1 つも作れません。測定 (ドップラーの時間窓の数) が '
+              'windows_length に対して短すぎます。windows_length を小さくするか、長い測定を使ってください')
 
 
 def read_set(exp_dir, name):

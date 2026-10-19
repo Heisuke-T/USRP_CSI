@@ -6,6 +6,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // データセット作成 → 学習 → テスト → 図 → 結果のまとめ (outputs/har_summary_*.md) を一度に回す。
+            // 活動ラベルはファイル名から集める。CSI から始めるときは args に "--csi", "E:/Dataset_CSI" などを足す
+            "name": "SHARP 0. 全部まとめて実行 (S1 で学習 → S2,S3 でテスト)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/SHARP-USRP/Python_code/run_har.py",
+            "cwd": "${workspaceFolder}/SHARP-USRP/Python_code",
+            "args": ["--train", "S1", "--test", "S2,S3", "--antennas", "${input:antennas}"],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "SHARP 1. データセット作成 (学習用: S1)",
             "type": "debugpy",
             "request": "launch",
