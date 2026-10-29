@@ -399,6 +399,11 @@ Python_code/doppler_traces/                  Python_code/doppler_traces/
 - `antenna1` / `antenna2` がアンテナ。アンテナ名以外が同じファイルどうしを
   同じ測定として束ねる
 - `_meta.json`, `_time.npy` はそのまま置いておいてよい (読み込み対象から外している)
+- 2 台の受信機のデータ (`W_antenna1.mat` と `W_antenna2.mat` など) は、`alignCSI.m`
+  の出力 (`*_aligned_CSI.mat`) を使う。2 台が両方受けたパケットだけが同じ順番・
+  同じ時刻で入っているので、パケット番号で切るドップラーの窓も 2 台で同じパケットを
+  指す。元の `*_CSI.mat` は受けたパケットが 2 台で少しずつ違い、番号で重ねると
+  後ろへ行くほど時刻がずれる
 
 左の形は、セッションごとのフォルダ (`E:\Dataset_CSI\S1\W_antenna1.mat` など) を
 `run_batch.py` にまとめて渡すとできる (`--prefix_parent` で出力名の頭に必ず

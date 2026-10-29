@@ -104,9 +104,10 @@ def find_recordings(trace_dir, session, activities, antennas):
 def load_recording(files):
     """1 測定ぶんのドップラーデータを読み、[アンテナ x ビン x 時間] にする。
 
-    2 台の受信機はそれぞれ受けたパケットの数が違うので、時間方向の長さが
-    揃わない。短いほうに合わせて末尾を切る (SHARP は 4 コアが同じパケットを
-    受けるので長さが常に一致していた)。
+    alignCSI.m の出力 (2 台が両方受けたパケットだけを同じ順番で並べたもの) から
+    作ったドップラーデータなら、長さはアンテナ間で一致する。一致しない場合は
+    短いほうに合わせて末尾を切るが、そのときは窓の番号が 2 台で同じ時刻を
+    指さない (SHARP は 4 コアが同じパケットを受けるので長さが常に一致していた)。
 
     戻り値: (配列, 各ファイルの _meta.json の中身のリスト)
     """
@@ -129,6 +130,8 @@ def load_recording(files):
     if max(lengths) != ll:
         print(f'    長さがアンテナ間で違うため {ll} に揃えます '
               f'({", ".join(str(n) for n in lengths)})')
+        print('    注意: 2 台のパケットが揃っていません。alignCSI.m の出力から作ると'
+              '一致します')
     return np.stack([m[:, :ll] for m in mats]), metas
 
 
