@@ -312,8 +312,14 @@ overrunCount    = meta.overrunCount;
 timestamp       = meta.captureDatetime;
 
 % --- 出力ファイル名 ---
-ssidSafe   = regexprep(targetSSID, '[^A-Za-z0-9_-]', '_');
-outFileName = [timestamp '_' ssidSafe '_CSI.mat'];
+% captureIQ*.m の saveFileName で名前を付けていればその名前 (例: D1_E_antenna1)、
+% 無ければキャプチャ時刻を頭に付ける
+ssidSafe = regexprep(targetSSID, '[^A-Za-z0-9_-]', '_');
+outBase  = timestamp;
+if isfield(meta, 'saveName') && ~isempty(meta.saveName)
+    outBase = char(meta.saveName);
+end
+outFileName = [outBase '_' ssidSafe '_CSI.mat'];
 if ~isempty(batchOutFileName)
     % 一括処理では入力ファイル名から出力名を決める (呼び出し側で決定済み)。
     % meta.captureDatetime は分割セグメント間で同じ値になるため、そのままだと

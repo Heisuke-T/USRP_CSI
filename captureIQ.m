@@ -24,7 +24,8 @@
 %    - ホストPC に接続された HDD (空き容量に注意。下記参照)
 %
 %  出力ファイル:
-%    <hddSavePath>/<mmddHHMM>_raw.mat   (mmddHHMM = 月日時分)
+%    <hddSavePath>/<saveFileName>_raw.mat   (例: D1_E_antenna1_raw.mat)
+%    saveFileName が '' なら <hddSavePath>/<mmddHHMM>_raw.mat (mmddHHMM = 月日時分)
 %      iq   … 受信 IQ サンプル (complex double 列ベクトル)
 %      meta … 中心周波数・サンプルレート・オーバーラン回数等の取得条件
 %
@@ -33,7 +34,7 @@
 %      double 前提であるため、型変換を挟まず double のまま保存する。
 %
 %    ※ファイルサイズの目安 (20 MSps, complex double = 16 byte/sample):
-%        1 秒 → 約 320 MB,  2 秒 → 約 640 MB,  10 秒 → 約 3.2 GB
+%        1 秒 → 約 320 MB,  10 秒 → 約 3.2 GB,  90 秒 → 約 28.8 GB
 %      キャプチャ中は同じサイズをメモリ上にも確保するため、実際の上限は
 %      HDD 容量ではなく空きメモリ量で決まる点に注意。
 %
@@ -68,14 +69,23 @@ clear; clc;
 %     現在の環境: HDPC-UT (D:)
 hddSavePath = 'D:\IQ_raw';
 
+% --- 保存ファイル名 ------------------------------------------------------
+%     hddSavePath に <saveFileName>_raw.mat という名前で保存する。
+%     データセット・活動・アンテナごとにここを書き換える
+%       例: 'D1_E_antenna1'  ->  D1_E_antenna1_raw.mat
+%     この名前は復号結果にも引き継がれる (D1_E_antenna1_WAX202_CSI.mat)。
+%     '' にすると、従来どおり収集を始めた時刻の名前 (mmddHHMM) になる。
+%     同じ名前のファイルが既にある場合は、上書きしないよう収集の前に止まる。
+saveFileName = 'D1_E_antenna1';
+
 % --- Wi-Fi 受信パラメータ (5GHz 帯 ch36 / 20MHz) -------------------------
 centerFrequency = 5.180e9;      % [Hz] 5GHz 帯 ch36 (20MHz 帯域幅)
 sampleRate      = 20e6;         % [Sps] 20 MHz 帯域
-gain            = 40;           % [dB] B200 系は 0〜76 dB 程度
+gain            = 30;           % [dB] B200 系は 0〜76 dB 程度
                                  %      飽和するなら下げ、弱すぎるなら上げる
-captureDuration = 30.0;          % [s] Beacon 間隔は通常 100ms なので
+captureDuration = 90.0;          % [s] Beacon 間隔は通常 100ms なので
                                  %     確実に捕捉したい場合は長めに設定。
-                                 %     5s で約 1.6 GB (メモリも同量必要)。
+                                 %     90s で約 28.8 GB (メモリも同量必要)。
                                  %     ※decodeIQ_HE.m の復号はキャプチャ長の
                                  %       40〜60 倍程度かかる (5s で 3〜5 分、
                                  %       電波の混雑度に依存)。長時間の
@@ -105,15 +115,36 @@ end
 fclose(fidTest);
 delete(testFile);
 
+% --- 保存ファイル名の確認 ---
+% 収集を始める前に確かめる (長い収集が終わってから上書きに気付くと
+% 取り直しになるため)。'_raw' や '.mat' まで書いてあっても受け付ける。
+saveName = char(regexprep(strtrim(char(saveFileName)), '(_raw)?(\.mat)?$', ''));
+if ~isempty(saveName)
+    if ~isempty(regexp(saveName, '[\\/:*?"<>|]', 'once'))
+        error('captureIQ:badFileName', ...
+            'saveFileName にファイル名に使えない文字が入っています: %s', saveName);
+    end
+    rawMatFile = fullfile(hddSavePath, [saveName '_raw.mat']);
+    if isfile(rawMatFile)
+        error('captureIQ:fileExists', ...
+            ['同じ名前のファイルが既にあります: %s\n', ...
+             '上書きしないよう止めました。saveFileName を変えるか、', ...
+             '既にあるファイルを移動してください。'], rawMatFile);
+    end
+end
+
 % 保存サイズの事前表示 (complex double で 16 byte/sample)
 % 同じサイズをキャプチャ中にメモリ上へも確保するため、空きメモリも要確認。
 estimatedBytes = captureDuration * sampleRate * 16;
 fprintf('保存予定サイズ: 約 %.2f GB (メモリも同量必要)\n', estimatedBytes / 1e9);
 
-% ファイル名に使う時刻は mmddHHMM (月日時分)。年は入らないので、
+% saveFileName が '' のときは、ファイル名に時刻 mmddHHMM (月日時分) を使う。
+% 時刻には年が入らないので、
 % 年まで含む完全な日時は meta.captureDatetimeFull に別途記録する。
 timestamp  = datestr(now, 'mmddHHMM');
-rawMatFile = fullfile(hddSavePath, [timestamp '_raw.mat']);
+if isempty(saveName)
+    rawMatFile = fullfile(hddSavePath, [timestamp '_raw.mat']);
+end
 
 %% ------------------------------------------------------------------------
 %  3. USRP B205 mini-i 受信機オブジェクトの生成
@@ -209,6 +240,7 @@ meta = struct();
 meta.description      = 'USRP B205 mini-i captured Wi-Fi IQ samples (5GHz ch36)';
 meta.dataFormat       = 'complex double column vector, variable name: iq';
 meta.rawMatFile       = rawMatFile;
+meta.saveName         = saveName;               % saveFileName ('' = 時刻の名前)
 meta.wifiChannel      = 36;
 meta.centerFrequency  = centerFrequency;        % [Hz]
 meta.sampleRate       = sampleRate;             % [Sps] = 帯域幅
@@ -221,7 +253,7 @@ meta.samplesPerFrame  = samplesPerFrame;
 meta.totalSamples     = totalSamplesCaptured;
 meta.overrunCount     = overrunCount;
 meta.elapsedCapture   = elapsedCapture;         % [s] 実際に要した時間
-meta.captureDatetime     = timestamp;   % 'mmddHHMM' (ファイル名と同じ)
+meta.captureDatetime     = timestamp;   % 'mmddHHMM' (収集を始めた時刻)
 meta.captureDatetimeFull = datestr(now, 'yyyy-mm-dd HH:MM:SS');   % 年を含む完全な日時
 meta.matlabVersion    = version;
 

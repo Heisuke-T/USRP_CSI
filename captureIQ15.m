@@ -36,15 +36,17 @@
 %    TSF タイムスタンプで行うのが確実 (復号側で対応予定)。
 %
 %  出力ファイル:
-%    <hddSavePath>/<mmddHHMM>_<シリアル番号>_raw.mat
+%    <hddSavePath>/<saveFileName>_raw.mat   (例: D1_E_antenna1_raw.mat)
 %      iq   … 受信 IQ サンプル (complex double 列ベクトル)
 %      meta … 取得条件 + 上記の開始時刻の記録
-%    2 台分のファイルを同じフォルダに集めても名前が衝突しないよう、
-%    ファイル名に USRP のシリアル番号を入れている。復号結果
-%    (*_CSI.mat) の名前にも引き継がれる。
+%    名前は復号結果 (*_CSI.mat) にも引き継がれる。2 台で取るときは、
+%    PC ごとにアンテナの部分 (antenna1 / antenna2) を変えておく。
+%    saveFileName が '' なら <mmddHHMM>_<シリアル番号>_raw.mat (2 台分を
+%    同じフォルダに集めても衝突しないよう、USRP のシリアル番号を入れる)。
 %
 %  2 台で使うときの手順の例:
-%    1. 両方の PC で、このファイルの保存先・ゲイン・キャプチャ時間を揃える
+%    1. 両方の PC で、このファイルの保存先・ゲイン・キャプチャ時間を揃え、
+%       saveFileName のアンテナの部分だけを PC ごとに変える
 %    2. 合図で同時に実行する (またはどちらかが captureIQ10.m、もう一方が
 %       captureIQ15.m を 5 秒遅れで実行する、など)
 %    3. 表示される「収集開始時刻」を両方メモしておく
@@ -86,15 +88,24 @@ startDelay = 15.0;             % [s] 実行ボタンを押してから収集を�
 %     現在の環境: HDPC-UT (D:)
 hddSavePath = 'D:\IQ_raw';
 
+% --- 保存ファイル名 ------------------------------------------------------
+%     hddSavePath に <saveFileName>_raw.mat という名前で保存する。
+%     データセット・活動・アンテナごとにここを書き換える
+%       例: 'D1_E_antenna1'  ->  D1_E_antenna1_raw.mat
+%     この名前は復号結果にも引き継がれる (D1_E_antenna1_WAX202_CSI.mat)。
+%     '' にすると、従来どおり収集を始めた時刻の名前 (mmddHHMM_<シリアル番号>) になる。
+%     同じ名前のファイルが既にある場合は、上書きしないよう収集の前に止まる。
+saveFileName = 'D1_E_antenna1';
+
 % --- Wi-Fi 受信パラメータ (5GHz 帯 ch36 / 20MHz) -------------------------
 %     2 台で収集するときは、両方の PC でここを揃えること。
 centerFrequency = 5.180e9;      % [Hz] 5GHz 帯 ch36 (20MHz 帯域幅)
 sampleRate      = 20e6;         % [Sps] 20 MHz 帯域
-gain            = 40;           % [dB] B200 系は 0〜76 dB 程度
+gain            = 30;           % [dB] B200 系は 0〜76 dB 程度
                                  %      飽和するなら下げ、弱すぎるなら上げる
-captureDuration = 30.0;         % [s] キャプチャ時間。complex double で
+captureDuration = 90.0;         % [s] キャプチャ時間。complex double で
                                  %     1 秒あたり 320 MB のメモリを使う
-                                 %     (30 秒で 9.6 GB)。
+                                 %     (90 秒で 28.8 GB)。
 samplesPerFrame = 20000;        % [samples/frame]
 usrpPlatform    = 'B200';
 
@@ -124,6 +135,24 @@ if fidTest == -1
 end
 fclose(fidTest);
 delete(testFile);
+
+% --- 保存ファイル名の確認 ---
+% 収集を始める前に確かめる (長い収集が終わってから上書きに気付くと
+% 取り直しになるため)。'_raw' や '.mat' まで書いてあっても受け付ける。
+saveName = char(regexprep(strtrim(char(saveFileName)), '(_raw)?(\.mat)?$', ''));
+if ~isempty(saveName)
+    if ~isempty(regexp(saveName, '[\\/:*?"<>|]', 'once'))
+        error('captureIQ15:badFileName', ...
+            'saveFileName にファイル名に使えない文字が入っています: %s', saveName);
+    end
+    rawMatFile = fullfile(hddSavePath, [saveName '_raw.mat']);
+    if isfile(rawMatFile)
+        error('captureIQ15:fileExists', ...
+            ['同じ名前のファイルが既にあります: %s\n', ...
+             '上書きしないよう止めました。saveFileName を変えるか、', ...
+             '既にあるファイルを移動してください。'], rawMatFile);
+    end
+end
 
 % 保存サイズの事前表示 (complex double で 16 byte/sample)
 % 同じサイズをキャプチャ中にメモリ上へも確保するため、空きメモリも要確認。
@@ -182,6 +211,12 @@ fprintf('  ゲイン          : %d dB\n', gain);
 fprintf('  キャプチャ時間  : %.2f s\n', captureDuration);
 fprintf('  USRP シリアル   : %s\n', usrpSerialNum);
 fprintf('  保存先フォルダ  : %s\n', hddSavePath);
+if isempty(saveName)
+    fprintf('  保存ファイル名  : (収集開始の時刻)_%s_raw.mat\n', ...
+        regexprep(usrpSerialNum, '[^A-Za-z0-9]', ''));
+else
+    fprintf('  保存ファイル名  : %s_raw.mat\n', saveName);
+end
 fprintf('  実行した時刻    : %s\n', ...
     fmtTime(scriptStartWall, 'yyyy-MM-dd HH:mm:ss.SSS'));
 fprintf('  収集開始の予定  : 実行から %.1f 秒後\n', startDelay);
@@ -272,13 +307,15 @@ fprintf('  キャプチャ完了: %d サンプル, %.2f s, オーバーラン %d
 %% ------------------------------------------------------------------------
 %  5. IQ とメタデータを HDD へ保存
 %  ------------------------------------------------------------------------
-% ファイル名は「収集を始めた時刻 (mmddHHMM)」+「USRP のシリアル番号」。
+% saveFileName を指定していればその名前 (上で決めた rawMatFile)。
+% '' のときは「収集を始めた時刻 (mmddHHMM)」+「USRP のシリアル番号」。
 % 2 台分を同じフォルダに集めても衝突しないようにシリアル番号を入れる。
-% この文字列は meta.captureDatetime として復号側にも引き継がれ、
-% 復号結果 (*_CSI.mat) のファイル名にも付く。
+% 時刻 + シリアル番号は meta.captureDatetime として復号側にも引き継がれる。
 serialTag  = regexprep(usrpSerialNum, '[^A-Za-z0-9]', '');
 timestamp  = [fmtTime(captureStartWall, 'MMddHHmm') '_' serialTag];
-rawMatFile = fullfile(hddSavePath, [timestamp '_raw.mat']);
+if isempty(saveName)
+    rawMatFile = fullfile(hddSavePath, [timestamp '_raw.mat']);
+end
 
 % 復号 (decodeIQ_HE.m) 側の WLAN Toolbox が double を要求するため、型変換を
 % 挟まず complex double のまま保存する。
@@ -286,6 +323,7 @@ meta = struct();
 meta.description      = 'USRP B205 mini-i captured Wi-Fi IQ samples (5GHz ch36), delayed start';
 meta.dataFormat       = 'complex double column vector, variable name: iq';
 meta.rawMatFile       = rawMatFile;
+meta.saveName         = saveName;               % saveFileName ('' = 時刻の名前)
 meta.wifiChannel      = 36;
 meta.centerFrequency  = centerFrequency;        % [Hz]
 meta.sampleRate       = sampleRate;             % [Sps] = 帯域幅
@@ -299,7 +337,7 @@ meta.samplesPerFrame  = samplesPerFrame;
 meta.totalSamples     = totalSamplesCaptured;
 meta.overrunCount     = overrunCount;
 meta.elapsedCapture   = elapsedCapture;         % [s] 実際に要した時間
-meta.captureDatetime     = timestamp;   % 'mmddHHMM_<シリアル>' (ファイル名と同じ)
+meta.captureDatetime     = timestamp;   % 'mmddHHMM_<シリアル>' (収集開始の時刻)
 meta.captureDatetimeFull = fmtTime(captureStartWall, 'yyyy-MM-dd HH:mm:ss');
 meta.matlabVersion    = version;
 
