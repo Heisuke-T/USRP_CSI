@@ -506,6 +506,96 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - `shuffle=True was passed, but will be ignored` — データセット側でシャッフル
   しているので問題ない
 
+### 受信レートの低下を模擬する (packet_loss.py)
+
+実環境では他の通信・干渉・混雑などで CSI を受信できないパケットが出る。
+位相サニタイゼーション済みの CSI (`processed_phase/`) のパケットを「受信 / 欠落」
+に振り分けるマスクを掛けて、受信レートが下がった状況を疑似的に作る。
+受信が止まる時間の長さと規則性で 4 つのパターンを用意しており、どれも
+**欠落率 `--loss_rate` (0〜1) で強さを変えられる**。
+
+| `--loss` | 受信の様子 | 想定する原因 | 強さを決めるオプション |
+|---|---|---|---|
+| `random` | 1 パケットずつ散発的に欠ける | 低 SNR (距離・壁)、他の端末との衝突 | `--loss_rate` |
+| `burst` | 一定時間まとめて途切れ、その後回復する | 他の通信によるチャネル占有、干渉、人体による遮蔽 | `--loss_rate`, `--burst_ms` (途切れの平均長) |
+| `periodic` | 一定の周期でまとめて途切れる | 端末・AP の定期スキャン | `--period_s` (周期) と `--loss_rate` (または `--burst_ms`) |
+| `sustained` | 途切れはしないが受信レートが下がり続ける | 混雑で送信機が CSMA/CA で待機し続ける | `--loss_rate` (レートが 1 - 欠落率 倍になる) |
+
+- `burst` は途切れる時間・受信する時間の長さが指数分布 (Gilbert-Elliott モデルを
+  時間で表したもの)。平均の途切れが `--burst_ms`、長い目で見た欠落の割合が
+  `--loss_rate` になる。`--burst_dist fixed` で途切れの長さを固定できる
+- `periodic` の 1 回の途切れは `欠落率 x 周期` (例: `--period_s 30 --loss_rate 0.01`
+  なら 30 秒ごとに 300 ms)。`--burst_ms 300` と直接書いてもよい
+- `--loss_start_s 20 --loss_duration_s 30` のように、測定の一部の区間だけを
+  低下させることもできる (先頭のパケットからの秒数)
+- 欠け方は乱数で決まるが、ファイル名と `--loss_seed` から作るので再実行で同じになる
+- 2 台の受信機 (`antenna1`, `antenna2`): `random` は受信側の要因なので受信機ごとに
+  独立に欠け、それ以外は送信側の要因 (送られなかったパケット) なので 2 台で同じ
+  パケットが欠ける。`--loss_antennas shared / independent` で固定できる
+
+欠落したパケットは既定では取り除く (`--loss_fill drop`)。実際に受信が欠けたときに
+パイプラインが受け取るデータと同じで、`time_sec` も欠落後のものになる。
+`hold` (直前の受信で埋める) と `interp` (前後から線形補間) も選べる。
+
+**欠落率ごとの正解率を比べる (run_har.py --loss)**
+
+```powershell
+cd SHARP-USRP\Python_code
+
+# S1 (欠落なし) で学習し、S2,S3 に burst の欠落を入れて欠落率ごとにテストする
+python run_har.py --train S1 --test S2,S3 --noise_level -3.0 --despike `
+    --loss burst --loss_rate 0.1,0.2,0.4 --burst_ms 100
+
+# 学習側にも同じ欠落を入れる (欠落率ごとに学習し直す)
+python run_har.py --train S1 --test S2,S3 --noise_level -3.0 --despike `
+    --loss sustained --loss_rate 0.3,0.6 --loss_on both
+```
+
+1. `processed_phase/` から、欠落なしで全セッションのドップラーデータを計算する
+   (`doppler_traces_loss/none/`)。これが基準
+2. 欠落率ごとに、テストのセッションへ欠落を入れて計算する
+   (`doppler_traces_loss/burst_r0.2_b100ms/` など)
+3. 欠落なしのデータで 1 回学習し、条件ごとにテストする
+
+`outputs/har_summary_<日時>.md` の先頭に、条件ごとの 実際の欠落率・受信レート・
+最長の途切れ・正解率 を並べた表が出る。混同行列の図は条件ごとに
+`plots/complete_different_..._S2,S3_burst_r0.2_b100ms_max_merge.png` のように分かれる。
+
+- 位相サニタイゼーション済みの CSI (`processed_phase/S1_*.mat` など) が必要。
+  `--csi` と一緒に使えば、先にそれを作ってから欠落の模擬に進む
+- ドップラー計算の設定 (`--noise_level`, `--despike`, `--remove_static` など) は
+  基準と欠落ありの両方に同じものを使う。以前の `doppler_traces/` と設定が違えば
+  警告を出す
+
+**単体で使う**
+
+```powershell
+# processed_phase の .mat に欠落を入れて別のフォルダに書き出す (受信の様子の図も出す)
+python packet_loss.py ./processed_phase/S2_*.mat --out_dir ./processed_phase_loss/ `
+    --loss burst --loss_rate 0.2 --burst_ms 100 --preview
+
+# ドップラー計算で直接入れる (--only で対象のファイルを絞れる)
+python CSI_doppler_computation.py ./processed_phase/ . ./doppler_traces_loss/test/ 10 10 31 1 -3.0 `
+    --despike --only S2_,S3_ --loss periodic --period_s 30 --burst_ms 300
+```
+
+書き出した `.mat` には元のパケットごとの受信 (1) / 欠落 (0) が `loss_mask` として、
+欠落の実績 (欠落率、連続した欠落の長さ、受信レート) が `<名前>_loss.json` に入る。
+ドップラー計算で入れた場合は `_meta.json` の `packet_loss` に残る。
+
+**注意**
+
+- `drop` では受信したパケットだけを並べて STFT に掛けるので (既定の `--resample none`)、
+  途切れた時間は詰められる。また `sustained` で受信レートが下がると Tc が延び、
+  ドップラーの速度軸の範囲 (`v_max`) が狭くなる。これらは実際にレートが落ちたときに
+  このパイプラインで起きることそのもの。途切れの時間を正しく扱いたい場合は
+  `--resample nudft` を試す
+- 欠落はパケット数を減らすので、ドップラーの時間窓の数も減る。測定が短いと
+  学習・テスト用の窓が作れなくなることがある (`--window` を小さくする)
+- 位相サニタイゼーションの後で欠落させている。サニタイゼーションはパケットごとの
+  処理なので、欠落してから処理した場合とほぼ同じになる (前処理のサブキャリアごとの
+  振幅の正規化だけは全パケットの平均を使うが、パケットが減っても平均はほぼ変わらない)
+
 ### MATLAB から変換する場合
 
 Python を使わず MATLAB 内で手順0 を済ませたい場合:
@@ -746,6 +836,7 @@ SHARP-USRP/
     ├── run_phase_sanitization.py   手順0〜3の一括実行 (1ファイル)
     ├── run_batch.py                手順0〜5の一括実行 (複数ファイル)
     ├── run_har.py                  手順6〜8 (--csi で 0〜8) の一括実行と結果のまとめ
+    ├── packet_loss.py              受信レートの低下 (パケット欠落) の模擬
     ├── CSI_doppler_create_dataset_train.py  手順6: 学習用データセット
     ├── CSI_doppler_create_dataset_test.py   手順6: テスト用データセット
     ├── CSI_network.py              手順7: 学習
@@ -762,6 +853,7 @@ SHARP-USRP/
         ├── test_pipeline.py            パイプライン全体のテスト
         ├── test_doppler.py             ドップラー計算の検証
         ├── test_har.py                 データセット作成〜学習〜テストの検証
+        ├── test_packet_loss.py         パケット欠落の模擬の検証
         └── test_matlab_parity.py       MATLAB/Python 一致テスト
 ```
 

@@ -5,9 +5,9 @@ Python_code/phase_processing/*.json
 Python_code/phase_processing/*.npy
 Python_code/processed_phase*/**/*.mat
 Python_code/processed_phase*/*.mat
-Python_code/doppler_traces/**/*.txt
-Python_code/doppler_traces/**/*.json
-Python_code/doppler_traces/**/*.npy
+Python_code/doppler_traces*/**/*.txt
+Python_code/doppler_traces*/**/*.json
+Python_code/doppler_traces*/**/*.npy
 
 # 活動認識の学習 (データセットの窓は doppler_traces 内の *.txt として上で無視される)
 Python_code/*_cache_*

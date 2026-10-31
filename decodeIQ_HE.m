@@ -127,6 +127,16 @@
 %                      から送信元を判定したもの)。CSI 自体には影響しない。
 %      targetSSIDOut / targetBSSIDOut … 指定SSIDと学習されたBSSID
 %      seenNetworks … 検出できた全 BSSID/SSID の一覧 (診断用)
+%      frameLog     … 復号できた全フレーム (対象 SSID 以外も含む) の時刻・送信元・宛先。
+%                     IMU 計測アプリ (WT9011DCL) がノート PC から送る Wi-Fi の合図
+%                     (上りのデータフレーム) を後で探し、IMU と時刻を合わせるのに使う。
+%                     数値だけの構造体なので Python (h5py) からも読みやすい:
+%                       timeSec  … キャプチャ開始からの時刻 [s] (timeSec* と同じ時間軸)
+%                       ta / ra  … 送信元 / 宛先の MAC アドレスを 48 bit の数値にしたもの (NaN = 不明)
+%                       phy      … 1=Non-HT 2=HT 3=VHT 4=HE
+%                       isData   … フレーム種別に "Data" を含むか
+%                       toAP     … 宛先が対象 BSSID (= AP 宛ての上り)
+%                       fcsVerified, uplinkHE … 上の同名の変数と同じ意味
 %
 %    ※ 対象 SSID への帰属判定は、送信元(Address2)・宛先(Address1)の
 %      どちらかが対象 BSSID と一致するかで行う (ダウンリンクは Address2、
@@ -1394,6 +1404,11 @@ end
 %% ------------------------------------------------------------------------
 %  7. 保存 (.mat) — HDD と USB メモリの両方へ
 %  ------------------------------------------------------------------------
+% 全フレームの記録 (IMU との時刻合わせ用。対象 SSID に絞る前の pktLog から作る)
+frameLog = buildFrameLog(pktLog, targetBSSID);
+fprintf('全フレームの記録 (frameLog): %d 件 (うち AP 宛ての上りデータ %d 件)\n', ...
+    numel(frameLog.timeSec), nnz(frameLog.toAP & frameLog.isData));
+
 % 変数名は ResultCSI.m と揃えて csiMeta とする
 csiMeta = struct();
 csiMeta.description      = ['CSI filtered by target SSID ', ...
@@ -1432,7 +1447,7 @@ saveVars = { ...
     'csiHE', 'timeSecHE', 'frameTypeHE', 'fcsHE', 'uplinkHE', 'bssColorHE', ...
     'subcarrierIndicesNonHT', 'subcarrierIndicesHT20', ...
     'subcarrierIndicesVHT20', 'subcarrierIndicesHE20', ...
-    'targetSSIDOut', 'targetBSSIDOut', 'seenNetworks'};
+    'targetSSIDOut', 'targetBSSIDOut', 'seenNetworks', 'frameLog'};
 
 fprintf('\n');
 nSaved = 0;
@@ -2961,6 +2976,54 @@ function bytes = bitsToOctets(bits)
     end
     b = reshape(bits(1:n), 8, []);
     bytes = (2.^(0:7)) * b;   % 1 x (n/8), 各要素は 0..255
+end
+
+function F = buildFrameLog(pktLog, targetBSSID)
+    % 復号できた全フレームの時刻と送信元・宛先を、数値だけの表にまとめる。
+    % IMU 計測アプリが送る Wi-Fi の合図 (ノート PC → AP の上りデータフレーム、
+    % 一定間隔の小さなかたまり) を後で探すのに使う。中身は暗号化で読めないが、
+    % 送信元・宛先のアドレスと時刻は読める。
+    n = numel(pktLog);
+    F = struct();
+    F.description = ['all decoded frames (any BSS). ta/ra = transmitter/receiver MAC as 48-bit ', ...
+                     'numbers (NaN = unknown). phy: 1=Non-HT 2=HT 3=VHT 4=HE. isData: frame type ', ...
+                     'contains "Data". toAP: receiver is the target BSSID. timeSec: seconds from capture start.'];
+    F.timeSec     = zeros(n, 1);
+    F.ta          = nan(n, 1);
+    F.ra          = nan(n, 1);
+    F.phy         = zeros(n, 1);
+    F.isData      = false(n, 1);
+    F.fcsVerified = false(n, 1);
+    F.uplinkHE    = false(n, 1);
+    F.targetBSSID = macToNum(targetBSSID);
+    phyNames = {'Non-HT', 'HT', 'VHT', 'HE'};
+    for k = 1:n
+        e = pktLog(k);
+        F.timeSec(k) = e.timeSec;
+        F.ta(k) = macToNum(e.bssid);      % pktLog の bssid は Address2 (送信元)
+        F.ra(k) = macToNum(e.addr1);
+        p = find(strcmpi(phyNames, e.phyFormat), 1);
+        if ~isempty(p)
+            F.phy(k) = p;
+        end
+        F.isData(k)      = ~isempty(strfind(lower(char(string(e.frameType))), 'data'));
+        F.fcsVerified(k) = logical(e.fcsVerified);
+        F.uplinkHE(k)    = logical(e.uplink);
+    end
+    F.toAP = ~isnan(F.ra) & (F.ra == F.targetBSSID);
+end
+
+function v = macToNum(s)
+    % 'AA:BB:CC:DD:EE:FF' や 'AABBCCDDEEFF' を 48 bit の数値にする (double で正確に表せる)
+    v = NaN;
+    if isempty(s)
+        return;
+    end
+    h = regexprep(char(string(s)), '[^0-9A-Fa-f]', '');
+    if numel(h) ~= 12
+        return;
+    end
+    v = hex2dec(h);
 end
 
 function out = ternary(cond, a, b)

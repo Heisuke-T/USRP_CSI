@@ -39,6 +39,11 @@
          よって既定は 'none' (SHARP と同じ扱い)。走行など速い動きを見る場合は
          'nudft' を推奨する。検証は tests/test_doppler.py。
 
+      4. 受信レートの低下を模擬できる (--loss, 本実装で追加)
+         パケットの欠落 (random / burst / periodic / sustained) を入れてから
+         計算する。詳細は packet_loss.py。欠落の実績は _meta.json の
+         packet_loss に残る。
+
     Copyright (C) 2026 Heisuke Takeda
     Based on SHARP (C) 2022 Francesca Meneghello, GNU GPL v3.
 
@@ -65,6 +70,8 @@ import numpy as np
 import scipy.io as sio
 from scipy.fftpack import fft, fftshift
 from scipy.signal.windows import hann
+
+import packet_loss
 
 V_LIGHT = 3e8
 
@@ -245,6 +252,21 @@ def process_one(mat_file, out_file, args):
     amp = amp / np.mean(amp, axis=1, keepdims=True)
     csi_complex = amp * np.exp(1j * csi_matrix_processed[:, :, 1])
 
+    # --- 受信レートの低下 (パケット欠落) の模擬 ---
+    # 実際に受信が欠けた状況を作るため、外れ値の除去や間引きより前に入れる
+    loss = None
+    if getattr(args, 'loss', None):
+        keep, t_used = packet_loss.mask_for(
+            path.basename(mat_file)[:-4], time_sec, args,
+            n=csi_complex.shape[0], Tc=args.Tc)
+        csi_complex, time_sec = packet_loss.apply_mask(
+            csi_complex, time_sec, keep, args.loss_fill)
+        loss = packet_loss.loss_stats(t_used, keep)
+        loss['setting'] = packet_loss.describe(args)
+        loss['fill'] = args.loss_fill
+        print(f'  欠落の模擬: {loss["setting"]}')
+        packet_loss.print_stats(loss, indent='    ')
+
     # 部分帯域の切り出し (既定は全サブキャリア)
     if args.subcarrier_range is not None:
         lo, hi = args.subcarrier_range
@@ -352,9 +374,13 @@ def process_one(mat_file, out_file, args):
         resample_mode=args.resample,
         remove_static=bool(args.remove_static),
         sub_sampling=int(args.sub_sampling),
+        despike=bool(args.despike),
+        despike_sigmas=float(args.despike_sigmas),
         despiked_packets=n_despiked,
+        start=int(args.start), end=int(args.end),
         interval_cv=cv,
         resample=resample_stats,
+        packet_loss=loss,
     )
     with open(out_file[:-4] + '_meta.json', 'w', encoding='utf-8') as fp:
         json.dump(meta, fp, ensure_ascii=False, indent=2)
@@ -412,7 +438,16 @@ def main():
     parser.add_argument('--subcarrier_range', type=int, nargs=2, default=None,
                         metavar=('LO', 'HI'),
                         help='使用するサブキャリアの範囲 (既定は全部)')
+    parser.add_argument('--only', default=None,
+                        help='名前がこれで始まるファイルだけ処理する (カンマ区切り。例: S2_,S3_)')
+    parser.add_argument('--overwrite', action='store_true',
+                        help='処理済み (出力の .txt がある) でもやり直す')
+    packet_loss.add_loss_args(parser)
     args = parser.parse_args()
+    try:
+        packet_loss.check_loss_args(args)
+    except ValueError as e:
+        parser.error(str(e))
 
     # 雑音床は 10^x として使う。x >= 0 だと 10^x >= 1 となり、窓ごとの
     # 最大値 1.0 を含む全ビンが切り捨てられて真っ平らな図になる。
@@ -430,13 +465,16 @@ def main():
         os.makedirs(out_dir, exist_ok=True)
 
         names = [f[:-4] for f in sorted(listdir(exp_dir)) if f.endswith('.mat')]
+        if args.only:
+            prefixes = tuple(p for p in args.only.split(',') if p)
+            names = [n for n in names if n.startswith(prefixes)]
         if not names:
             print(f'{exp_dir}: .mat がありません')
             continue
 
         for name in names:
             out_file = path.join(out_dir, name + '.txt')
-            if path.exists(out_file):
+            if path.exists(out_file) and not args.overwrite:
                 print(f'{name}: 処理済みのためスキップ')
                 continue
             print(name)
