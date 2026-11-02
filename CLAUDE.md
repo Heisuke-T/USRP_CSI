@@ -49,6 +49,7 @@ python tests/test_har.py        # データセット作成〜学習〜テスト�
 python tests/test_pipeline.py   # 位相サニタイゼーション
 python tests/test_doppler.py    # ドップラー計算
 python tests/test_packet_loss.py  # 受信レートの低下 (パケット欠落) の模擬
+python tests/test_doppler_variants.py  # 正規化を省いたドップラー (--save_unnormalized)
 ```
 
 ## 約束
