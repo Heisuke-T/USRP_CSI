@@ -37,6 +37,7 @@ SHARP-USRP が、オリジナルの [SHARP](https://github.com/francescamen/SHAR
 | `optimization_utility.py` | SHARP | **無変更** (そのまま利用) |
 | `wifi_config.py` | 新規 | 規格ごとの OFDM 構成を集約 (A) |
 | `pipeline_meta.py` | 新規 | 段間で規格設定を引き継ぐ (A) |
+| `output_name.py` | 新規 | 出力名に掛けた処理の数字を入れる (D) |
 | `usrp_to_sharp.py` / `usrpCSItoSHARP.m` | 新規 | デコーダ出力 → SHARP 入力形式の変換 (C) |
 | `CSI_phase_sanitization_signal_preprocessing.py` | SHARP | (A)(B)(C) |
 | `CSI_phase_sanitization_H_estimation.py` | SHARP | (A)(B) |
@@ -328,6 +329,42 @@ prof = np.exp(-1j * 2 * np.pi * np.outer(f_grid, t)) @ (x * w[:, None])
 
 ---
 
+### 4.x 出力名に処理条件を入れた (オリジナルには無い)
+
+SHARP は 1 つの条件でしか処理しないため、出力名は入力名のままでよかった。
+本実装は雑音床・窓長・外れ値処理などを変えて何度も回すので、どの図がどの
+条件のものか名前から分かるようにした。
+
+```
+# SHARP オリジナル (入力名のまま)
+T0_A_R_antenna1_WAX202_aligned_CSI_stream_0.png
+
+# SHARP-USRP (共通語を落とし、掛けた処理を数字で表す)
+T0_A_R_antenna1_134.png
+```
+
+数字の意味は `output_name.py` の `STEPS`:
+
+| 数字 | 処理 | 指定 |
+|---|---|---|
+| 1 | 外れ値パケットを前後から補間する | `--despike` |
+| 2 | 窓内の時間平均 (静止経路) を引く | `--remove_static` |
+| 3 | パケットごとに、全サブキャリアの平均振幅で割る | 既定で掛かる |
+| 4 | 窓ごとに最大値で割り、雑音床 10^noise_level で切り捨てる | 既定で掛かる |
+
+3 と 4 は `--save_unnormalized` の版では外れるので、同じ測定から 3 通りの
+名前が出る (通常 `_134` / nowinnorm `_13` / raw `_1`)。どれも掛かっていなければ
+`_0`。`--name_style full` で入力名のままにできる。
+
+落とす共通語は `WAX202` / `aligned` / `CSI` と、ストリームが 1 本のときの
+`stream_0`。ラベルは名前の 4 文字目、アンテナはアンダースコア区切りの語から
+読むため (`dataset_utility.py`)、末尾だけを短くする限り学習側はそのまま動く。
+
+雑音床の値・窓長・`--loss` の条件は名前に入らない (数字 1 文字で表せないため)。
+`_meta.json` には残るので、条件を変えて並べるときは `--doppler_dir` を分けること。
+
+---
+
 ## 5. 活動認識 (手順6〜8) の変更点
 
 次は**変えていない**: ネットワークの構造 (`network_utility.py`)、学習の設定
@@ -398,6 +435,7 @@ SHARP は 4 コアが同じパケットを受けるので長さが常に一致�
 | `usrp_to_sharp.py` / `matlab/usrpCSItoSHARP.m` | デコーダ出力 (使用サブキャリアのみ) を SHARP が前提とする FFT 長ぶんの `csi_buff` (FFT 順) へ変換。両者の出力はビット単位で一致することを検証済み |
 | `wifi_config.py` | 規格ごとの OFDM 構成の一元管理 |
 | `pipeline_meta.py` | 段間で規格・切り出し位置を引き継ぐ |
+| `output_name.py` | ドップラーデータと図の名前に、掛けた処理を表す数字を入れる |
 | `run_phase_sanitization.py` | 手順0〜3 の一括実行 |
 | `run_har.py` | 手順6〜8 (`--csi` で手順0〜8) の一括実行と、正解率・混同行列のまとめ |
 | `CSI_doppler_plot.py` | ドップラーマップの描画 (軸は `_meta.json` から) |
@@ -405,6 +443,7 @@ SHARP は 4 コアが同じパケットを受けるので長さが常に一致�
 | `tests/test_doppler.py` | 非等間隔サンプリングの 3 手法を比較検証 |
 | `tests/test_matlab_parity.py` | MATLAB 版と Python 版の一致を Octave で検証 |
 | `tests/test_har.py` | データセット作成 (ラベル位置・アンテナの束ね方) と、S1 で学習 → S2,S3 でテストの流れを合成データで検証 |
+| `tests/test_output_name.py` | 出力名の組み立てと、短くした名前を学習側が読めることを検証 |
 
 ---
 

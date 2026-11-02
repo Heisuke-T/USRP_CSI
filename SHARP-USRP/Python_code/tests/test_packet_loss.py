@@ -254,10 +254,11 @@ def test_cli(root, proc):
     out = run('CSI_doppler_computation.py', proc + '/', '.', dop, 10, 10, 31, 1, -3.0,
               '--only', 'S2_W_', '--loss', 'sustained', '--loss_rate', '0.5', cwd=root)
     check('欠落の模擬' in out, 'ドップラー計算で欠落を入れられる')
+    # 出力名は掛けた処理の数字で終わる (output_name.py)。ここは 3 と 4 だけ
     names = sorted(f for f in os.listdir(dop) if f.endswith('.txt'))
-    check(names == ['S2_W_antenna1_stream_0.txt', 'S2_W_antenna2_stream_0.txt'],
+    check(names == ['S2_W_antenna1_34.txt', 'S2_W_antenna2_34.txt'],
           f'--only で対象のファイルだけ計算する ({names})')
-    with open(os.path.join(dop, 'S2_W_antenna1_stream_0_meta.json'), encoding='utf-8') as fp:
+    with open(os.path.join(dop, 'S2_W_antenna1_34_meta.json'), encoding='utf-8') as fp:
         meta = json.load(fp)
     pl_meta = meta['packet_loss']
     check(abs(pl_meta['loss_rate'] - 0.5) < 0.02, f'_meta.json に欠落率が残る ({pl_meta["loss_rate"]:.3f})')

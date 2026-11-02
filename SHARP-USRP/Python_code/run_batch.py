@@ -32,6 +32,7 @@ import traceback
 from collections import Counter
 from datetime import datetime
 
+import output_name
 import usrp_to_sharp
 from CSI_doppler_computation import VARIANTS, variant_dir
 from CSI_doppler_computation import process_one as doppler_one
@@ -80,14 +81,27 @@ class _DopplerArgs:
         self.sub_sampling = a.sub_sampling
         self.despike = a.despike
         self.despike_sigmas = a.despike_sigmas
+        self.name_style = a.name_style
         self.save_unnormalized = a.save_unnormalized
 
 
-def _variant_files(args, stem):
-    """--save_unnormalized の版の保存先 (doppler_traces_nowinnorm/ など)。"""
+def _out_stem(args, stem, variant='normalized', keep_stream=False):
+    """ドップラー/図の出力名。--name_style code なら共通語を落として数字を付ける。"""
+    if getattr(args, 'name_style', 'code') != 'code':
+        return stem
+    return output_name.build(stem, output_name.flags_for(args, variant),
+                             keep_stream=keep_stream)
+
+
+def _variant_files(args, stem, keep_stream=False):
+    """--save_unnormalized の版の保存先 (doppler_traces_nowinnorm/ など)。
+
+    版ごとに掛かる処理が違うので、名前の数字も版ごとに変わる。
+    """
     if not args.save_unnormalized:
         return None
-    return {v: os.path.join(variant_dir(args.doppler_dir, v, args.label), stem + '.txt')
+    return {v: os.path.join(variant_dir(args.doppler_dir, v, args.label),
+                            _out_stem(args, stem, v, keep_stream) + '.txt')
             for v in VARIANTS}
 
 
@@ -99,14 +113,17 @@ def doppler_only(name, args):
     dop_dir = (args.doppler_dir if args.label is None
                else os.path.join(args.doppler_dir, args.label))
     meta = None
-    for stream in range(args.nss * args.ncore):
-        stem = f'{name}_stream_{stream}'
-        mat_file = os.path.join(out_dir, stem + '.mat')
+    n_tot = args.nss * args.ncore
+    for stream in range(n_tot):
+        mat_stem = f'{name}_stream_{stream}'
+        out_stem = _out_stem(args, mat_stem, keep_stream=n_tot > 1)
+        mat_file = os.path.join(out_dir, mat_stem + '.mat')
         if not os.path.exists(mat_file):
             raise FileNotFoundError(f'{mat_file} がありません (--redo で最初からやり直してください)')
         print('  手順4: ドップラー計算 (正規化を省いた版を追加)')
-        meta = doppler_one(mat_file, os.path.join(dop_dir, stem + '.txt'),
-                           _DopplerArgs(args, args.fc), variant_files=_variant_files(args, stem))
+        meta = doppler_one(mat_file, os.path.join(dop_dir, out_stem + '.txt'),
+                           _DopplerArgs(args, args.fc),
+                           variant_files=_variant_files(args, mat_stem, n_tot > 1))
     return meta
 
 
@@ -203,17 +220,21 @@ def run_one(in_path, args, name=None):
 
     pngs = []
     for stream in range(n_tot):
-        stem = f'{name}_stream_{stream}'
-        mat_file = os.path.join(out_dir, stem + '.mat')
-        txt_file = os.path.join(dop_dir, stem + '.txt')
+        # 手順0〜3 の中間ファイルは入力の名前のまま。短くするのは
+        # 人が見るドップラーデータと図だけにする
+        mat_stem = f'{name}_stream_{stream}'
+        out_stem = _out_stem(args, mat_stem, keep_stream=n_tot > 1)
+        mat_file = os.path.join(out_dir, mat_stem + '.mat')
+        txt_file = os.path.join(dop_dir, out_stem + '.txt')
         print('  手順4: ドップラー計算')
         meta = doppler_one(mat_file, txt_file, _DopplerArgs(args, args.fc),
-                           variant_files=_variant_files(args, stem))
+                           variant_files=_variant_files(args, mat_stem,
+                                                        n_tot > 1))
 
         print('  手順5: 描画')
         arr, m = load_doppler(txt_file)
-        png = os.path.join(plot_dir, stem + '.png')
-        plot_doppler(arr, m, png, title=stem, ylim=args.ylim)
+        png = os.path.join(plot_dir, out_stem + '.png')
+        plot_doppler(arr, m, png, title=out_stem, ylim=args.ylim)
         pngs.append(png)
         print(f'    -> {png}')
 
@@ -289,6 +310,11 @@ def main():
                         help='ログの出力先 (既定: ./batch_<日時>.log)')
     parser.add_argument('--redo', action='store_true',
                         help='完了済み (PNG がある) のファイルもやり直す')
+    parser.add_argument('--name_style', choices=['code', 'full'], default='code',
+                        help='ドップラーデータと図の名前の付け方。code (既定): '
+                             '共通語 (WAX202 など) を落とし、掛けた処理の数字を'
+                             '末尾に付ける (T0_A_R_antenna1_134)。'
+                             'full: 入力の名前のまま')
     parser.add_argument('--prefix_parent', action='store_true',
                         help='出力名に親フォルダ名を必ず前置する。'
                              '名前が重なる場合は指定がなくても前置する')
@@ -337,9 +363,12 @@ def main():
         # 完了済みなら飛ばす
         plot_dir = (args.plot_dir if args.label is None
                     else os.path.join(args.plot_dir, args.label))
-        done = os.path.join(plot_dir, f'{name}_stream_0.png')
+        n_tot = args.nss * args.ncore
+        done = os.path.join(
+            plot_dir,
+            _out_stem(args, f'{name}_stream_0', keep_stream=n_tot > 1) + '.png')
         if os.path.exists(done) and not args.redo:
-            vf = _variant_files(args, f'{name}_stream_0')
+            vf = _variant_files(args, f'{name}_stream_0', n_tot > 1)
             if vf and not all(os.path.exists(p) for p in vf.values()):
                 # 位相の処理は済んでいるので、ドップラー計算だけやり直して版を足す
                 try:
