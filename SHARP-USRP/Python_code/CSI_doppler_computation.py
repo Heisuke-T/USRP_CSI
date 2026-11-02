@@ -67,6 +67,8 @@ import pickle
 from os import listdir, path
 
 import numpy as np
+
+import output_name
 import scipy.io as sio
 from scipy.fftpack import fft, fftshift
 from scipy.signal.windows import hann
@@ -467,8 +469,14 @@ def process_one(mat_file, out_file, args, variant_files=None):
         interval_cv=cv,
         resample=resample_stats,
         packet_loss=loss,
+        # _time.npy is measured from this packet time (seconds on the input .mat time axis; for alignCSI
+        # outputs that is the aligned CSI axis, 0 = start of the cut-out window)
+        # _time.npy はこの時刻を 0 とする（入力 .mat の時間軸。alignCSI の出力なら切り出し区間の先頭 = 0）
+        time_origin_s=(float(ts[0]) if ts is not None else None),
         variant='normalized',
         normalization='(1) パケットごとの振幅の割り算 + (2) 窓ごとの最大値での割り算と雑音床 (SHARP と同じ)',
+        steps_code=output_name.code(output_name.flags_for(args, 'normalized')),
+        steps=output_name.legend(output_name.flags_for(args, 'normalized')),
     )
     with open(out_file[:-4] + '_meta.json', 'w', encoding='utf-8') as fp:
         json.dump(meta, fp, ensure_ascii=False, indent=2)
@@ -486,7 +494,10 @@ def process_one(mat_file, out_file, args, variant_files=None):
                 pickle.dump(data, fp)
             if centers is not None:
                 np.save(vfile[:-4] + '_time.npy', centers)
+            vflags = output_name.flags_for(args, vname)
             vmeta = dict(meta, variant=vname, normalization=VARIANTS[vname],
+                         steps_code=output_name.code(vflags),
+                         steps=output_name.legend(vflags),
                          noise_level=None,
                          units='|H|^2 をサブキャリア方向に足したパワー (任意単位。'
                                '雑音床での切り捨てなし)')
@@ -548,6 +559,10 @@ def main():
     parser.add_argument('--subcarrier_range', type=int, nargs=2, default=None,
                         metavar=('LO', 'HI'),
                         help='使用するサブキャリアの範囲 (既定は全部)')
+    parser.add_argument('--name_style', choices=['code', 'full'], default='code',
+                        help='出力名の付け方。code (既定): 共通語を落とし、'
+                             '掛けた処理の数字を末尾に付ける '
+                             '(T0_A_R_antenna1_134)。full: 入力の名前のまま')
     parser.add_argument('--only', default=None,
                         help='名前がこれで始まるファイルだけ処理する (カンマ区切り。例: S2_,S3_)')
     parser.add_argument('--overwrite', action='store_true',
@@ -583,9 +598,23 @@ def main():
             continue
 
         sub = subdir if subdir != '.' else None
+
+        # 出力名は版ごとに数字が変わる (通常版 134 / nowinnorm 13 / raw 1)
+        if args.name_style == 'code':
+            out_names = {
+                v: output_name.build_many(
+                    names, output_name.flags_for(args, v))
+                for v in ('normalized',) + tuple(VARIANTS)}
+            print(f'  出力名の数字: {output_name.legend()}')
+        else:
+            out_names = {v: {n: n for n in names}
+                         for v in ('normalized',) + tuple(VARIANTS)}
+
         for name in names:
-            out_file = path.join(out_dir, name + '.txt')
-            vfiles = ({v: path.join(variant_dir(args.dir_doppler, v, sub), name + '.txt')
+            out_file = path.join(out_dir,
+                                 out_names['normalized'][name] + '.txt')
+            vfiles = ({v: path.join(variant_dir(args.dir_doppler, v, sub),
+                                    out_names[v][name] + '.txt')
                        for v in VARIANTS} if args.save_unnormalized else None)
             todo = [out_file] + (list(vfiles.values()) if vfiles else [])
             if all(path.exists(f) for f in todo) and not args.overwrite:
