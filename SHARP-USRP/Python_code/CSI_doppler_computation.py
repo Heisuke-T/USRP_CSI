@@ -469,6 +469,10 @@ def process_one(mat_file, out_file, args, variant_files=None):
         interval_cv=cv,
         resample=resample_stats,
         packet_loss=loss,
+        # _time.npy is measured from this packet time (seconds on the input .mat time axis; for alignCSI
+        # outputs that is the aligned CSI axis, 0 = start of the cut-out window)
+        # _time.npy はこの時刻を 0 とする（入力 .mat の時間軸。alignCSI の出力なら切り出し区間の先頭 = 0）
+        time_origin_s=(float(ts[0]) if ts is not None else None),
         variant='normalized',
         normalization='(1) パケットごとの振幅の割り算 + (2) 窓ごとの最大値での割り算と雑音床 (SHARP と同じ)',
         steps_code=output_name.code(output_name.flags_for(args, 'normalized')),

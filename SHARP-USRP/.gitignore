@@ -22,3 +22,7 @@ __pycache__/
 *.pyc
 
 # 共有したい解析結果は明示的に add する (例: doppler_rs/) ので無視しない
+
+# 回帰モデルの入力データ (README.md だけコミットする)
+Python_code/regression_input/*
+!Python_code/regression_input/README.md
