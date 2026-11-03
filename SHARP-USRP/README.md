@@ -556,7 +556,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - 区間は加速度計算ソフトと同じ区切り (0, 1, 2 … 秒 / 0, 5, 10 … 秒)。ドップラーの時刻は `_meta.json` の
   `time_origin_s` で CSI の時間軸に直す (この値がない古いドップラーは先頭のパケット数から見積もる)
 
-入力は `regression_input/<試行名>/` に置く (置き方は `regression_input/README.md`)。
+入力は `regression_input/` に置く。データセットごとにまとめる置き方 (`A1/imu/<試行名>/`・`A1/doppler_traces_nowinnorm/`、名前か一括処理の `batch_pairs_*.csv` で対応づける) と、試行ごとのフォルダの置き方のどちらでもよい (詳しくは `regression_input/README.md`)。最初に、見つけた試行と組み合わせの一覧をログに出す。
 
 ```powershell
 python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒と 5 秒

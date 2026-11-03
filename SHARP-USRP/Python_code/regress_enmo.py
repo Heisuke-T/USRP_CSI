@@ -20,7 +20,10 @@
           隣り合う 1 秒どうしはよく似ているので、ランダムに分けると精度が高く出すぎるため。
           試行が 1 本しかないときは、時間を 5 つのかたまりに分けて同じことをする。
 
-    入力フォルダ (regression_input/ の README.md を参照):
+    入力フォルダ (regression_input/ の README.md を参照。次の 2 通りのどちらでもよい):
+      regression_input/A1/imu/<試行名>/(imu/)<試行名>_power_timeseries.csv と
+      regression_input/A1/doppler_traces_nowinnorm/<全試行のドップラー>  (名前か batch_pairs_*.csv で対応づける)
+    または
       regression_input/<試行名>/
           <名前>_power_timeseries.csv  (正解データ。加速度計算ソフトの出力。imu/ の中に置いてもよい)
           doppler_traces/            *antenna1*.txt, *antenna2*.txt (+ _time.npy, _meta.json)
@@ -39,10 +42,12 @@
 
 import argparse
 import csv
+import difflib
 import glob
 import json
 import os
 import pickle
+import re
 import sys
 import time
 from datetime import datetime
@@ -80,10 +85,9 @@ def _one(pattern, what):
     return hits[0]
 
 
-def load_doppler(folder, antenna, out):
+def load_doppler(txt, out):
     """One antenna's Doppler: (frames x bins) array, frame times on the CSI axis [s], velocity axis [m/s].
     1 本のアンテナのドップラー: (時間フレーム x 速度ビン) の配列、各フレームの CSI の時刻、速度軸"""
-    txt = _one(os.path.join(folder, f"*{antenna}*.txt"), f"{os.path.basename(folder)} の {antenna} のドップラー")
     with open(txt, "rb") as fp:
         arr = np.asarray(pickle.load(fp), dtype=float)
     base = txt[:-4]
@@ -109,20 +113,14 @@ def load_doppler(folder, antenna, out):
     return dict(S=arr, t=t, v=v, meta=meta, file=os.path.basename(txt))
 
 
-def load_target(trial_dir, window):
+def load_target(spec, window):
     """ENMO per sample (t_csi, value), or per window. / ENMO（各時刻、または区間ごと）"""
-    # directly in <trial>/ (or in <trial>/imu/ as before) / <試行>/ の直下（前の置き方の <試行>/imu/ でもよい）
-    ts, win = [], []
-    for sub in ("", "imu"):
-        ts = ts or sorted(glob.glob(os.path.join(trial_dir, sub, "*_power_timeseries.csv")))
-        win = win or sorted(glob.glob(os.path.join(trial_dir, sub, f"*_windows_{window:g}s.csv")))
-    if ts:
-        path, kind = ts[0], "timeseries"
-    elif win:
-        path, kind = win[0], "windows"
+    if spec.get("ts"):
+        path, kind = spec["ts"], "timeseries"
+    elif spec.get("win", {}).get(window):
+        path, kind = spec["win"][window], "windows"
     else:
-        raise RegError(f"{trial_dir}/ (または {trial_dir}/imu/) に *_power_timeseries.csv "
-                       f"(または *_windows_{window:g}s.csv) がありません")
+        raise RegError(f"{spec['name']}: *_power_timeseries.csv (または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     if not rows or TARGET not in rows[0]:
@@ -136,6 +134,112 @@ def load_target(trial_dir, window):
     b = np.array([float(r["end_csi(s)"]) for r in rows])
     y = np.array([float(r[TARGET]) for r in rows])
     return dict(kind=kind, a=a, b=b, y=y, file=os.path.basename(path))
+
+
+# ============================================================ finding the trials
+TS_SUFFIX = "_power_timeseries.csv"
+
+
+def _antenna(name):
+    m = re.search(r"antenna([12])", name, flags=re.I)
+    return f"antenna{m.group(1)}" if m else None
+
+
+def _dop_key(name):
+    """'A1_XR1_antenna1_WAX202_aligned_CSI_stream_0' -> 'A1_XR1_antenna#_WAX202_aligned_CSI_stream_0'"""
+    return re.sub(r"antenna[12]", "antenna#", name, flags=re.I)
+
+
+def _dop_prefix(key):
+    """Part of the Doppler name before the antenna (usually the trial / CSI name). / アンテナより前の部分"""
+    return re.split(r"_?antenna#", key, flags=re.I)[0].strip("_")
+
+
+def discover(root, out, pairs_csv=None):
+    """Find every trial: its ground truth and its Doppler files, in either layout.
+    試行ごとに、正解データとドップラーを探す（どちらの置き方でもよい）
+
+      (a) one folder per trial / 試行ごとのフォルダ:
+            <root>/<trial>/<name>_power_timeseries.csv (or <trial>/imu/...), <root>/<trial>/doppler_traces_nowinnorm/*.txt
+      (b) a dataset folder with everything mixed / データセットのフォルダにまとめて:
+            <root>/A1/imu/<trial>/(imu/)<name>_power_timeseries.csv, <root>/A1/doppler_traces_nowinnorm/*.txt (all trials)
+    Ground truth and Doppler are matched by folder (a), by the pairing list of the batch run (batch_pairs_*.csv),
+    or by name. / 正解とドップラーは、同じフォルダ (a)、一括処理の組み合わせの一覧、名前の順で対応づける
+    """
+    truths = {}
+    for p in sorted(glob.glob(os.path.join(root, "**", "*" + TS_SUFFIX), recursive=True)):
+        name = os.path.basename(p)[:-len(TS_SUFFIX)]
+        if name in truths and truths[name].get("ts"):
+            raise RegError(f"正解データ {name}{TS_SUFFIX} が 2 か所にあります: {truths[name]['ts']} と {p}")
+        truths.setdefault(name, dict(name=name, win={}))["ts"] = p
+    for p in sorted(glob.glob(os.path.join(root, "**", "*_windows_*s.csv"), recursive=True)):
+        m = re.match(r"(.+)_windows_([\d.]+)s\.csv$", os.path.basename(p))
+        if m:
+            truths.setdefault(m.group(1), dict(name=m.group(1), win={}))["win"][float(m.group(2))] = p
+    for t in truths.values():
+        d = os.path.dirname(t.get("ts") or next(iter(t["win"].values())))
+        t["dir"] = os.path.dirname(d) if os.path.basename(d).lower() == "imu" else d
+
+    # Doppler groups (antenna1 + antenna2 of one capture), keyed by the name without the antenna number
+    # ドップラーのまとまり（同じ収集の antenna1 と antenna2）。アンテナ番号を除いた名前で分ける
+    groups = {}
+    for variant, folder in VARIANT_DIRS.items():
+        for d in sorted(glob.glob(os.path.join(root, "**", folder), recursive=True)):
+            if not os.path.isdir(d) or os.path.basename(d) != folder:
+                continue
+            for txt in sorted(glob.glob(os.path.join(d, "*.txt"))):
+                stem = os.path.basename(txt)[:-4]
+                ant = _antenna(stem)
+                if not ant:
+                    continue
+                key = (os.path.dirname(d), _dop_key(stem))
+                g = groups.setdefault(key, dict(key=key[1], parent=key[0], files={}))
+                g["files"].setdefault(variant, {})[ant] = txt
+
+    # pairing list of the batch run: IMU CSV name -> CSI name / 一括処理の組み合わせ（IMU の名前 → CSI の名前）
+    mapping = {}
+    if pairs_csv is None:
+        found = sorted(glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True))
+        pairs_csv = found[-1] if found else None
+    if pairs_csv:
+        with open(pairs_csv, encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                if r.get("imu") and r.get("csi"):
+                    mapping[os.path.splitext(r["imu"].strip())[0]] = os.path.splitext(r["csi"].strip())[0]
+        log(f"  組み合わせの一覧を使います: {pairs_csv}（{len(mapping)} 組）", out)
+
+    cand = []
+    for tn, t in truths.items():
+        for gk, g in groups.items():
+            pre = _dop_prefix(g["key"])
+            if os.path.normcase(g["parent"]) == os.path.normcase(t["dir"]):
+                cand.append((3, 1.0, tn, gk, "同じフォルダ"))
+            elif tn in mapping and _dop_key(mapping[tn]).lower() in g["key"].lower():
+                cand.append((2, 1.0, tn, gk, "組み合わせの一覧"))
+            else:
+                a, b = tn.lower(), pre.lower()
+                r = difflib.SequenceMatcher(None, a, b).ratio()
+                if b and (a == b or a in b or b in a or r >= 0.75):
+                    cand.append((1, 1.0 if a == b else r, tn, gk, "名前"))
+    cand.sort(key=lambda c: (c[0], c[1]), reverse=True)
+    used_t, used_g, specs = set(), set(), []
+    for _, _, tn, gk, how in cand:
+        if tn in used_t or gk in used_g:
+            continue
+        used_t.add(tn)
+        used_g.add(gk)
+        specs.append(dict(truths[tn], doppler=groups[gk]["files"], dop_name=groups[gk]["key"], how=how))
+    specs.sort(key=lambda s_: s_["name"])
+    log(f"  試行: {len(specs)} 本（正解データとドップラーの組）", out)
+    for sp in specs:
+        log(f"    {sp['name']}  ↔  {sp['dop_name']}  （{sp['how']}で対応）", out)
+    for tn in sorted(set(truths) - used_t):
+        log(f"  注意: ドップラーが見つからない正解データ: {tn}（飛ばします）", out)
+    for gk in sorted(set(groups) - used_g):
+        log(f"  注意: 正解データが見つからないドップラー: {groups[gk]['key']}（飛ばします）", out)
+    if not specs:
+        raise RegError(f"{root} に、正解データとドップラーの組が見つかりません (README.md の置き方を参照)")
+    return specs
 
 
 # ============================================================ features
@@ -198,14 +302,15 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(trial_dir, variant, window, out):
+def build_trial(spec, variant, window, out):
     """Windows of one trial: features A, B, CNN input and the target. / 1 試行分の区間"""
-    name = os.path.basename(trial_dir.rstrip("/\\"))
-    dop_dir = os.path.join(trial_dir, VARIANT_DIRS[variant])
-    if not os.path.isdir(dop_dir):
-        raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ がありません")
-    ants = [load_doppler(dop_dir, a, out) for a in ("antenna1", "antenna2")]
-    tgt = load_target(trial_dir, window)
+    name = spec["name"]
+    files = spec["doppler"].get(variant, {})
+    missing = [a for a in ("antenna1", "antenna2") if a not in files]
+    if missing:
+        raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
+    ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
+    tgt = load_target(spec, window)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
@@ -321,9 +426,9 @@ def run(opts):
     out_dir = opts.out or os.path.join(HERE, "outputs", f"regression_{stamp}")
     os.makedirs(out_dir, exist_ok=True)
     log(f"=== ドップラー → ENMO の回帰 ({stamp}) ===", out)
-    trial_dirs = sorted(d for d in glob.glob(os.path.join(opts.input, "*")) if os.path.isdir(d))
-    if not trial_dirs:
-        raise RegError(f"{opts.input} に試行のフォルダがありません (README.md の置き方を参照)")
+    if not os.path.isdir(opts.input):
+        raise RegError(f"入力フォルダがありません: {opts.input}")
+    specs = discover(opts.input, out, getattr(opts, "pairs", None))
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
     bad = [m for m in models if m not in ALL_MODELS]
@@ -335,7 +440,7 @@ def run(opts):
     for variant, window in [(v, w) for v in variants for w in windows]:
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
-            trials = [build_trial(d, variant, window, out) for d in trial_dirs]
+            trials = [build_trial(sp, variant, window, out) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -555,6 +660,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--input", default=os.path.join(HERE, "regression_input"), help="入力フォルダ（既定 regression_input）")
     ap.add_argument("--out", default=None, help="保存先（既定 outputs/regression_<日時>）")
+    ap.add_argument("--pairs", default=None,
+                    help="IMU と CSI の組み合わせの一覧（加速度計算ソフトの一括処理の batch_pairs_*.csv）。"
+                         "ドップラーと正解データの名前が対応しないときに使う（入力フォルダの中にあれば自動で使う）")
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")

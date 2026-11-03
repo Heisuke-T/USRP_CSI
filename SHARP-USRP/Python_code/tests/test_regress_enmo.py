@@ -87,6 +87,43 @@ def make_trial(root, k, old_meta=False):
             w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
 
 
+def dataset_layout(tmp, related_names=True):
+    """The layout of a dataset folder (everything of A1 together). / データセットのフォルダにまとめた置き方
+        <in>/A1/imu/<trial>/imu/<trial>_power_timeseries.csv
+        <in>/A1/doppler_traces_nowinnorm/<CSI name>_antenna{1,2}_..._stream_0.txt  (all trials)
+    With related_names=False the Doppler names do not contain the trial name, and a batch_pairs_*.csv
+    (from the calculator's batch run) gives the pairs. / 名前が対応しないときは一括処理の組み合わせの一覧で"""
+    import csv as _csv
+    src = os.path.join(tmp, "src" + ("" if related_names else "_pairs"))
+    for k in range(5):
+        make_trial(src, k)
+    root = os.path.join(tmp, "in_ds" + ("" if related_names else "_pairs"))
+    ds = os.path.join(root, "A1")
+    rows = []
+    for k in range(5):
+        tn, trial = f"T{k + 1}", f"A1_XR{k + 1}"
+        tdir = os.path.join(ds, "imu", trial, "imu")
+        os.makedirs(tdir, exist_ok=True)
+        shutil.copy(os.path.join(src, tn, "imu", f"{tn}_power_timeseries.csv") if os.path.exists(
+            os.path.join(src, tn, "imu", f"{tn}_power_timeseries.csv")) else os.path.join(src, tn, f"{tn}_power_timeseries.csv"),
+            os.path.join(tdir, f"{trial}_power_timeseries.csv"))
+        csi = trial if related_names else f"A1_walk{(k * 3) % 5 + 1}"
+        for folder in ro.VARIANT_DIRS.values():
+            os.makedirs(os.path.join(ds, folder), exist_ok=True)
+            for f in os.listdir(os.path.join(src, tn, folder)):
+                shutil.copy(os.path.join(src, tn, folder, f),
+                            os.path.join(ds, folder, f.replace(f"{tn}_antenna", f"{csi}_antenna").replace(
+                                "_stream_0", "_WAX202_aligned_CSI_stream_0")))
+        rows.append([f"{trial}.csv", f"{csi}_antenna1_WAX202_aligned_CSI.mat"])
+    if not related_names:
+        with open(os.path.join(root, "batch_pairs_20270101_000000.csv"), "w", newline="") as f:
+            w = _csv.writer(f)
+            w.writerow(["use", "imu", "csi", "how"])
+            for r in rows:
+                w.writerow(["1"] + r + ["時刻"])
+    return root
+
+
 def main():
     tmp = tempfile.mkdtemp(prefix="regress_")
     ok = True
@@ -94,6 +131,19 @@ def main():
         inp = os.path.join(tmp, "in")
         for k in range(5):
             make_trial(inp, k, old_meta=(k == 4))
+        # the dataset-folder layout (quick, linear model only) / データセットのフォルダの置き方（線形回帰だけで確認）
+        import argparse
+        for related in (True, False):
+            root = dataset_layout(tmp, related)
+            res, _ = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_ds"), doppler="nowinnorm",
+                                               models="linear", features="B", windows=[1.0], blocks=5, epochs=5,
+                                               seed=0, no_plots=True, pairs=None))
+            r = [x for x in res if x["model"] == "linear"][0]
+            names = sorted(set(r["tname"]))
+            good = names == [f"A1_XR{k}" for k in range(1, 6)] and r["R2"] > 0.5
+            label = "名前で対応" if related else "組み合わせの一覧で対応"
+            print(f"  {'OK ' if good else 'NG '} データセットのフォルダの置き方（{label}）: {names}, R² {r['R2']:.3f}")
+            ok &= good
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,cnn"
