@@ -23,6 +23,8 @@ regression_input/
 ```
 
 - ドップラーは、ファイル名に `antenna1` / `antenna2` が入った `.txt` を 1 つずつ。`_time.npy` と `_meta.json` も必ず一緒に
+- 仕事率計算ソフトの「正解データの保存先」にこの `imu/` フォルダを指定すると、計算のたびに自動でここに保存されます
+  （`imu/` を作らず試行のフォルダの直下に置いても読めます）
 - IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mg)` が入った版。6 面キャリブレーションを指定して計算したもの）。
   なければ `*_windows_1s.csv` / `*_windows_5s.csv` でも可
 - ドップラーと IMU は、どちらも alignCSI.m でそろえた同じ 80 秒の CSI から作ったものを使う（時間軸が同じになる）

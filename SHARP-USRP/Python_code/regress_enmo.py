@@ -111,14 +111,18 @@ def load_doppler(folder, antenna, out):
 
 def load_target(trial_dir, window):
     """ENMO per sample (t_csi, value), or per window. / ENMO（各時刻、または区間ごと）"""
-    ts = sorted(glob.glob(os.path.join(trial_dir, "imu", "*_power_timeseries.csv")))
-    win = sorted(glob.glob(os.path.join(trial_dir, "imu", f"*_windows_{window:g}s.csv")))
+    # in <trial>/imu/ (or directly in <trial>/) / <試行>/imu/ に（なければ <試行>/ の直下に）
+    ts, win = [], []
+    for sub in ("imu", ""):
+        ts = ts or sorted(glob.glob(os.path.join(trial_dir, sub, "*_power_timeseries.csv")))
+        win = win or sorted(glob.glob(os.path.join(trial_dir, sub, f"*_windows_{window:g}s.csv")))
     if ts:
         path, kind = ts[0], "timeseries"
     elif win:
         path, kind = win[0], "windows"
     else:
-        raise RegError(f"{trial_dir}/imu/ に *_power_timeseries.csv (または *_windows_{window:g}s.csv) がありません")
+        raise RegError(f"{trial_dir}/imu/ (または {trial_dir}/) に *_power_timeseries.csv "
+                       f"(または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     if not rows or TARGET not in rows[0]:
