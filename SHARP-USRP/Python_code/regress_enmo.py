@@ -22,7 +22,7 @@
 
     入力フォルダ (regression_input/ の README.md を参照):
       regression_input/<試行名>/
-          imu/      <名前>_power_timeseries.csv  (加速度計算ソフトの出力)
+          <名前>_power_timeseries.csv  (正解データ。加速度計算ソフトの出力。imu/ の中に置いてもよい)
           doppler_traces/            *antenna1*.txt, *antenna2*.txt (+ _time.npy, _meta.json)
           doppler_traces_nowinnorm/  同上 (--save_unnormalized の版)
           doppler_traces_raw/        同上
@@ -111,9 +111,9 @@ def load_doppler(folder, antenna, out):
 
 def load_target(trial_dir, window):
     """ENMO per sample (t_csi, value), or per window. / ENMO（各時刻、または区間ごと）"""
-    # in <trial>/imu/ (or directly in <trial>/) / <試行>/imu/ に（なければ <試行>/ の直下に）
+    # directly in <trial>/ (or in <trial>/imu/ as before) / <試行>/ の直下（前の置き方の <試行>/imu/ でもよい）
     ts, win = [], []
-    for sub in ("imu", ""):
+    for sub in ("", "imu"):
         ts = ts or sorted(glob.glob(os.path.join(trial_dir, sub, "*_power_timeseries.csv")))
         win = win or sorted(glob.glob(os.path.join(trial_dir, sub, f"*_windows_{window:g}s.csv")))
     if ts:
@@ -121,7 +121,7 @@ def load_target(trial_dir, window):
     elif win:
         path, kind = win[0], "windows"
     else:
-        raise RegError(f"{trial_dir}/imu/ (または {trial_dir}/) に *_power_timeseries.csv "
+        raise RegError(f"{trial_dir}/ (または {trial_dir}/imu/) に *_power_timeseries.csv "
                        f"(または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))

@@ -48,7 +48,10 @@ def make_trial(root, k, old_meta=False):
     name = f"T{k + 1}"
     rng = np.random.default_rng(k)
     d = os.path.join(root, name)
-    os.makedirs(os.path.join(d, "imu"))
+    # ground truth directly in the trial folder; trial 4 uses the old layout <trial>/imu/
+    # 正解データは試行のフォルダの直下。4 番目の試行だけ前の置き方 <試行>/imu/
+    truth_dir = os.path.join(d, "imu") if k == 3 else d
+    os.makedirs(truth_dir, exist_ok=True)
     origin = 0.06
     t_frames = np.arange(0, 80.5, FRAME_DT)            # local frame times (first packet = 0)
     t_abs = t_frames + origin                          # on the CSI axis / CSI の時間軸
@@ -77,7 +80,7 @@ def make_trial(root, k, old_meta=False):
                 json.dump(meta, fp)
     t50 = np.arange(0, 80.0, 0.02)
     en = 60 * intensity(t50, k) + rng.normal(0, 2.0, len(t50))
-    with open(os.path.join(d, "imu", f"{name}_power_timeseries.csv"), "w", newline="") as f:
+    with open(os.path.join(truth_dir, f"{name}_power_timeseries.csv"), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
         for a, b in zip(t50, en):

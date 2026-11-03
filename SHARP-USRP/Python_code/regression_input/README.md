@@ -6,8 +6,7 @@
 ```
 regression_input/
 ├── T1/
-│   ├── imu/
-│   │   └── T1_A_R_power_timeseries.csv      ← 加速度計算ソフトの出力（output/power/<名前>/ にある）
+│   ├── T1_A_R_power_timeseries.csv          ← 正解データ（加速度計算ソフトの出力。_windows_1s/5s.csv も一緒でよい）
 │   ├── doppler_traces_nowinnorm/            ← SHARP-USRP の doppler_traces_nowinnorm/ から、この試行の分をコピー
 │   │   ├── T1_antenna1_stream_0.txt
 │   │   ├── T1_antenna1_stream_0_time.npy
@@ -23,8 +22,9 @@ regression_input/
 ```
 
 - ドップラーは、ファイル名に `antenna1` / `antenna2` が入った `.txt` を 1 つずつ。`_time.npy` と `_meta.json` も必ず一緒に
-- 加速度計算ソフトの「正解データの保存先」にこの `imu/` フォルダを指定すると、計算のたびに自動でここに保存されます
-  （`imu/` を作らず試行のフォルダの直下に置いても読めます）
+- 加速度計算ソフトの「正解データの保存先」にこの試行のフォルダ（例 `regression_input/T1`）を指定すると、
+  計算のたびに自動でここに保存されます。一括処理なら親フォルダ `regression_input` を指定すると、`<IMU の名前>/` に入ります
+  （前の置き方の `<試行名>/imu/` に置いても読めます）
 - IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mg)` が入った版。6 面キャリブレーションを指定して計算したもの）。
   なければ `*_windows_1s.csv` / `*_windows_5s.csv` でも可
 - ドップラーと IMU は、どちらも alignCSI.m でそろえた同じ 80 秒の CSI から作ったものを使う（時間軸が同じになる）
