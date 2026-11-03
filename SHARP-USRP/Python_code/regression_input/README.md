@@ -1,4 +1,4 @@
-# 回帰モデルの入力フォルダ（regress_omron.py）
+# 回帰モデルの入力フォルダ（regress_enmo.py）
 
 試行ごとにフォルダを作り、次のようにファイルを置きます。フォルダ名（例 `T1`）が試行名になります。
 ここに置いたデータは Git に入りません（この README だけが入ります）。
@@ -23,15 +23,16 @@ regression_input/
 ```
 
 - ドップラーは、ファイル名に `antenna1` / `antenna2` が入った `.txt` を 1 つずつ。`_time.npy` と `_meta.json` も必ず一緒に
-- IMU は `*_power_timeseries.csv`（オムロン式の列 `omron_acc(mG)` が入った最新版）。なければ `*_power_windows.csv` でも可
+- IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mg)` が入った版。6 面キャリブレーションを指定して計算したもの）。
+  なければ `*_windows_1s.csv` / `*_windows_5s.csv` でも可
 - ドップラーと IMU は、どちらも alignCSI.m でそろえた同じ 80 秒の CSI から作ったものを使う（時間軸が同じになる）
 
 実行:
 
 ```
 cd SHARP-USRP/Python_code
-python regress_omron.py                 # nowinnorm 版で 5 モデル
-python regress_omron.py --doppler all   # 3 つの版それぞれで比べる
+python regress_enmo.py                  # nowinnorm 版で 5 モデル、1 秒と 5 秒の区間
+python regress_enmo.py --doppler all    # 3 つの版それぞれで比べる
 ```
 
 結果は `outputs/regression_<日時>/`（比較の表 `metrics.csv`・図 `comparison.png`・モデルごとの予測の図 `pred_*.png` など）。
