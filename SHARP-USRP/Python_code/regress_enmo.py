@@ -1,7 +1,7 @@
 """
     ドップラーから腰の加速度の指標 (ENMO) を推定する回帰モデルを作り、比べる。
 
-    正解: 仕事率計算ソフト (witmotion_wt011 の compute_power.py) が出す腰の ENMO
+    正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す腰の ENMO
           (max(合成加速度 - 1 g, 0) [mg]) の区間 (既定 1 秒と 5 秒) ごとの平均
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
@@ -22,7 +22,7 @@
 
     入力フォルダ (regression_input/ の README.md を参照):
       regression_input/<試行名>/
-          imu/      <名前>_power_timeseries.csv  (仕事率計算ソフトの出力)
+          imu/      <名前>_power_timeseries.csv  (加速度計算ソフトの出力)
           doppler_traces/            *antenna1*.txt, *antenna2*.txt (+ _time.npy, _meta.json)
           doppler_traces_nowinnorm/  同上 (--save_unnormalized の版)
           doppler_traces_raw/        同上
@@ -127,7 +127,7 @@ def load_target(trial_dir, window):
         rows = list(csv.DictReader(f))
     if not rows or TARGET not in rows[0]:
         raise RegError(f"{os.path.basename(path)} に ENMO の列 ({TARGET}) がありません。"
-                       "仕事率計算ソフトを最新にして計算し直してください")
+                       "加速度計算ソフトを最新にして計算し直してください")
     if kind == "timeseries":
         t = np.array([float(r["t_csi(s)"]) for r in rows])
         y = np.array([float(r[TARGET]) for r in rows])
@@ -210,7 +210,7 @@ def build_trial(trial_dir, variant, window, out):
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
         # windows on the same grid as the power software (0, 1, 2 ... s); allow 0.1 s missing at the ends
-        # 仕事率計算ソフトと同じ区切り（0, 1, 2 … 秒）。端の 0.1 秒までの欠けは許す
+        # 加速度計算ソフトと同じ区切り（0, 1, 2 … 秒）。端の 0.1 秒までの欠けは許す
         edges = np.arange(np.floor(t0 / window) * window, t1 - window + 0.1 + 1e-9, window)
         edges = edges[edges >= t0 - 0.1 - 1e-9]
         wins = [(e, e + window) for e in edges]

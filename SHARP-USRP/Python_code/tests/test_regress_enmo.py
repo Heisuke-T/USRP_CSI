@@ -4,11 +4,11 @@
     5 試行ぶんの入力フォルダを作る。各試行の中で動きの強さ s(t) が変わり (試行ごとに違う運動)、
       ドップラー: 足踏みの周期で速さが揺れる反射。速度の広がりと強さが s(t) に比例
                   (アンテナ 2 本、時刻は alignCSI の時間軸、_meta.json に time_origin_s)
-      IMU:       ENMO = 60 * s(t) + 雑音 [mg] (仕事率計算ソフトと同じ列の _power_timeseries.csv)
+      IMU:       ENMO = 60 * s(t) + 雑音 [mg] (加速度計算ソフトと同じ列の _power_timeseries.csv)
     これで regress_enmo.py を 1 秒と 5 秒の区間で回し、
       1. 3 つのドップラーの版・5 モデル + 基準 (平均値) が最後まで動き、表と図ができること
       2. 物理特徴量 B の線形回帰などが、平均値で予測する基準よりはっきり良いこと (R² > 0.5)
-      3. 区間が仕事率計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
+      3. 区間が加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
     を確かめる。
 
     実行:  python3 tests/test_regress_enmo.py   (CNN は TensorFlow があるときだけ)
@@ -129,7 +129,7 @@ def main():
         first = r["win"][r["tname"] == "T1"][0]
         n1 = int(np.sum(r["tname"] == "T1"))
         al = abs(first[0]) < 1e-9 and n1 == 80
-        print(f"  {'OK ' if al else 'NG '} 区間は仕事率計算ソフトと同じ 0, 1, 2 … 秒の区切りで 80 区間 "
+        print(f"  {'OK ' if al else 'NG '} 区間は加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りで 80 区間 "
               f"(T1 の最初 {first[0]:.2f}〜{first[1]:.2f} s、{n1} 区間)")
         ok &= al
         n5 = int(np.sum(got[("nowinnorm", 5.0, "linear", "B")]["tname"] == "T1"))

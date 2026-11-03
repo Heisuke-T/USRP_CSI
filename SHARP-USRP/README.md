@@ -540,7 +540,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 
 ### ドップラーから腰の ENMO を推定する回帰 (regress_enmo.py)
 
-ドップラーから、仕事率計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
+ドップラーから、加速度計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
 (max(合成加速度 − 1 g, 0) [mg]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
 区間は 1 秒と 5 秒 (`--windows` で変更)。
 
@@ -553,7 +553,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - 評価は **試行ごとに分ける** (1 試行をテスト、残りで学習、を全試行で繰り返す)。
   隣り合う区間はよく似ているので、ランダムに分けると精度が高く出すぎるため。試行が 1 本ならその中を時間で 5 分割 (参考値)
 - ドップラーは `doppler_traces_nowinnorm/` (窓ごとの割り算なし) が既定。`--doppler all` で 3 つの版を比べる
-- 区間は仕事率計算ソフトと同じ区切り (0, 1, 2 … 秒 / 0, 5, 10 … 秒)。ドップラーの時刻は `_meta.json` の
+- 区間は加速度計算ソフトと同じ区切り (0, 1, 2 … 秒 / 0, 5, 10 … 秒)。ドップラーの時刻は `_meta.json` の
   `time_origin_s` で CSI の時間軸に直す (この値がない古いドップラーは先頭のパケット数から見積もる)
 
 入力は `regression_input/<試行名>/` に置く (置き方は `regression_input/README.md`)。

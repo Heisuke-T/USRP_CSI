@@ -7,7 +7,7 @@
 regression_input/
 ├── T1/
 │   ├── imu/
-│   │   └── T1_A_R_power_timeseries.csv      ← 仕事率計算ソフトの出力（output/power/<名前>/ にある）
+│   │   └── T1_A_R_power_timeseries.csv      ← 加速度計算ソフトの出力（output/power/<名前>/ にある）
 │   ├── doppler_traces_nowinnorm/            ← SHARP-USRP の doppler_traces_nowinnorm/ から、この試行の分をコピー
 │   │   ├── T1_antenna1_stream_0.txt
 │   │   ├── T1_antenna1_stream_0_time.npy
@@ -23,7 +23,7 @@ regression_input/
 ```
 
 - ドップラーは、ファイル名に `antenna1` / `antenna2` が入った `.txt` を 1 つずつ。`_time.npy` と `_meta.json` も必ず一緒に
-- 仕事率計算ソフトの「正解データの保存先」にこの `imu/` フォルダを指定すると、計算のたびに自動でここに保存されます
+- 加速度計算ソフトの「正解データの保存先」にこの `imu/` フォルダを指定すると、計算のたびに自動でここに保存されます
   （`imu/` を作らず試行のフォルダの直下に置いても読めます）
 - IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mg)` が入った版。6 面キャリブレーションを指定して計算したもの）。
   なければ `*_windows_1s.csv` / `*_windows_5s.csv` でも可

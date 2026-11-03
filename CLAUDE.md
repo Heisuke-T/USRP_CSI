@@ -44,7 +44,7 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
 ## ドップラー → ENMO の回帰
 
 `regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・CNN で、ドップラーから
-腰の ENMO (仕事率計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒と 5 秒の区間) を推定して比べる。入力は
+腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒と 5 秒の区間) を推定して比べる。入力は
 `regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない)、
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)
 
