@@ -41,10 +41,10 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
   (`--loss` は random / burst / periodic / sustained。詳細は `SHARP-USRP/README.md`)
 - 必要なパッケージ: `pip install numpy scipy osqp h5py matplotlib tensorflow scikit-learn xgboost`
 
-## ドップラー → オムロン式 の回帰
+## ドップラー → ENMO の回帰
 
-`regress_omron.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・CNN で、ドップラーから
-オムロン式 (仕事率計算ソフトが出す腰の合成加速度、1 秒ごと) を推定して比べる。入力は
+`regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・CNN で、ドップラーから
+腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒と 5 秒の区間) を推定して比べる。入力は
 `regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない)、
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)
 
@@ -57,7 +57,7 @@ python tests/test_pipeline.py   # 位相サニタイゼーション
 python tests/test_doppler.py    # ドップラー計算
 python tests/test_packet_loss.py  # 受信レートの低下 (パケット欠落) の模擬
 python tests/test_doppler_variants.py  # 正規化を省いたドップラー (--save_unnormalized)
-python tests/test_regress_omron.py     # ドップラー → オムロン式 の回帰 (合成データ)
+python tests/test_regress_enmo.py      # ドップラー → ENMO の回帰 (合成データ)
 ```
 
 ## 約束

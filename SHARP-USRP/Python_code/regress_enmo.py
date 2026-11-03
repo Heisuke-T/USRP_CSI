@@ -1,8 +1,8 @@
 """
-    ドップラーから腰の加速度の指標 (オムロン式) を推定する回帰モデルを作り、比べる。
+    ドップラーから腰の加速度の指標 (ENMO) を推定する回帰モデルを作り、比べる。
 
-    正解: 仕事率計算ソフト (witmotion_wt011 の compute_power.py) が出すオムロン式
-          (重力を除いた腰の合成加速度 [mG]) の 1 秒ごとの平均
+    正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す腰の ENMO
+          (max(合成加速度 - 1 g, 0) [mg]) の区間 (既定 1 秒と 5 秒) ごとの平均
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
     モデル (5 種類):
@@ -14,23 +14,27 @@
     特徴量 A = 1 秒の中で速度ビンごとに平均したスペクトル (log10, アンテナ 2 本で 200 個)
     特徴量 B = 物理に基づく特徴量 (速さの平均・2 乗平均・広がり・最大速度・足踏みの周期など,
                アンテナごと)
-    どのモデルも出力は 1 秒ごとのオムロン式の値 (数値)。最後に予測と正解を図にする。
+    どのモデルも出力は区間ごとの ENMO の値 (数値)。最後に予測と正解を図にする。
 
     評価: 試行ごとに分ける (1 試行をテスト、残りで学習、を全試行について繰り返す)。
           隣り合う 1 秒どうしはよく似ているので、ランダムに分けると精度が高く出すぎるため。
           試行が 1 本しかないときは、時間を 5 つのかたまりに分けて同じことをする。
 
-    入力フォルダ (regression_input/ の README.md を参照):
+    入力フォルダ (regression_input/ の README.md を参照。次の 2 通りのどちらでもよい):
+      regression_input/A1/imu/<試行名>/(imu/)<試行名>_power_timeseries.csv と
+      regression_input/A1/doppler_traces_nowinnorm/<全試行のドップラー>  (名前か batch_pairs_*.csv で対応づける)
+    または
       regression_input/<試行名>/
-          imu/      <名前>_power_timeseries.csv  (仕事率計算ソフトの出力)
+          <名前>_power_timeseries.csv  (正解データ。加速度計算ソフトの出力。imu/ の中に置いてもよい)
           doppler_traces/            *antenna1*.txt, *antenna2*.txt (+ _time.npy, _meta.json)
           doppler_traces_nowinnorm/  同上 (--save_unnormalized の版)
           doppler_traces_raw/        同上
 
     例:
-      python regress_omron.py                       # nowinnorm 版で 5 モデル
-      python regress_omron.py --doppler all         # 3 つの版それぞれで比べる
-      python regress_omron.py --models linear,rf    # 一部のモデルだけ
+      python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒と 5 秒の区間
+      python regress_enmo.py --doppler all          # 3 つの版それぞれで比べる
+      python regress_enmo.py --windows 1            # 1 秒の区間だけ
+      python regress_enmo.py --models linear,rf     # 一部のモデルだけ
 
     Copyright (C) 2026 Heisuke Takeda
     Released under the GNU GPL v3 (see LICENSE).
@@ -38,10 +42,12 @@
 
 import argparse
 import csv
+import difflib
 import glob
 import json
 import os
 import pickle
+import re
 import sys
 import time
 from datetime import datetime
@@ -54,7 +60,8 @@ VARIANT_DIRS = {"normalized": "doppler_traces", "nowinnorm": "doppler_traces_now
 MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレスト", "xgboost": "XGBoost",
                "mlp": "MLP", "cnn": "CNN"}
 ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "cnn"]
-CNN_FRAMES = 64          # time frames per window fed to the CNN / CNN に入れる 1 秒あたりの時間フレーム数
+CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
+TARGET = "ENMO(mg)"      # target column in the work-rate software's output / 正解の列
 EPS = 1e-12
 
 
@@ -78,10 +85,9 @@ def _one(pattern, what):
     return hits[0]
 
 
-def load_doppler(folder, antenna, out):
+def load_doppler(txt, out):
     """One antenna's Doppler: (frames x bins) array, frame times on the CSI axis [s], velocity axis [m/s].
     1 本のアンテナのドップラー: (時間フレーム x 速度ビン) の配列、各フレームの CSI の時刻、速度軸"""
-    txt = _one(os.path.join(folder, f"*{antenna}*.txt"), f"{os.path.basename(folder)} の {antenna} のドップラー")
     with open(txt, "rb") as fp:
         arr = np.asarray(pickle.load(fp), dtype=float)
     base = txt[:-4]
@@ -107,29 +113,133 @@ def load_doppler(folder, antenna, out):
     return dict(S=arr, t=t, v=v, meta=meta, file=os.path.basename(txt))
 
 
-def load_target(trial_dir):
-    """Omron-style index per sample (t_csi, value). / オムロン式（各時刻）"""
-    ts = sorted(glob.glob(os.path.join(trial_dir, "imu", "*_power_timeseries.csv")))
-    win = sorted(glob.glob(os.path.join(trial_dir, "imu", "*_power_windows.csv")))
-    if ts:
-        path, kind = ts[0], "timeseries"
-    elif win:
-        path, kind = win[0], "windows"
+def load_target(spec, window):
+    """ENMO per sample (t_csi, value), or per window. / ENMO（各時刻、または区間ごと）"""
+    if spec.get("ts"):
+        path, kind = spec["ts"], "timeseries"
+    elif spec.get("win", {}).get(window):
+        path, kind = spec["win"][window], "windows"
     else:
-        raise RegError(f"{trial_dir}/imu/ に *_power_timeseries.csv (または *_power_windows.csv) がありません")
+        raise RegError(f"{spec['name']}: *_power_timeseries.csv (または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    if not rows or "omron_acc(mG)" not in rows[0]:
-        raise RegError(f"{os.path.basename(path)} にオムロン式の列 (omron_acc(mG)) がありません。"
-                       "仕事率計算ソフトを最新にして計算し直してください")
+    if not rows or TARGET not in rows[0]:
+        raise RegError(f"{os.path.basename(path)} に ENMO の列 ({TARGET}) がありません。"
+                       "加速度計算ソフトを最新にして計算し直してください")
     if kind == "timeseries":
         t = np.array([float(r["t_csi(s)"]) for r in rows])
-        y = np.array([float(r["omron_acc(mG)"]) for r in rows])
+        y = np.array([float(r[TARGET]) for r in rows])
         return dict(kind=kind, t=t, y=y, file=os.path.basename(path))
     a = np.array([float(r["start_csi(s)"]) for r in rows])
     b = np.array([float(r["end_csi(s)"]) for r in rows])
-    y = np.array([float(r["omron_acc(mG)"]) for r in rows])
+    y = np.array([float(r[TARGET]) for r in rows])
     return dict(kind=kind, a=a, b=b, y=y, file=os.path.basename(path))
+
+
+# ============================================================ finding the trials
+TS_SUFFIX = "_power_timeseries.csv"
+
+
+def _antenna(name):
+    m = re.search(r"antenna([12])", name, flags=re.I)
+    return f"antenna{m.group(1)}" if m else None
+
+
+def _dop_key(name):
+    """'A1_XR1_antenna1_WAX202_aligned_CSI_stream_0' -> 'A1_XR1_antenna#_WAX202_aligned_CSI_stream_0'"""
+    return re.sub(r"antenna[12]", "antenna#", name, flags=re.I)
+
+
+def _dop_prefix(key):
+    """Part of the Doppler name before the antenna (usually the trial / CSI name). / アンテナより前の部分"""
+    return re.split(r"_?antenna#", key, flags=re.I)[0].strip("_")
+
+
+def discover(root, out, pairs_csv=None):
+    """Find every trial: its ground truth and its Doppler files, in either layout.
+    試行ごとに、正解データとドップラーを探す（どちらの置き方でもよい）
+
+      (a) one folder per trial / 試行ごとのフォルダ:
+            <root>/<trial>/<name>_power_timeseries.csv (or <trial>/imu/...), <root>/<trial>/doppler_traces_nowinnorm/*.txt
+      (b) a dataset folder with everything mixed / データセットのフォルダにまとめて:
+            <root>/A1/imu/<trial>/(imu/)<name>_power_timeseries.csv, <root>/A1/doppler_traces_nowinnorm/*.txt (all trials)
+    Ground truth and Doppler are matched by folder (a), by the pairing list of the batch run (batch_pairs_*.csv),
+    or by name. / 正解とドップラーは、同じフォルダ (a)、一括処理の組み合わせの一覧、名前の順で対応づける
+    """
+    truths = {}
+    for p in sorted(glob.glob(os.path.join(root, "**", "*" + TS_SUFFIX), recursive=True)):
+        name = os.path.basename(p)[:-len(TS_SUFFIX)]
+        if name in truths and truths[name].get("ts"):
+            raise RegError(f"正解データ {name}{TS_SUFFIX} が 2 か所にあります: {truths[name]['ts']} と {p}")
+        truths.setdefault(name, dict(name=name, win={}))["ts"] = p
+    for p in sorted(glob.glob(os.path.join(root, "**", "*_windows_*s.csv"), recursive=True)):
+        m = re.match(r"(.+)_windows_([\d.]+)s\.csv$", os.path.basename(p))
+        if m:
+            truths.setdefault(m.group(1), dict(name=m.group(1), win={}))["win"][float(m.group(2))] = p
+    for t in truths.values():
+        d = os.path.dirname(t.get("ts") or next(iter(t["win"].values())))
+        t["dir"] = os.path.dirname(d) if os.path.basename(d).lower() == "imu" else d
+
+    # Doppler groups (antenna1 + antenna2 of one capture), keyed by the name without the antenna number
+    # ドップラーのまとまり（同じ収集の antenna1 と antenna2）。アンテナ番号を除いた名前で分ける
+    groups = {}
+    for variant, folder in VARIANT_DIRS.items():
+        for d in sorted(glob.glob(os.path.join(root, "**", folder), recursive=True)):
+            if not os.path.isdir(d) or os.path.basename(d) != folder:
+                continue
+            for txt in sorted(glob.glob(os.path.join(d, "*.txt"))):
+                stem = os.path.basename(txt)[:-4]
+                ant = _antenna(stem)
+                if not ant:
+                    continue
+                key = (os.path.dirname(d), _dop_key(stem))
+                g = groups.setdefault(key, dict(key=key[1], parent=key[0], files={}))
+                g["files"].setdefault(variant, {})[ant] = txt
+
+    # pairing list of the batch run: IMU CSV name -> CSI name / 一括処理の組み合わせ（IMU の名前 → CSI の名前）
+    mapping = {}
+    if pairs_csv is None:
+        found = sorted(glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True))
+        pairs_csv = found[-1] if found else None
+    if pairs_csv:
+        with open(pairs_csv, encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                if r.get("imu") and r.get("csi"):
+                    mapping[os.path.splitext(r["imu"].strip())[0]] = os.path.splitext(r["csi"].strip())[0]
+        log(f"  組み合わせの一覧を使います: {pairs_csv}（{len(mapping)} 組）", out)
+
+    cand = []
+    for tn, t in truths.items():
+        for gk, g in groups.items():
+            pre = _dop_prefix(g["key"])
+            if os.path.normcase(g["parent"]) == os.path.normcase(t["dir"]):
+                cand.append((3, 1.0, tn, gk, "同じフォルダ"))
+            elif tn in mapping and _dop_key(mapping[tn]).lower() in g["key"].lower():
+                cand.append((2, 1.0, tn, gk, "組み合わせの一覧"))
+            else:
+                a, b = tn.lower(), pre.lower()
+                r = difflib.SequenceMatcher(None, a, b).ratio()
+                if b and (a == b or a in b or b in a or r >= 0.75):
+                    cand.append((1, 1.0 if a == b else r, tn, gk, "名前"))
+    cand.sort(key=lambda c: (c[0], c[1]), reverse=True)
+    used_t, used_g, specs = set(), set(), []
+    for _, _, tn, gk, how in cand:
+        if tn in used_t or gk in used_g:
+            continue
+        used_t.add(tn)
+        used_g.add(gk)
+        specs.append(dict(truths[tn], doppler=groups[gk]["files"], dop_name=groups[gk]["key"], how=how))
+    specs.sort(key=lambda s_: s_["name"])
+    log(f"  試行: {len(specs)} 本（正解データとドップラーの組）", out)
+    for sp in specs:
+        log(f"    {sp['name']}  ↔  {sp['dop_name']}  （{sp['how']}で対応）", out)
+    for tn in sorted(set(truths) - used_t):
+        log(f"  注意: ドップラーが見つからない正解データ: {tn}（飛ばします）", out)
+    for gk in sorted(set(groups) - used_g):
+        log(f"  注意: 正解データが見つからないドップラー: {groups[gk]['key']}（飛ばします）", out)
+    if not specs:
+        raise RegError(f"{root} に、正解データとドップラーの組が見つかりません (README.md の置き方を参照)")
+    return specs
 
 
 # ============================================================ features
@@ -137,8 +247,8 @@ def physics_features(S, v, t, t_ctx=None, S_ctx=None):
     """Feature set B for one antenna and one window. / 特徴量 B（アンテナ 1 本・1 区間）
 
     S: frames x bins (power), v: velocity of each bin.
-    The step cadence needs a longer view, so it uses S_ctx/t_ctx (±2.5 s around the window).
-    足踏みの周期は 1 秒では測れないので、区間の前後 2.5 秒（S_ctx）から求める
+    The step cadence needs a longer view, so it uses S_ctx/t_ctx (at least 5 s around the window).
+    足踏みの周期は 1 秒では測れないので、区間を中心に 5 秒以上（S_ctx）から求める
     """
     P = np.clip(S, 0, None)
     av = np.abs(v)
@@ -183,27 +293,29 @@ B_NAMES = ["log_total", "log_moving", "moving_ratio", "mean_speed", "std_speed",
 
 
 def cnn_input(S, t, a, b):
-    """Window's Doppler resampled to CNN_FRAMES time frames (log10). / CNN の入力（時間を一定数にそろえる）"""
-    tu = a + (np.arange(CNN_FRAMES) + 0.5) * (b - a) / CNN_FRAMES
-    out = np.empty((CNN_FRAMES, S.shape[1]))
+    """Window's Doppler resampled to a fixed number of frames (log10). / CNN の入力（時間を一定数にそろえる）"""
+    n = int(min(320, round(CNN_FRAMES * (b - a))))
+    tu = a + (np.arange(n) + 0.5) * (b - a) / n
+    out = np.empty((n, S.shape[1]))
     for j in range(S.shape[1]):
         out[:, j] = np.interp(tu, t, S[:, j])
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(trial_dir, variant, window, out):
+def build_trial(spec, variant, window, out):
     """Windows of one trial: features A, B, CNN input and the target. / 1 試行分の区間"""
-    name = os.path.basename(trial_dir.rstrip("/\\"))
-    dop_dir = os.path.join(trial_dir, VARIANT_DIRS[variant])
-    if not os.path.isdir(dop_dir):
-        raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ がありません")
-    ants = [load_doppler(dop_dir, a, out) for a in ("antenna1", "antenna2")]
-    tgt = load_target(trial_dir)
+    name = spec["name"]
+    files = spec["doppler"].get(variant, {})
+    missing = [a for a in ("antenna1", "antenna2") if a not in files]
+    if missing:
+        raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
+    ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
+    tgt = load_target(spec, window)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
         # windows on the same grid as the power software (0, 1, 2 ... s); allow 0.1 s missing at the ends
-        # 仕事率計算ソフトと同じ区切り（0, 1, 2 … 秒）。端の 0.1 秒までの欠けは許す
+        # 加速度計算ソフトと同じ区切り（0, 1, 2 … 秒）。端の 0.1 秒までの欠けは許す
         edges = np.arange(np.floor(t0 / window) * window, t1 - window + 0.1 + 1e-9, window)
         edges = edges[edges >= t0 - 0.1 - 1e-9]
         wins = [(e, e + window) for e in edges]
@@ -228,7 +340,8 @@ def build_trial(trial_dir, variant, window, out):
             if sel.sum() < 0.5 * rate * (b - a):  # too few frames (packet gap) / フレームが少なすぎる
                 ok = False
                 break
-            ctx = (d["t"] >= (a + b) / 2 - 2.5) & (d["t"] < (a + b) / 2 + 2.5)
+            half = max(2.5, (b - a) / 2)
+            ctx = (d["t"] >= (a + b) / 2 - half) & (d["t"] < (a + b) / 2 + half)
             S = d["S"][sel]
             fa.append(np.log10(np.clip(S.mean(axis=0), EPS, None)))
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
@@ -312,10 +425,10 @@ def run(opts):
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_dir = opts.out or os.path.join(HERE, "outputs", f"regression_{stamp}")
     os.makedirs(out_dir, exist_ok=True)
-    log(f"=== ドップラー → オムロン式 の回帰 ({stamp}) ===", out)
-    trial_dirs = sorted(d for d in glob.glob(os.path.join(opts.input, "*")) if os.path.isdir(d))
-    if not trial_dirs:
-        raise RegError(f"{opts.input} に試行のフォルダがありません (README.md の置き方を参照)")
+    log(f"=== ドップラー → ENMO の回帰 ({stamp}) ===", out)
+    if not os.path.isdir(opts.input):
+        raise RegError(f"入力フォルダがありません: {opts.input}")
+    specs = discover(opts.input, out, getattr(opts, "pairs", None))
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
     bad = [m for m in models if m not in ALL_MODELS]
@@ -323,10 +436,11 @@ def run(opts):
         raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS)}）")
     feats = [f.strip().upper() for f in opts.features.split(",") if f.strip()]
     results, pred_rows = [], []
-    for variant in variants:
-        log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）]", out)
+    windows = opts.windows
+    for variant, window in [(v, w) for v in variants for w in windows]:
+        log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
-            trials = [build_trial(d, variant, opts.window, out) for d in trial_dirs]
+            trials = [build_trial(sp, variant, window, out) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -348,7 +462,8 @@ def run(opts):
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
         win = np.concatenate([tr["win"] for tr in trials])
-        _dump_features(os.path.join(out_dir, f"features_{variant}.csv"), tname, win, XA, XB, y, trials[0]["v"])
+        _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, y,
+                       trials[0]["v"])
         configs = [("baseline", "-")]
         for m in models:
             if m == "cnn":
@@ -379,12 +494,13 @@ def run(opts):
             mt = metrics(y, pred)
             per = {tn: metrics(y[tname == tn], pred[tname == tn]) for tn in dict.fromkeys(tname)}
             label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
-            results.append(dict(variant=variant, model=model, label=label, features=feat, **mt, per_trial=per,
+            results.append(dict(variant=variant, window=window, model=model, label=label, features=feat, **mt,
+                                per_trial=per,
                                 seconds=time.time() - t_start, pred=pred, y=y, tname=tname, win=win))
-            log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.1f} mG  RMSE {mt['RMSE']:7.1f}  "
+            log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
                 f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
             for i in range(len(y)):
-                pred_rows.append([variant, model, feat, tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}",
+                pred_rows.append([variant, f"{window:g}", model, feat, tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}",
                                   f"{y[i]:.3f}", f"{pred[i]:.3f}"])
     if not results:
         raise RegError("どの版でも計算できませんでした")
@@ -401,7 +517,7 @@ def _dump_features(path, tname, win, XA, XB, y, v):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
-        w.writerow(["trial", "start_csi(s)", "end_csi(s)", "omron_acc(mG)"] + B_NAMES_full()
+        w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
         for i in range(len(y)):
             w.writerow([tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}", f"{y[i]:.3f}"]
@@ -415,28 +531,30 @@ def B_NAMES_full():
 def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "model", "features", "MAE(mG)", "RMSE(mG)", "R2", "r", "seconds"])
+        w.writerow(["doppler", "window(s)", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds"])
         for r in results:
-            w.writerow([r["variant"], r["label"], r["features"], f"{r['MAE']:.3f}", f"{r['RMSE']:.3f}",
+            w.writerow([r["variant"], f"{r['window']:g}", r["label"], r["features"], f"{r['MAE']:.3f}", f"{r['RMSE']:.3f}",
                         f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "model", "features", "trial", "MAE(mG)", "RMSE(mG)", "R2", "r"])
+        w.writerow(["doppler", "window(s)", "model", "features", "trial", "MAE(mg)", "RMSE(mg)", "R2", "r"])
         for r in results:
             for tn, m in r["per_trial"].items():
-                w.writerow([r["variant"], r["label"], r["features"], tn, f"{m['MAE']:.3f}", f"{m['RMSE']:.3f}",
+                w.writerow([r["variant"], f"{r['window']:g}", r["label"], r["features"], tn, f"{m['MAE']:.3f}", f"{m['RMSE']:.3f}",
                             f"{m['R2']:.4f}", f"{m['r']:.4f}"])
     with open(os.path.join(out_dir, "predictions.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "model", "features", "trial", "start_csi(s)", "end_csi(s)", "true_omron(mG)",
-                    "pred_omron(mG)"])
+        w.writerow(["doppler", "window(s)", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
+                    "true_ENMO(mg)", "pred_ENMO(mg)"])
         w.writerows(pred_rows)
     with open(os.path.join(out_dir, "config.json"), "w", encoding="utf-8") as f:
         json.dump(vars(opts), f, ensure_ascii=False, indent=2)
-    best = min((r for r in results if r["model"] != "baseline"), key=lambda r: r["MAE"], default=None)
-    if best:
-        log(f"\n一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、ドップラー {best['variant']}）: "
-            f"MAE {best['MAE']:.1f} mG、R² {best['R2']:.3f}", out)
+    for wl in dict.fromkeys(r["window"] for r in results):
+        best = min((r for r in results if r["model"] != "baseline" and r["window"] == wl), key=lambda r: r["MAE"],
+                   default=None)
+        if best:
+            log(f"\n{wl:g} 秒の区間で一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、"
+                f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mg、R² {best['R2']:.3f}", out)
 
 
 # ============================================================ plots
@@ -470,11 +588,11 @@ def _plots(out_dir, results):
             m = r["tname"] == tn
             mid = r["win"][m].mean(axis=1)
             ax = fig.add_subplot(gs[i, :2])
-            ax.plot(mid, r["y"][m], color="#333333", lw=1.4, label="正解（オムロン式）")
+            ax.plot(mid, r["y"][m], color="#333333", lw=1.4, label="正解（ENMO）")
             ax.plot(mid, r["pred"][m], color=colors[r["model"]], lw=1.2, label="予測")
             pt = r["per_trial"][tn]
-            ax.set_title(f"{tn}  MAE {pt['MAE']:.0f} mG / R² {pt['R2']:.2f}", loc="left", fontsize=10)
-            ax.set_ylabel("[mG]")
+            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mg / R² {pt['R2']:.2f}", loc="left", fontsize=10)
+            ax.set_ylabel("ENMO [mg]")
             if i == 0:
                 ax.legend(loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=2, fontsize=9, frameon=False)
             if i == len(names) - 1:
@@ -485,35 +603,36 @@ def _plots(out_dir, results):
             m = r["tname"] == tn
             ax.scatter(r["y"][m], r["pred"][m], s=12, alpha=0.7, label=tn)
         ax.plot([lo, hi], [lo, hi], color="#333333", lw=0.8, ls="--")
-        ax.set_xlabel("正解 [mG]")
-        ax.set_ylabel("予測 [mG]")
-        ax.set_title(f"全体: MAE {r['MAE']:.0f} mG / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
+        ax.set_xlabel("正解 [mg]")
+        ax.set_ylabel("予測 [mg]")
+        ax.set_title(f"全体: MAE {r['MAE']:.1f} mg / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
-        fig.suptitle(f"{r['label']}（特徴量 {r['features']}、ドップラー {r['variant']}）")
+        fig.suptitle(f"{r['label']}（特徴量 {r['features']}、ドップラー {r['variant']}、区間 {r['window']:g} 秒）")
         fig.tight_layout()
-        fig.savefig(os.path.join(out_dir, f"pred_{r['variant']}_{r['model']}_{r['features'].split()[0]}.png"), dpi=110)
+        fig.savefig(os.path.join(out_dir, f"pred_{r['variant']}_{r['window']:g}s_{r['model']}_"
+                                          f"{r['features'].split()[0]}.png"), dpi=110)
         plt.close(fig)
     # comparison / 比較
-    variants = list(dict.fromkeys(r["variant"] for r in results))
-    fig, ax = plt.subplots(len(variants), 2, figsize=(14, 4.2 * len(variants)), squeeze=False)
-    for vi, var in enumerate(variants):
-        rs = [r for r in results if r["variant"] == var]
+    groups = list(dict.fromkeys((r["variant"], r["window"]) for r in results))
+    fig, ax = plt.subplots(len(groups), 2, figsize=(14, 4.2 * len(groups)), squeeze=False)
+    for vi, (var, wl) in enumerate(groups):
+        rs = [r for r in results if r["variant"] == var and r["window"] == wl]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
                  "mlp": "MLP", "cnn": "CNN"}
         labels = [short[r["model"]] + ("" if r["model"] in ("baseline", "cnn") else f"\n特徴量{r['features']}")
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
-        for j, (key, unit) in enumerate((("MAE", " [mG]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
+        for j, (key, unit) in enumerate((("MAE", " [mg]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
             vals = [r[key] for r in rs]
             ax[vi, j].bar(x, vals, color=cols)
             for xi, val in zip(x, vals):
-                ax[vi, j].text(xi, val, f"{val:.2f}" if key == "R2" else f"{val:.0f}", ha="center",
+                ax[vi, j].text(xi, val, f"{val:.2f}" if key == "R2" else f"{val:.1f}", ha="center",
                                va="bottom" if val >= 0 else "top", fontsize=8)
             ax[vi, j].set_xticks(x)
             ax[vi, j].set_xticklabels(labels, fontsize=9)
             ax[vi, j].set_ylabel(("R²" if key == "R2" else key) + unit)
-            ax[vi, j].set_title(f"ドップラー: {var}", loc="left", fontsize=10)
+            ax[vi, j].set_title(f"ドップラー: {var}、区間 {wl:g} 秒", loc="left", fontsize=10)
             if key == "R2":
                 ax[vi, j].axhline(0, color="#333333", lw=0.8)
     fig.suptitle("モデルの比較（試行ごとに分けた評価。RF = ランダムフォレスト、線形 = 線形回帰 (Ridge)）")
@@ -523,6 +642,16 @@ def _plots(out_dir, results):
 
 
 # ============================================================ CLI
+def parse_windows(text):
+    try:
+        ws = [float(x) for x in str(text).split(",") if x.strip()]
+    except ValueError:
+        raise RegError(f"--windows は数字をカンマで区切って指定します（{text}）")
+    if not ws or any(w <= 0 for w in ws):
+        raise RegError(f"--windows の値が正しくありません（{text}）")
+    return list(dict.fromkeys(ws))
+
+
 def main(argv=None):
     try:
         sys.stdout.reconfigure(errors="replace")
@@ -531,17 +660,21 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--input", default=os.path.join(HERE, "regression_input"), help="入力フォルダ（既定 regression_input）")
     ap.add_argument("--out", default=None, help="保存先（既定 outputs/regression_<日時>）")
+    ap.add_argument("--pairs", default=None,
+                    help="IMU と CSI の組み合わせの一覧（加速度計算ソフトの一括処理の batch_pairs_*.csv）。"
+                         "ドップラーと正解データの名前が対応しないときに使う（入力フォルダの中にあれば自動で使う）")
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")
     ap.add_argument("--features", default="A,B", help="CNN 以外のモデルの特徴量（A, B。既定 A,B）")
-    ap.add_argument("--window", type=float, default=1.0, help="1 区間の長さ [s]（既定 1）")
+    ap.add_argument("--windows", default="1,5", help="区間の長さ [s]（カンマ区切り。既定 1,5）")
     ap.add_argument("--blocks", type=int, default=5, help="試行が 1 本のとき、時間を分けるかたまりの数（既定 5）")
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--seed", type=int, default=0, help="乱数の種（既定 0）")
     ap.add_argument("--no_plots", action="store_true", help="図を作らない")
     opts = ap.parse_args(argv)
     try:
+        opts.windows = parse_windows(opts.windows)
         run(opts)
     except RegError as e:
         print(f"エラー: {e}", file=sys.stderr)

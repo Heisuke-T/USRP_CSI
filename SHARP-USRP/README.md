@@ -538,35 +538,37 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - `shuffle=True was passed, but will be ignored` — データセット側でシャッフル
   しているので問題ない
 
-### ドップラーから腰の加速度の指標を推定する回帰 (regress_omron.py)
+### ドップラーから腰の ENMO を推定する回帰 (regress_enmo.py)
 
-ドップラーから、仕事率計算ソフト (witmotion_wt011 の `compute_power.py`) が出す
-**オムロン式** (重力を除いた腰の合成加速度 [mG]、1 秒ごと) を推定するモデルを 5 種類作って比べる。
+ドップラーから、加速度計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
+(max(合成加速度 − 1 g, 0) [mg]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
+区間は 1 秒と 5 秒 (`--windows` で変更)。
 
 | モデル | 入力 |
 |---|---|
-| 線形回帰 (Ridge)・ランダムフォレスト・XGBoost・MLP | 特徴量 A (1 秒の平均スペクトル、log10、アンテナ 2 本で 200 個) と 特徴量 B (物理に基づく特徴量: 動きの強さ・平均の速さ・速さの 2 乗の平均・速度の広がり・95 % の速さ・足踏みの周期など、アンテナごと) のそれぞれ |
-| CNN | 1 秒分のドップラーの 2 次元配列 (64 時間フレーム x 速度ビン x アンテナ 2 本、log10) |
+| 線形回帰 (Ridge)・ランダムフォレスト・XGBoost・MLP | 特徴量 A (区間の平均スペクトル、log10、アンテナ 2 本で 200 個) と 特徴量 B (物理に基づく特徴量: 動きの強さ・平均の速さ・速さの 2 乗の平均・速度の広がり・95 % の速さ・足踏みの周期など、アンテナごと) のそれぞれ |
+| CNN | 区間のドップラーの 2 次元配列 (1 秒あたり 64 時間フレーム x 速度ビン x アンテナ 2 本、log10) |
 
-- 出力はどれも 1 秒ごとのオムロン式の値。比べやすいように「平均値で予測する基準」も一緒に出す
+- 出力はどれも区間ごとの ENMO の値。比べやすいように「平均値で予測する基準」も一緒に出す
 - 評価は **試行ごとに分ける** (1 試行をテスト、残りで学習、を全試行で繰り返す)。
-  隣り合う 1 秒はよく似ているので、ランダムに分けると精度が高く出すぎるため。試行が 1 本ならその中を時間で 5 分割 (参考値)
+  隣り合う区間はよく似ているので、ランダムに分けると精度が高く出すぎるため。試行が 1 本ならその中を時間で 5 分割 (参考値)
 - ドップラーは `doppler_traces_nowinnorm/` (窓ごとの割り算なし) が既定。`--doppler all` で 3 つの版を比べる
-- 区間は仕事率計算ソフトと同じ 0, 1, 2 … 秒の区切り。ドップラーの時刻は `_meta.json` の `time_origin_s` で
-  CSI の時間軸に直す (この値がない古いドップラーは先頭のパケット数から見積もる)
+- 区間は加速度計算ソフトと同じ区切り (0, 1, 2 … 秒 / 0, 5, 10 … 秒)。ドップラーの時刻は `_meta.json` の
+  `time_origin_s` で CSI の時間軸に直す (この値がない古いドップラーは先頭のパケット数から見積もる)
 
-入力は `regression_input/<試行名>/` に置く (置き方は `regression_input/README.md`)。
+入力は `regression_input/` に置く。データセットごとにまとめる置き方 (`A1/imu/<試行名>/`・`A1/doppler_traces_nowinnorm/`、名前か一括処理の `batch_pairs_*.csv` で対応づける) と、試行ごとのフォルダの置き方のどちらでもよい (詳しくは `regression_input/README.md`)。最初に、見つけた試行と組み合わせの一覧をログに出す。
 
 ```powershell
-python regress_omron.py                       # nowinnorm 版で 5 モデル
-python regress_omron.py --doppler all         # 3 つの版それぞれで
-python regress_omron.py --models linear,rf    # 一部のモデルだけ
+python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒と 5 秒
+python regress_enmo.py --doppler all          # 3 つの版それぞれで
+python regress_enmo.py --windows 5            # 5 秒の区間だけ
+python regress_enmo.py --models linear,rf     # 一部のモデルだけ
 ```
 
 結果は `outputs/regression_<日時>/`: `metrics.csv` (MAE・RMSE・R²・r)、`metrics_by_trial.csv`、
-`predictions.csv`、`comparison.png` (比較の棒グラフ)、`pred_<版>_<モデル>_<特徴量>.png`
-(試行ごとの正解と予測の時間変化と散布図)、`features_<版>.csv` (作った特徴量)。
-必要なパッケージ: `pip install scikit-learn xgboost tensorflow`。検証は `tests/test_regress_omron.py`。
+`predictions.csv`、`comparison.png` (比較の棒グラフ、版と区間ごと)、`pred_<版>_<区間>_<モデル>_<特徴量>.png`
+(試行ごとの正解と予測の時間変化と散布図)、`features_<版>_<区間>.csv` (作った特徴量)。
+必要なパッケージ: `pip install scikit-learn xgboost tensorflow`。検証は `tests/test_regress_enmo.py`。
 
 ### 受信レートの低下を模擬する (packet_loss.py)
 
@@ -917,7 +919,7 @@ SHARP-USRP/
         ├── test_har.py                 データセット作成〜学習〜テストの検証
         ├── test_packet_loss.py         パケット欠落の模擬の検証
         ├── test_doppler_variants.py    正規化を省いたドップラーの検証
-        ├── test_regress_omron.py       回帰モデル (regress_omron.py) の検証
+        ├── test_regress_enmo.py        回帰モデル (regress_enmo.py) の検証
         └── test_matlab_parity.py       MATLAB/Python 一致テスト
 ```
 
