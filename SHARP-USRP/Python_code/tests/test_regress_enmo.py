@@ -13,7 +13,7 @@
          線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
       6. CNN の確認 (--cnn_study, --cnn_seeds): 理由を確かめる CNN 4 種・乱数の種ごとの結果・Grad-CAM の図ができること
       7. SVR とガウス過程回帰 (特徴量 B) も基準よりはっきり良いこと
-      5. regression_input/A1 と A2 を並べて置いたとき: データセットをまたいで名前で組にしないこと、
+      5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
 
@@ -190,6 +190,15 @@ def check_two_datasets(tmp):
             for f in os.listdir(os.path.join(src, tn, folder)):
                 shutil.copy(os.path.join(src, tn, folder, f),
                             os.path.join(root, ds, folder, f.replace(f"{tn}_antenna", f"{trial}_antenna")))
+    # a complete trial in "その他": never read / 「その他」の中の試行は読まない
+    oth = os.path.join(root, "その他")
+    os.makedirs(os.path.join(oth, "imu", "A2_XHR1"), exist_ok=True)
+    shutil.copy(os.path.join(root, "A1", "imu", "A1_XR1", "A1_XR1_power_timeseries.csv"),
+                os.path.join(oth, "imu", "A2_XHR1", "A2_XHR1_power_timeseries.csv"))
+    shutil.copytree(os.path.join(root, "A1", ro.VARIANT_DIRS["nowinnorm"]), os.path.join(oth, ro.VARIANT_DIRS["nowinnorm"]))
+    for f in os.listdir(os.path.join(oth, ro.VARIANT_DIRS["nowinnorm"])):
+        os.rename(os.path.join(oth, ro.VARIANT_DIRS["nowinnorm"], f),
+                  os.path.join(oth, ro.VARIANT_DIRS["nowinnorm"], f.replace("A1_XR", "A2_XHR")))
     out_dir = os.path.join(tmp, "out_two")
     res, _ = ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear", features="B",
                                        windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False, pairs=None,
@@ -200,7 +209,7 @@ def check_two_datasets(tmp):
     good = (set(by) == {s1, s2, "試行ごと"}
             and sorted(set(by[s1]["tname"])) == ["A2_XR1", "A2_XR2", "A2_XR4"]
             and sorted(set(by[s2]["tname"])) == ["A2_XR2"] and len(by[s2]["y"]) == 80
-            and "A2_XR3" not in names_all and len(names_all) == 7
+            and "A2_XR3" not in names_all and len(names_all) == 7 and not any("XHR" in n for n in names_all)
             and all(by[k]["R2"] > 0.5 for k in by))
     files = os.listdir(out_dir)
     good &= any(f.startswith("pred_train_A1_test_A2_") for f in files)

@@ -172,7 +172,10 @@ def _dop_prefix(key):
     return re.split(r"_?antenna#", key, flags=re.I)[0].strip("_")
 
 
-def discover(root, out, pairs_csv=None):
+EXCLUDE_DEFAULT = "その他"   # folders under the input folder that are not read / 読まないフォルダ
+
+
+def discover(root, out, pairs_csv=None, exclude=EXCLUDE_DEFAULT):
     """Find every trial: its ground truth and its Doppler files, in either layout.
     試行ごとに、正解データとドップラーを探す（どちらの置き方でもよい）
 
@@ -183,13 +186,25 @@ def discover(root, out, pairs_csv=None):
     Ground truth and Doppler are matched by folder (a), by the pairing list of the batch run (batch_pairs_*.csv),
     or by name. / 正解とドップラーは、同じフォルダ (a)、一括処理の組み合わせの一覧、名前の順で対応づける
     """
+    skip = {x.strip().lower() for x in str(exclude or "").split(",") if x.strip()}
+
+    def excluded(path):  # inside a folder that is not read / 読まないフォルダの中か
+        rel = os.path.relpath(path, root)
+        return any(part.lower() in skip for part in rel.split(os.sep)[:-1])
+
+    if skip:
+        log(f"  読まないフォルダ: {', '.join(sorted(skip))}（--exclude で変更）", out)
     truths = {}
     for p in sorted(glob.glob(os.path.join(root, "**", "*" + TS_SUFFIX), recursive=True)):
+        if excluded(p):
+            continue
         name = os.path.basename(p)[:-len(TS_SUFFIX)]
         if name in truths and truths[name].get("ts"):
             raise RegError(f"正解データ {name}{TS_SUFFIX} が 2 か所にあります: {truths[name]['ts']} と {p}")
         truths.setdefault(name, dict(name=name, win={}))["ts"] = p
     for p in sorted(glob.glob(os.path.join(root, "**", "*_windows_*s.csv"), recursive=True)):
+        if excluded(p):
+            continue
         m = re.match(r"(.+)_windows_([\d.]+)s\.csv$", os.path.basename(p))
         if m:
             truths.setdefault(m.group(1), dict(name=m.group(1), win={}))["win"][float(m.group(2))] = p
@@ -207,7 +222,7 @@ def discover(root, out, pairs_csv=None):
     groups = {}
     for variant, folder in VARIANT_DIRS.items():
         for d in sorted(glob.glob(os.path.join(root, "**", folder), recursive=True)):
-            if not os.path.isdir(d) or os.path.basename(d) != folder:
+            if not os.path.isdir(d) or os.path.basename(d) != folder or excluded(os.path.join(d, "x")):
                 continue
             for txt in sorted(glob.glob(os.path.join(d, "*.txt"))):
                 stem = os.path.basename(txt)[:-4]
@@ -221,8 +236,9 @@ def discover(root, out, pairs_csv=None):
     # pairing list of the batch run: IMU CSV name -> CSI name / 一括処理の組み合わせ（IMU の名前 → CSI の名前）
     mapping = {}
     # every pairing list found (A1, A2, ... may each have one; newer files win) / 見つかった一覧をすべて使う
-    lists = [pairs_csv] if pairs_csv else sorted(glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True),
-                                                 key=os.path.getmtime)
+    lists = [pairs_csv] if pairs_csv else sorted(
+        (p for p in glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True) if not excluded(p)),
+        key=os.path.getmtime)
     for pc in lists:
         n0 = len(mapping)
         with open(pc, encoding="utf-8-sig") as f:
@@ -657,7 +673,7 @@ def run(opts):
     log(f"=== ドップラー → ENMO の回帰 ({stamp}) ===", out)
     if not os.path.isdir(opts.input):
         raise RegError(f"入力フォルダがありません: {opts.input}")
-    specs = discover(opts.input, out, getattr(opts, "pairs", None))
+    specs = discover(opts.input, out, getattr(opts, "pairs", None), getattr(opts, "exclude", EXCLUDE_DEFAULT))
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
     bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS]
@@ -1060,6 +1076,8 @@ def main(argv=None):
     ap.add_argument("--pairs", default=None,
                     help="IMU と CSI の組み合わせの一覧（加速度計算ソフトの一括処理の batch_pairs_*.csv）。"
                          "ドップラーと正解データの名前が対応しないときに使う（入力フォルダの中にあれば自動で使う）")
+    ap.add_argument("--exclude", default=EXCLUDE_DEFAULT,
+                    help=f"入力フォルダの中で読まないフォルダの名前（カンマ区切り。既定「{EXCLUDE_DEFAULT}」。空にすると全部読む）")
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS),

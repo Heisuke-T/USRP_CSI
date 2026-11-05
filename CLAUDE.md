@@ -46,7 +46,8 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
 `regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・SVR・ガウス過程回帰・CNN で、ドップラー (特徴量 A: 平均スペクトル、
 B: 物理特徴量。C: 速さの時間微分は実データで効かなかったので既定では使わない) から
 腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒ごと) を推定して比べる。入力は
-`regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない)、
+`regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない。
+`regression_input/その他/` はユーザーの希望で読まない: `--exclude` の既定)、
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。
 `--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
 (時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)。前後 2 秒の CNN は `--models cnn5s`
