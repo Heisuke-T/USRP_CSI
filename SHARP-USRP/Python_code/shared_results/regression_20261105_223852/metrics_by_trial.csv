@@ -1,0 +1,19 @@
+doppler,window(s),split,model,features,trial,MAE(mg),RMSE(mg),R2,r
+nowinnorm,1,学習 A1 → テスト A2,平均値で予測（基準）,-,A2_XR1,178.712,263.306,-0.0528,0.0000
+nowinnorm,1,学習 A1 → テスト A2,平均値で予測（基準）,-,A2_XR2,223.636,269.857,-0.0000,-0.0000
+nowinnorm,1,学習 A1 → テスト A2,CNN,Doppler 2D,A2_XR1,87.299,129.463,0.7455,0.9342
+nowinnorm,1,学習 A1 → テスト A2,CNN,Doppler 2D,A2_XR2,94.642,125.681,0.7831,0.9153
+nowinnorm,1,学習 A1 → テスト A2,CNN（時間の順番を入れ替え）,Doppler 2D 時間入替,A2_XR1,108.336,160.199,0.6103,0.8564
+nowinnorm,1,学習 A1 → テスト A2,CNN（時間の順番を入れ替え）,Doppler 2D 時間入替,A2_XR2,101.366,134.375,0.7520,0.8984
+nowinnorm,1,学習 A1 → テスト A2,CNN（時間で平均）,Doppler 2D 時間平均,A2_XR1,112.974,165.711,0.5830,0.8420
+nowinnorm,1,学習 A1 → テスト A2,CNN（時間で平均）,Doppler 2D 時間平均,A2_XR2,110.909,142.380,0.7216,0.8748
+nowinnorm,1,学習 A1 → テスト A2,1 次元 CNN（時間方向）,Doppler 1D,A2_XR1,81.649,107.373,0.8249,0.9333
+nowinnorm,1,学習 A1 → テスト A2,1 次元 CNN（時間方向）,Doppler 1D,A2_XR2,104.575,141.631,0.7245,0.8875
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR1,85.417,119.441,0.7834,0.9119
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR2,80.452,108.984,0.8369,0.9276
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,平均値で予測（基準）,-,A2_XR2,223.277,269.996,-0.0010,0.0000
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN,Doppler 2D,A2_XR2,91.203,120.566,0.8004,0.9160
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN（時間の順番を入れ替え）,Doppler 2D 時間入替,A2_XR2,107.122,137.275,0.7412,0.8861
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN（時間で平均）,Doppler 2D 時間平均,A2_XR2,110.088,139.751,0.7318,0.8733
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,1 次元 CNN（時間方向）,Doppler 1D,A2_XR2,100.861,132.409,0.7592,0.8918
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR2,82.234,107.519,0.8413,0.9271
