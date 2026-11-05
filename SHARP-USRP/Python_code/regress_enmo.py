@@ -713,10 +713,15 @@ def run(opts):
         models += [m for m in ["cnn"] + STUDY_MODELS if m not in models]
     n_seeds = max(1, int(getattr(opts, "cnn_seeds", 1) or 1))
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
-    badf = [f for f in feats if not f or any(p not in ("A", "B", "C", "D", "E") for p in f.split("+"))]
+    def _ok(f):
+        base, _, k = f.partition("@")
+        return bool(base) and all(p in ("A", "B", "C", "D", "E") for p in base.split("+")) and (
+            k == "" or (k.isdigit() and 1 <= int(k) <= 5))
+    badf = [f for f in feats if not _ok(f)]
     if badf:
-        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E と、その組み合わせ A+D など）")
-    used = {p for f in feats for p in f.split("+")}
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E と、その組み合わせ A+D など。"
+                       "前後の区間も入れるときは B+D@1 のように @ と区間の数 1〜5）")
+    used = {p for f in feats for p in f.partition("@")[0].split("+")}
     splits = parse_splits(getattr(opts, "split", None))
     for kind, tr_tok, te_tok in splits:  # check the names before the slow part / 時間の掛かる処理の前に名前を確かめる
         if tr_tok:
@@ -766,6 +771,19 @@ def run(opts):
         XD = np.concatenate([tr["XD"] for tr in trials])
         XE = np.concatenate([tr["XE"] for tr in trials])
         fsets = {"A": XA, "B": XB, "C": XC, "D": XD, "E": XE}
+        fnames = feature_names(trials[0]["v"])
+        x_cache = {}
+
+        def tab_data(feat):
+            """Input of a tabular model and its column names (made once). / 表の形のモデルの入力と列の名前"""
+            if feat not in x_cache:
+                base, _, k = feat.partition("@")
+                X = np.hstack([fsets[p] for p in base.split("+")])
+                names = [n for p in base.split("+") for n in fnames[p]]
+                if k:
+                    X, names = add_context(X, names, tname, int(k))
+                x_cache[feat] = (X, names)
+            return x_cache[feat]
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
         win = np.concatenate([tr["win"] for tr in trials])
@@ -787,6 +805,8 @@ def run(opts):
                 preds, skip = [], False
                 gp_sd = np.full(len(y), np.nan) if model == "gpr" else None
                 cams = None
+                want_imp = bool(getattr(opts, "importance", False))
+                imp_sum, imp_n = None, 0
                 for si, seed in enumerate(seeds):
                     pred = np.full(len(y), np.nan)
                     for tr_i, te_i in folds:
@@ -808,7 +828,7 @@ def run(opts):
                                     cams = np.full((len(y),) + cm.shape[1:], np.nan, np.float32)
                                 cams[te_i] = cm
                         else:
-                            X = np.hstack([fsets[p] for p in feat.split("+")])
+                            X, xnames = tab_data(feat)
                             est = make_tabular(model, seed)
                             with warnings.catch_warnings():
                                 warnings.simplefilter("ignore")  # GPR / SVR convergence notes / 収束の注意は出さない
@@ -817,6 +837,9 @@ def run(opts):
                                     pred[te_i], gp_sd[te_i] = est.predict(X[te_i], return_std=True)
                                 else:
                                     pred[te_i] = est.predict(X[te_i])
+                            if want_imp and model in ("rf", "xgboost"):
+                                imp_sum = est.feature_importances_ + (0 if imp_sum is None else imp_sum)
+                                imp_n += 1
                     if skip:
                         break
                     preds.append(pred)
@@ -837,6 +860,9 @@ def run(opts):
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
                                     features=feat, **mt, per_trial=per, seconds=time.time() - t_start,
                                     pred=pp, y=yy, tname=tn_, win=ww, **extra))
+                if imp_n:
+                    imp = imp_sum / imp_n
+                    results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
                 log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
                 if seed_m:
@@ -858,12 +884,115 @@ def run(opts):
     if not results:
         raise RegError("どの版でも計算できませんでした")
     _save(out_dir, results, pred_rows, opts, out)
+    if any("importance" in r for r in results):
+        _save_importance(out_dir, results, out, plots=not opts.no_plots)
     if not opts.no_plots:
         _plots(out_dir, results)
     log(f"\n保存しました: {out_dir}", out)
     with open(os.path.join(out_dir, "log.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(out) + "\n")
     return results, out_dir
+
+
+def d_feature_names(v):
+    """Column names of feature set D (per antenna: std of each bin, then the coarse grid). / 特徴量 D の列の名前"""
+    vb = np.array_split(np.arange(len(v)), D_GRID[1])
+    names = []
+    for a in (1, 2):
+        names += [f"D_ant{a}_std_v{x:+.3f}" for x in v]
+        names += [f"D_ant{a}_grid_t{i + 1}_v{v[b_[0]]:+.1f}to{v[b_[-1]]:+.1f}" for i in range(D_GRID[0]) for b_ in vb]
+    return names
+
+
+def feature_names(v):
+    """Column names of every feature set. / 特徴量ごとの列の名前"""
+    return {"A": [f"A_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v], "B": B_NAMES_full(),
+            "C": [f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES], "D": d_feature_names(v),
+            "E": [f"E_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v]}
+
+
+def add_context(X, names, tname, k):
+    """Append the features of the k windows before and after (same trial; at the ends the nearest window).
+    前後 k 区間の特徴量を横に足す（同じ試行の中。端では一番近い区間）"""
+    out = [X]
+    names = list(names)
+    offsets = [o for o in range(-k, k + 1) if o != 0]
+    for o in offsets:
+        Z = np.empty_like(X)
+        for tn in dict.fromkeys(tname):
+            idx = np.where(tname == tn)[0]
+            Z[idx] = X[idx[np.clip(np.arange(len(idx)) + o, 0, len(idx) - 1)]]
+        out.append(Z)
+    names_all = names + [f"t{o:+d}:{n}" for o in offsets for n in names]
+    return np.hstack(out), names_all
+
+
+def _feature_group(name):
+    """Group of a column for the summary (t-1: ... / B_mean_speed / D_std / ...). / まとめ用のグループ"""
+    pre, _, n = name.rpartition(":")
+    if n.startswith("B_"):
+        g = "B_" + n.split("_", 2)[2]            # B_ant1_mean_speed -> B_mean_speed
+    elif n.startswith("D_"):
+        g = "D_" + n.split("_")[2]               # D_ant1_std_v.. -> D_std / D_grid
+    else:
+        g = n.split("_")[0]                      # A / C / E
+    return (pre + ":" if pre else "") + g
+
+
+def _save_importance(out_dir, results, out, plots=True, top=20):
+    """Feature importance of the tree models (mean over the folds): a table of all, the top for the best model
+    of each split (log and figure). / 決定木のモデルの特徴量の重要度（学習した回の平均）"""
+    rows, groups = [], []
+    for r in results:
+        if "importance" not in r:
+            continue
+        names, imp = r["importance"]
+        order = np.argsort(-imp)
+        for rank, j in enumerate(order, 1):
+            rows.append([r["split"], r["label"], r["features"], rank, names[j], f"{imp[j]:.5f}"])
+        g = {}
+        for n, x in zip(names, imp):
+            g[_feature_group(n)] = g.get(_feature_group(n), 0.0) + float(x)
+        for k_, x in sorted(g.items(), key=lambda kv: -kv[1]):
+            groups.append([r["split"], r["label"], r["features"], k_, f"{x:.4f}"])
+    with open(os.path.join(out_dir, "importance.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["split", "model", "features", "rank", "feature", "importance"])
+        w.writerows(rows)
+    with open(os.path.join(out_dir, "importance_groups.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["split", "model", "features", "group", "importance"])
+        w.writerows(groups)
+    log("\n特徴量の重要度（決定木のモデル。importance.csv・importance_groups.csv）", out)
+    for sp in dict.fromkeys(r["split"] for r in results):
+        cand = [r for r in results if r["split"] == sp and "importance" in r]
+        if not cand:
+            continue
+        b = max(cand, key=lambda r: r["R2"])
+        names, imp = b["importance"]
+        order = np.argsort(-imp)[:top]
+        g = {}
+        for n, x in zip(names, imp):
+            g[_feature_group(n)] = g.get(_feature_group(n), 0.0) + float(x)
+        gtxt = "、".join(f"{k_} {x:.0%}" for k_, x in sorted(g.items(), key=lambda kv: -kv[1])[:6])
+        log(f"  [{sp}] {b['label']}（特徴量 {b['features']}、R² {b['R2']:.3f}）: 上位 "
+            + "、".join(f"{names[j]} {imp[j]:.1%}" for j in order[:5]) + f"／グループ別 {gtxt}", out)
+        if not plots:
+            continue
+        try:
+            plt = _setup_plt()
+            fig, ax = plt.subplots(figsize=(9, 0.32 * len(order) + 1.4))
+            ax.barh(np.arange(len(order))[::-1], imp[order], color="#3A9D5D")
+            ax.set_yticks(np.arange(len(order))[::-1])
+            ax.set_yticklabels([names[j] for j in order], fontsize=8)
+            ax.set_xlabel("重要度（合計 1）")
+            ax.set_title(f"{b['label']}（特徴量 {b['features']}、R² {b['R2']:.2f}）上位 {len(order)} 個\n{sp}",
+                         fontsize=10)
+            fig.tight_layout()
+            fig.savefig(os.path.join(out_dir, f"importance_{_split_tag(sp) or 'cv_'}{b['model']}.png"), dpi=110)
+            plt.close(fig)
+        except Exception as e:  # the figure is optional / 図は失敗しても続ける
+            log(f"  注意: 重要度の図を作れませんでした（{e}）", out)
 
 
 def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None):
@@ -873,13 +1002,7 @@ def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None):
         has_c = bool(np.isfinite(XC).any())  # feature C only when it was computed / C は計算したときだけ
         has_d = XD is not None and XD.ndim == 2 and XD.shape[1] > 0
         has_e = XE is not None and XE.ndim == 2 and XE.shape[1] > 0
-        vb = np.array_split(np.arange(len(v)), D_GRID[1])
-        d_names = []
-        if has_d:  # per antenna, as built: std (100) then grid (40) / 作った順: ばらつき 100 個、マス 40 個
-            for a in (1, 2):
-                d_names += [f"D_ant{a}_std_v{x:+.3f}" for x in v]
-                d_names += [f"D_ant{a}_grid_t{i + 1}_v{v[b_[0]]:+.1f}to{v[b_[-1]]:+.1f}"
-                            for i in range(D_GRID[0]) for b_ in vb]
+        d_names = d_feature_names(v) if has_d else []
         w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
                    + ([f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES] if has_c else [])
                    + d_names + ([f"E_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v] if has_e else [])
@@ -1127,7 +1250,7 @@ def main(argv=None):
                     help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）など）")
     ap.add_argument("--features", default="A,B",
                     help="CNN 以外のモデルの特徴量（既定 A,B。ほかに C: 速さの時間微分、D: 1 秒の中の時間変化、"
-                         "E: 強さをそろえたスペクトル。組み合わせは A+B、A+D など）")
+                         "E: 強さをそろえたスペクトル。組み合わせは A+B、A+D など。B+D@1 で前後 1 区間の特徴量も並べる）")
     ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")
     ap.add_argument("--split", action="append", default=None,
                     help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"
@@ -1141,6 +1264,8 @@ def main(argv=None):
                     help="CNN が効く理由を確かめる: 時間の順番を入れ替えた CNN・時間で平均した CNN・1 次元 CNN・"
                          "前後 1 秒も入れた CNN を足し、CNN が見た場所の図（Grad-CAM）を作る")
     ap.add_argument("--seed", type=int, default=0, help="乱数の種（既定 0）")
+    ap.add_argument("--importance", action="store_true",
+                    help="ランダムフォレストと XGBoost の特徴量の重要度を出す（importance.csv・importance_groups.csv・図）")
     ap.add_argument("--no_plots", action="store_true", help="図を作らない")
     opts = ap.parse_args(argv)
     try:

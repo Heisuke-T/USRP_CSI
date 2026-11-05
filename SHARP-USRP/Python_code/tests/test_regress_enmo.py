@@ -15,6 +15,7 @@
       7. SVR とガウス過程回帰 (特徴量 B) も基準よりはっきり良いこと
       8. 特徴量 D・E: どちらも動き、試行ごとに受信の強さが違うとき E (強さをそろえたスペクトル) が A より良いこと
          (ランダムフォレストで比べる。線形回帰は強さの違いを係数で打ち消せるので差が出にくい)
+      9. 特徴量の重要度 (--importance) と前後の区間の特徴量 (B+D@1) が出ること
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -216,6 +217,30 @@ def check_feature_de(tmp):
     return good
 
 
+def check_importance_context(tmp):
+    """--importance and B+D@1 (features of the window before and after). / 重要度と前後の区間の特徴量"""
+    import argparse
+    inp = os.path.join(tmp, "in_imp")
+    for k in range(4):
+        make_trial(inp, k)
+    out_dir = os.path.join(tmp, "out_imp")
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="rf,xgboost",
+                                       features="B+D,B+D@1", windows=[1.0], blocks=5, epochs=5, seed=0,
+                                       no_plots=False, pairs=None, importance=True))
+    files = os.listdir(out_dir)
+    with open(os.path.join(out_dir, "importance.csv"), encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    n_bd = sum(1 for r in rows if r["features"] == "B+D" and r["model"] == "XGBoost")
+    n_ctx = sum(1 for r in rows if r["features"] == "B+D@1" and r["model"] == "XGBoost")
+    has_t = any(r["feature"].startswith("t-1:") for r in rows) and any(r["feature"].startswith("t+1:") for r in rows)
+    good = (n_bd == 300 and n_ctx == 900 and has_t and "importance_groups.csv" in files
+            and any(f.startswith("importance_") and f.endswith(".png") for f in files)
+            and all(r["R2"] > 0.5 for r in res if r["model"] != "baseline"))
+    print(f"  {'OK ' if good else 'NG '} 特徴量の重要度と前後の区間: B+D {n_bd} 列、B+D@1 {n_ctx} 列（t-1・t+1 つき）、"
+          f"図 {[f for f in files if f.startswith('importance_') and f.endswith('.png')]}")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -336,6 +361,7 @@ def main():
         ok &= check_feature_c(tmp)
         ok &= check_two_datasets(tmp)
         ok &= check_feature_de(tmp)
+        ok &= check_importance_context(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
