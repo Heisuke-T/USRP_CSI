@@ -6,7 +6,7 @@
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
     モデル (5 種類):
-      線形回帰 (Ridge)    : 特徴量 A / B / C / A+C / B+C
+      線形回帰 (Ridge)    : 特徴量 A / B（C や A+C などは --features で指定したときだけ）
       ランダムフォレスト  : 同上
       XGBoost             : 同上
       MLP                 : 同上
@@ -391,7 +391,7 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out):
+def build_trial(spec, variant, window, out, need_c=True):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -399,7 +399,7 @@ def build_trial(spec, variant, window, out):
     if missing:
         raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
     ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
-    acc = [accel_traces(d) for d in ants]
+    acc = [accel_traces(d) if need_c else None for d in ants]  # feature C only when used / C は使うときだけ
     tgt = load_target(spec, window)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
@@ -435,7 +435,7 @@ def build_trial(spec, variant, window, out):
             S = d["S"][sel]
             fa.append(np.log10(np.clip(S.mean(axis=0), EPS, None)))
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
-            fc.append(accel_features(ac, a, b))
+            fc.append(accel_features(ac, a, b) if ac is not None else np.full(len(C_NAMES), np.nan))
             fn.append(cnn_input(d["S"], d["t"], a, b))
         if not ok:
             dropped += 1
@@ -605,7 +605,7 @@ def run(opts):
     for variant, window in [(v, w) for v in variants for w in windows]:
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
-            trials = [build_trial(sp, variant, window, out) for sp in specs]
+            trials = [build_trial(sp, variant, window, out, need_c=any("C" in f for f in feats)) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -679,12 +679,14 @@ def _dump_features(path, tname, win, XA, XB, XC, y, v):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
+        has_c = bool(np.isfinite(XC).any())  # feature C only when it was computed / C は計算したときだけ
         w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
-                   + [f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES]
+                   + ([f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES] if has_c else [])
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
         for i in range(len(y)):
             w.writerow([tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}", f"{y[i]:.3f}"]
-                       + [f"{x:.6g}" for x in XB[i]] + [f"{x:.6g}" for x in XC[i]] + [f"{x:.6g}" for x in XA[i]])
+                       + [f"{x:.6g}" for x in XB[i]] + ([f"{x:.6g}" for x in XC[i]] if has_c else [])
+                       + [f"{x:.6g}" for x in XA[i]])
 
 
 def B_NAMES_full():
@@ -840,8 +842,8 @@ def main(argv=None):
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")
-    ap.add_argument("--features", default="A,B,C,A+C,B+C",
-                    help="CNN 以外のモデルの特徴量（A, B, C と、その組み合わせ A+C など。既定 A,B,C,A+C,B+C）")
+    ap.add_argument("--features", default="A,B",
+                    help="CNN 以外のモデルの特徴量（A, B。既定 A,B。速さの時間微分の C と組み合わせ A+C なども指定できる）")
     ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")
     ap.add_argument("--split", action="append", default=None,
                     help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"
