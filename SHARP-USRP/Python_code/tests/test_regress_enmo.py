@@ -11,6 +11,8 @@
       3. 区間が加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
       4. 特徴量 C (速さの時間微分): 足踏みのテンポが試行ごとに違い、ENMO = 速さ x テンポ (加速度) のとき、
          線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
+      6. CNN の確認 (--cnn_study, --cnn_seeds): 理由を確かめる CNN 4 種・乱数の種ごとの結果・Grad-CAM の図ができること
+      7. SVR とガウス過程回帰 (特徴量 B) も基準よりはっきり良いこと
       5. regression_input/A1 と A2 を並べて置いたとき: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -135,6 +137,30 @@ def check_feature_c(tmp):
     return good
 
 
+def check_cnn_study(tmp):
+    """--cnn_study and --cnn_seeds (short training: only that everything runs). / CNN の確認（動くことだけ）"""
+    import importlib.util
+    if not importlib.util.find_spec("tensorflow"):
+        print("  (TensorFlow が無いので CNN の確認は飛ばします)")
+        return True
+    inp = os.path.join(tmp, "in_study")
+    for k in range(4):
+        make_trial(inp, k)
+    out_dir = os.path.join(tmp, "out_study")
+    import argparse
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="cnn", features="B",
+                                       windows=[1.0], blocks=5, epochs=3, seed=0, no_plots=False, pairs=None,
+                                       split=["T1,T2,T3:T4"], cnn_study=True, cnn_seeds=2))
+    got = {r["model"]: r for r in res}
+    files = os.listdir(out_dir)
+    good = (all(m in got for m in ro.CNN_KINDS) and all(got[m]["n_seeds"] == 2 and len(got[m]["seed_metrics"]) == 2
+                                                         for m in ro.CNN_KINDS)
+            and "cnn_seeds.csv" in files and any(f.startswith("cnn_gradcam_") for f in files))
+    print(f"  {'OK ' if good else 'NG '} CNN の確認: {', '.join(sorted(got))}、乱数の種 2 回、Grad-CAM の図 "
+          f"{[f for f in files if f.startswith('cnn_gradcam_')]}")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -245,11 +271,12 @@ def main():
             ok &= good
         ok &= check_feature_c(tmp)
         ok &= check_two_datasets(tmp)
+        ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
-            models = "linear,rf,xgboost,mlp,cnn"
+            models = "linear,rf,xgboost,mlp,svr,gpr,cnn"
         else:
-            models = "linear,rf,xgboost,mlp"
+            models = "linear,rf,xgboost,mlp,svr,gpr"
             print("(TensorFlow が無いので CNN は飛ばします)")
         out_dir = os.path.join(tmp, "out")
         results, _ = ro.run(ro_args(inp, out_dir, models))
@@ -267,6 +294,8 @@ def main():
                 all(got[("nowinnorm", w, "linear", "B")]["R2"] > 0.5 for w in W),
             'ランダムフォレスト (特徴量 B, nowinnorm) の R² > 0.5 (1 秒・5 秒)':
                 all(got[("nowinnorm", w, "rf", "B")]["R2"] > 0.5 for w in W),
+            'SVR とガウス過程回帰 (特徴量 B, nowinnorm) の R² > 0.5 (1 秒・5 秒)':
+                all(got[("nowinnorm", w, m, "B")]["R2"] > 0.5 for w in W for m in ("svr", "gpr")),
             '表と図ができている': all(f in files for f in ("metrics.csv", "metrics_by_trial.csv", "predictions.csv",
                                                         "comparison.png", "log.txt"))
                                 and any(f.startswith("pred_nowinnorm_1s_linear") for f in files)
