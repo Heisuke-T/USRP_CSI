@@ -1,0 +1,649 @@
+split,model,features,group,importance
+学習 A1 → テスト A2,ランダムフォレスト,B+D,D_grid,0.6045
+学習 A1 → テスト A2,ランダムフォレスト,B+D,D_std,0.3088
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_moving_ratio,0.0351
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_spread,0.0215
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_cadence,0.0119
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_speed2_x_cadence,0.0096
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_log_moving,0.0023
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_log_total,0.0022
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_v95,0.0012
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_std_speed,0.0012
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_mean_speed2,0.0010
+学習 A1 → テスト A2,ランダムフォレスト,B+D,B_mean_speed,0.0006
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,D_grid,0.3451
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:D_std,0.2371
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,D_std,0.1907
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:D_grid,0.0767
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_moving_ratio,0.0406
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_spread,0.0309
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:D_std,0.0288
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:D_grid,0.0137
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_spread,0.0087
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_mean_speed2,0.0040
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_cadence,0.0038
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_speed2_x_cadence,0.0036
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_speed2_x_cadence,0.0034
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_cadence,0.0033
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_std_speed,0.0019
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_cadence,0.0010
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_moving_ratio,0.0010
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_speed2_x_cadence,0.0007
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_mean_speed2,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_log_total,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_log_moving,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_log_total,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_mean_speed,0.0004
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_log_total,0.0004
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_mean_speed,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,B_v95,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_log_moving,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_std_speed,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_moving_ratio,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_std_speed,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_log_moving,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t-1:B_v95,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_v95,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_mean_speed,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_spread,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@1,t+1:B_mean_speed2,0.0000
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,D_grid,0.3402
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:D_std,0.2223
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,D_std,0.1832
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:D_grid,0.0699
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_moving_ratio,0.0358
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_spread,0.0303
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:D_std,0.0220
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:D_std,0.0204
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:D_grid,0.0123
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:D_std,0.0110
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:D_grid,0.0107
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_spread,0.0086
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:D_grid,0.0066
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_mean_speed2,0.0036
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_cadence,0.0028
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_cadence,0.0026
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_speed2_x_cadence,0.0026
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_speed2_x_cadence,0.0025
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_cadence,0.0012
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_std_speed,0.0010
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_speed2_x_cadence,0.0009
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_moving_ratio,0.0009
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_std_speed,0.0008
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_log_total,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_speed2_x_cadence,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_cadence,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_mean_speed,0.0005
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_log_moving,0.0004
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_mean_speed2,0.0004
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_std_speed,0.0004
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_mean_speed,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_log_total,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_cadence,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_log_total,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_mean_speed2,0.0003
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_speed2_x_cadence,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_log_moving,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_spread,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_log_total,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_moving_ratio,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_std_speed,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_v95,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_v95,0.0002
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_log_moving,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_log_moving,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_log_total,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_moving_ratio,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_moving_ratio,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_std_speed,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_log_moving,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_spread,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_v95,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,B_v95,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_mean_speed,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-2:B_mean_speed,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t-1:B_v95,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_mean_speed2,0.0001
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+2:B_mean_speed2,0.0000
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_mean_speed,0.0000
+学習 A1 → テスト A2,ランダムフォレスト,B+D@2,t+1:B_spread,0.0000
+学習 A1 → テスト A2,XGBoost,B+D,D_std,0.5416
+学習 A1 → テスト A2,XGBoost,B+D,D_grid,0.4096
+学習 A1 → テスト A2,XGBoost,B+D,B_moving_ratio,0.0264
+学習 A1 → テスト A2,XGBoost,B+D,B_speed2_x_cadence,0.0046
+学習 A1 → テスト A2,XGBoost,B+D,B_cadence,0.0037
+学習 A1 → テスト A2,XGBoost,B+D,B_spread,0.0029
+学習 A1 → テスト A2,XGBoost,B+D,B_mean_speed2,0.0028
+学習 A1 → テスト A2,XGBoost,B+D,B_log_moving,0.0028
+学習 A1 → テスト A2,XGBoost,B+D,B_v95,0.0022
+学習 A1 → テスト A2,XGBoost,B+D,B_log_total,0.0017
+学習 A1 → テスト A2,XGBoost,B+D,B_std_speed,0.0009
+学習 A1 → テスト A2,XGBoost,B+D,B_mean_speed,0.0008
+学習 A1 → テスト A2,XGBoost,B+D@1,D_std,0.2982
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:D_std,0.2523
+学習 A1 → テスト A2,XGBoost,B+D@1,D_grid,0.1761
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:D_grid,0.1157
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_spread,0.0577
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:D_std,0.0395
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:D_grid,0.0244
+学習 A1 → テスト A2,XGBoost,B+D@1,B_moving_ratio,0.0135
+学習 A1 → テスト A2,XGBoost,B+D@1,B_spread,0.0100
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_speed2_x_cadence,0.0017
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_cadence,0.0015
+学習 A1 → テスト A2,XGBoost,B+D@1,B_mean_speed,0.0010
+学習 A1 → テスト A2,XGBoost,B+D@1,B_speed2_x_cadence,0.0010
+学習 A1 → テスト A2,XGBoost,B+D@1,B_cadence,0.0007
+学習 A1 → テスト A2,XGBoost,B+D@1,B_v95,0.0007
+学習 A1 → テスト A2,XGBoost,B+D@1,B_log_total,0.0006
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_log_moving,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@1,B_log_moving,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_cadence,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_log_total,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_moving_ratio,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_spread,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_std_speed,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_mean_speed2,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_speed2_x_cadence,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_v95,0.0003
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_log_total,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_std_speed,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_moving_ratio,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_mean_speed2,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_mean_speed,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_log_moving,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@1,t-1:B_v95,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@1,B_std_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@1,t+1:B_mean_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@1,B_mean_speed2,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:D_std,0.3064
+学習 A1 → テスト A2,XGBoost,B+D@2,D_std,0.2327
+学習 A1 → テスト A2,XGBoost,B+D@2,D_grid,0.2304
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:D_grid,0.0719
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:D_std,0.0343
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:D_std,0.0306
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:D_std,0.0207
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:D_grid,0.0181
+学習 A1 → テスト A2,XGBoost,B+D@2,B_moving_ratio,0.0157
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:D_grid,0.0109
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:D_grid,0.0092
+学習 A1 → テスト A2,XGBoost,B+D@2,B_spread,0.0045
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_cadence,0.0018
+学習 A1 → テスト A2,XGBoost,B+D@2,B_speed2_x_cadence,0.0014
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_cadence,0.0013
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_log_total,0.0009
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_mean_speed,0.0008
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_log_total,0.0008
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_speed2_x_cadence,0.0008
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_speed2_x_cadence,0.0008
+学習 A1 → テスト A2,XGBoost,B+D@2,B_v95,0.0006
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_cadence,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@2,B_log_total,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_moving_ratio,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@2,B_cadence,0.0005
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_log_moving,0.0004
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_log_total,0.0003
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_cadence,0.0003
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_v95,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_log_moving,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_spread,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_speed2_x_cadence,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_speed2_x_cadence,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_log_total,0.0002
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_mean_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_moving_ratio,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_log_moving,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_std_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,B_mean_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,B_log_moving,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_std_speed,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,B_mean_speed2,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_mean_speed2,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_moving_ratio,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_mean_speed2,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_mean_speed2,0.0001
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_std_speed,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_log_moving,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_std_speed,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,B_std_speed,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_mean_speed,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_moving_ratio,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_mean_speed2,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_spread,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-2:B_v95,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_spread,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t-1:B_v95,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_mean_speed,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t+1:B_spread,0.0000
+学習 A1 → テスト A2,XGBoost,B+D@2,t+2:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,D_grid,0.5124
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,D_std,0.3765
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_spread,0.0438
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_moving_ratio,0.0287
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_cadence,0.0138
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_speed2_x_cadence,0.0117
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_mean_speed2,0.0041
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_log_total,0.0026
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_mean_speed,0.0023
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_log_moving,0.0023
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_v95,0.0010
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D,B_std_speed,0.0008
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,D_grid,0.3548
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,D_std,0.2325
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:D_std,0.2195
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:D_grid,0.0376
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_spread,0.0329
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_moving_ratio,0.0319
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:D_std,0.0299
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:D_grid,0.0161
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_spread,0.0126
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_cadence,0.0053
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_speed2_x_cadence,0.0050
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_cadence,0.0042
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_speed2_x_cadence,0.0036
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_mean_speed2,0.0032
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_mean_speed,0.0016
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_mean_speed2,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_cadence,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_log_total,0.0010
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_mean_speed,0.0010
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_speed2_x_cadence,0.0009
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_log_moving,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_log_total,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_log_moving,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_log_total,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_std_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_log_moving,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_moving_ratio,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_v95,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,B_std_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_mean_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_moving_ratio,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t-1:B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_spread,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@1,t+1:B_mean_speed2,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,D_grid,0.3472
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,D_std,0.2212
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:D_std,0.1983
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_moving_ratio,0.0331
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_spread,0.0330
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:D_std,0.0322
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:D_grid,0.0319
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:D_std,0.0211
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:D_grid,0.0129
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_spread,0.0123
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:D_std,0.0116
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:D_grid,0.0081
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:D_grid,0.0065
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_speed2_x_cadence,0.0042
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_cadence,0.0034
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_cadence,0.0033
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_mean_speed2,0.0030
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_speed2_x_cadence,0.0027
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_speed2_x_cadence,0.0016
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_mean_speed,0.0013
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_mean_speed,0.0009
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_mean_speed2,0.0008
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_cadence,0.0008
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_cadence,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_speed2_x_cadence,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_mean_speed,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_log_total,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_log_total,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_mean_speed2,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_cadence,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_speed2_x_cadence,0.0004
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_log_moving,0.0004
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_log_total,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_log_moving,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_log_total,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_log_total,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_std_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_log_moving,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_std_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_log_moving,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_moving_ratio,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_spread,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_moving_ratio,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_log_moving,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_moving_ratio,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_moving_ratio,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_mean_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_mean_speed2,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_mean_speed2,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_mean_speed,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+2:B_spread,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t+1:B_spread,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-2:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,ランダムフォレスト,B+D@2,t-1:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,D_std,0.6025
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,D_grid,0.3308
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_spread,0.0402
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_moving_ratio,0.0090
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_mean_speed2,0.0033
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_cadence,0.0033
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_log_moving,0.0032
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_speed2_x_cadence,0.0031
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_log_total,0.0021
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_v95,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_mean_speed,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D,B_std_speed,0.0004
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:D_std,0.2942
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,D_std,0.2893
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,D_grid,0.2807
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:D_std,0.0572
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:D_grid,0.0307
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:D_grid,0.0148
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_mean_speed2,0.0062
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_moving_ratio,0.0055
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_spread,0.0046
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_speed2_x_cadence,0.0025
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_cadence,0.0015
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_log_total,0.0014
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_log_moving,0.0013
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_cadence,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_log_moving,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_mean_speed,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_log_total,0.0010
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_std_speed,0.0009
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_mean_speed,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_speed2_x_cadence,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_speed2_x_cadence,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_std_speed,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_cadence,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_log_total,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_mean_speed2,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_v95,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_mean_speed2,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_moving_ratio,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_spread,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_spread,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_log_moving,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_mean_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_moving_ratio,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t-1:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@1,t+1:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:D_std,0.2839
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,D_std,0.2231
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,D_grid,0.2071
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:D_std,0.0559
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:D_std,0.0503
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_spread,0.0468
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:D_grid,0.0445
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:D_std,0.0203
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:D_grid,0.0180
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:D_grid,0.0150
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:D_grid,0.0090
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_moving_ratio,0.0030
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_cadence,0.0022
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_cadence,0.0022
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_speed2_x_cadence,0.0020
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_log_moving,0.0019
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_log_total,0.0017
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_speed2_x_cadence,0.0013
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_mean_speed,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_log_moving,0.0011
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_log_total,0.0009
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_std_speed,0.0009
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_speed2_x_cadence,0.0007
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_cadence,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_speed2_x_cadence,0.0006
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_cadence,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_cadence,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_moving_ratio,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_mean_speed,0.0005
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_std_speed,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_mean_speed2,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_mean_speed,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_log_total,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_moving_ratio,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_std_speed,0.0003
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_speed2_x_cadence,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_mean_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_spread,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_std_speed,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_log_total,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_log_moving,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_log_moving,0.0002
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_v95,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_log_moving,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_spread,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_std_speed,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_log_total,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,B_mean_speed2,0.0001
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_moving_ratio,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_spread,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-2:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_mean_speed2,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t-1:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_mean_speed,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_mean_speed2,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_spread,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+1:B_v95,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_moving_ratio,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_mean_speed2,0.0000
+学習 A1+A2_XR1 → テスト A2_XR2,XGBoost,B+D@2,t+2:B_v95,0.0000
+試行ごと,ランダムフォレスト,B+D,D_grid,0.6297
+試行ごと,ランダムフォレスト,B+D,D_std,0.2462
+試行ごと,ランダムフォレスト,B+D,B_spread,0.0647
+試行ごと,ランダムフォレスト,B+D,B_moving_ratio,0.0154
+試行ごと,ランダムフォレスト,B+D,B_cadence,0.0148
+試行ごと,ランダムフォレスト,B+D,B_speed2_x_cadence,0.0132
+試行ごと,ランダムフォレスト,B+D,B_mean_speed2,0.0073
+試行ごと,ランダムフォレスト,B+D,B_log_total,0.0024
+試行ごと,ランダムフォレスト,B+D,B_mean_speed,0.0019
+試行ごと,ランダムフォレスト,B+D,B_log_moving,0.0019
+試行ごと,ランダムフォレスト,B+D,B_v95,0.0013
+試行ごと,ランダムフォレスト,B+D,B_std_speed,0.0012
+試行ごと,ランダムフォレスト,B+D@1,D_grid,0.5432
+試行ごと,ランダムフォレスト,B+D@1,D_std,0.1349
+試行ごと,ランダムフォレスト,B+D@1,t-1:D_std,0.1163
+試行ごと,ランダムフォレスト,B+D@1,B_spread,0.0598
+試行ごと,ランダムフォレスト,B+D@1,t-1:D_grid,0.0414
+試行ごと,ランダムフォレスト,B+D@1,t+1:D_std,0.0307
+試行ごと,ランダムフォレスト,B+D@1,t+1:D_grid,0.0145
+試行ごと,ランダムフォレスト,B+D@1,B_moving_ratio,0.0144
+試行ごと,ランダムフォレスト,B+D@1,B_mean_speed2,0.0061
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_speed2_x_cadence,0.0059
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_cadence,0.0054
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_spread,0.0051
+試行ごと,ランダムフォレスト,B+D@1,B_cadence,0.0048
+試行ごと,ランダムフォレスト,B+D@1,B_speed2_x_cadence,0.0042
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_cadence,0.0018
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_mean_speed,0.0016
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_mean_speed2,0.0015
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_speed2_x_cadence,0.0011
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_log_total,0.0009
+試行ごと,ランダムフォレスト,B+D@1,B_mean_speed,0.0008
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_log_total,0.0006
+試行ごと,ランダムフォレスト,B+D@1,B_log_total,0.0006
+試行ごと,ランダムフォレスト,B+D@1,B_log_moving,0.0005
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_log_moving,0.0005
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_std_speed,0.0004
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_moving_ratio,0.0004
+試行ごと,ランダムフォレスト,B+D@1,B_std_speed,0.0003
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_moving_ratio,0.0003
+試行ごと,ランダムフォレスト,B+D@1,t-1:B_v95,0.0003
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_spread,0.0003
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_log_moving,0.0003
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_std_speed,0.0002
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_mean_speed2,0.0002
+試行ごと,ランダムフォレスト,B+D@1,B_v95,0.0002
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_v95,0.0002
+試行ごと,ランダムフォレスト,B+D@1,t+1:B_mean_speed,0.0002
+試行ごと,ランダムフォレスト,B+D@2,D_grid,0.5357
+試行ごと,ランダムフォレスト,B+D@2,D_std,0.1214
+試行ごと,ランダムフォレスト,B+D@2,t-1:D_std,0.0940
+試行ごと,ランダムフォレスト,B+D@2,B_spread,0.0598
+試行ごと,ランダムフォレスト,B+D@2,t-2:D_std,0.0348
+試行ごと,ランダムフォレスト,B+D@2,t-1:D_grid,0.0335
+試行ごと,ランダムフォレスト,B+D@2,t+1:D_std,0.0220
+試行ごと,ランダムフォレスト,B+D@2,B_moving_ratio,0.0147
+試行ごと,ランダムフォレスト,B+D@2,t+2:D_std,0.0140
+試行ごと,ランダムフォレスト,B+D@2,t-2:D_grid,0.0105
+試行ごと,ランダムフォレスト,B+D@2,t+1:D_grid,0.0104
+試行ごと,ランダムフォレスト,B+D@2,t+2:D_grid,0.0062
+試行ごと,ランダムフォレスト,B+D@2,B_mean_speed2,0.0061
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_speed2_x_cadence,0.0048
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_spread,0.0046
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_cadence,0.0042
+試行ごと,ランダムフォレスト,B+D@2,B_cadence,0.0033
+試行ごと,ランダムフォレスト,B+D@2,B_speed2_x_cadence,0.0033
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_speed2_x_cadence,0.0018
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_cadence,0.0013
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_cadence,0.0012
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_mean_speed,0.0010
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_mean_speed2,0.0010
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_mean_speed2,0.0008
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_speed2_x_cadence,0.0007
+試行ごと,ランダムフォレスト,B+D@2,B_mean_speed,0.0006
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_mean_speed,0.0006
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_log_total,0.0006
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_cadence,0.0006
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_log_total,0.0004
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_spread,0.0004
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_log_total,0.0004
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_log_total,0.0003
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_moving_ratio,0.0003
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_log_moving,0.0003
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_speed2_x_cadence,0.0003
+試行ごと,ランダムフォレスト,B+D@2,B_log_moving,0.0003
+試行ごと,ランダムフォレスト,B+D@2,B_log_total,0.0003
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_std_speed,0.0003
+試行ごと,ランダムフォレスト,B+D@2,B_std_speed,0.0003
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_moving_ratio,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_mean_speed2,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_log_moving,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_spread,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_moving_ratio,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_log_moving,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t-1:B_v95,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_log_moving,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_std_speed,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_std_speed,0.0002
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_std_speed,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_moving_ratio,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_mean_speed,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_mean_speed,0.0001
+試行ごと,ランダムフォレスト,B+D@2,B_v95,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t-2:B_v95,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_v95,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+1:B_v95,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_spread,0.0001
+試行ごと,ランダムフォレスト,B+D@2,t+2:B_mean_speed2,0.0001
+試行ごと,XGBoost,B+D,D_grid,0.4672
+試行ごと,XGBoost,B+D,D_std,0.4334
+試行ごと,XGBoost,B+D,B_spread,0.0733
+試行ごと,XGBoost,B+D,B_moving_ratio,0.0064
+試行ごと,XGBoost,B+D,B_speed2_x_cadence,0.0043
+試行ごと,XGBoost,B+D,B_cadence,0.0041
+試行ごと,XGBoost,B+D,B_mean_speed2,0.0033
+試行ごと,XGBoost,B+D,B_log_moving,0.0024
+試行ごと,XGBoost,B+D,B_log_total,0.0021
+試行ごと,XGBoost,B+D,B_v95,0.0015
+試行ごと,XGBoost,B+D,B_std_speed,0.0011
+試行ごと,XGBoost,B+D,B_mean_speed,0.0009
+試行ごと,XGBoost,B+D@1,D_grid,0.3204
+試行ごと,XGBoost,B+D@1,D_std,0.2458
+試行ごと,XGBoost,B+D@1,t-1:D_std,0.1923
+試行ごと,XGBoost,B+D@1,t+1:D_std,0.0702
+試行ごと,XGBoost,B+D@1,t-1:D_grid,0.0694
+試行ごと,XGBoost,B+D@1,B_spread,0.0479
+試行ごと,XGBoost,B+D@1,t+1:D_grid,0.0187
+試行ごと,XGBoost,B+D@1,t-1:B_spread,0.0057
+試行ごと,XGBoost,B+D@1,B_moving_ratio,0.0047
+試行ごと,XGBoost,B+D@1,t-1:B_speed2_x_cadence,0.0030
+試行ごと,XGBoost,B+D@1,t-1:B_cadence,0.0024
+試行ごと,XGBoost,B+D@1,t+1:B_log_total,0.0016
+試行ごと,XGBoost,B+D@1,B_speed2_x_cadence,0.0016
+試行ごと,XGBoost,B+D@1,B_mean_speed2,0.0015
+試行ごと,XGBoost,B+D@1,B_cadence,0.0014
+試行ごと,XGBoost,B+D@1,t-1:B_mean_speed,0.0013
+試行ごと,XGBoost,B+D@1,t+1:B_cadence,0.0012
+試行ごと,XGBoost,B+D@1,t+1:B_mean_speed,0.0012
+試行ごと,XGBoost,B+D@1,t+1:B_log_moving,0.0011
+試行ごと,XGBoost,B+D@1,t+1:B_speed2_x_cadence,0.0011
+試行ごと,XGBoost,B+D@1,t-1:B_mean_speed2,0.0011
+試行ごと,XGBoost,B+D@1,t-1:B_log_total,0.0010
+試行ごと,XGBoost,B+D@1,B_log_moving,0.0009
+試行ごと,XGBoost,B+D@1,B_log_total,0.0008
+試行ごと,XGBoost,B+D@1,t+1:B_std_speed,0.0007
+試行ごと,XGBoost,B+D@1,B_mean_speed,0.0005
+試行ごと,XGBoost,B+D@1,t-1:B_log_moving,0.0005
+試行ごと,XGBoost,B+D@1,t-1:B_std_speed,0.0004
+試行ごと,XGBoost,B+D@1,B_std_speed,0.0004
+試行ごと,XGBoost,B+D@1,t+1:B_moving_ratio,0.0004
+試行ごと,XGBoost,B+D@1,B_v95,0.0003
+試行ごと,XGBoost,B+D@1,t-1:B_moving_ratio,0.0002
+試行ごと,XGBoost,B+D@1,t+1:B_mean_speed2,0.0002
+試行ごと,XGBoost,B+D@1,t+1:B_spread,0.0001
+試行ごと,XGBoost,B+D@1,t-1:B_v95,0.0001
+試行ごと,XGBoost,B+D@1,t+1:B_v95,0.0001
+試行ごと,XGBoost,B+D@2,D_grid,0.2975
+試行ごと,XGBoost,B+D@2,D_std,0.2051
+試行ごと,XGBoost,B+D@2,t-1:D_std,0.1556
+試行ごと,XGBoost,B+D@2,t-1:D_grid,0.0711
+試行ごと,XGBoost,B+D@2,t-2:D_std,0.0680
+試行ごと,XGBoost,B+D@2,t+1:D_std,0.0525
+試行ごと,XGBoost,B+D@2,B_spread,0.0419
+試行ごと,XGBoost,B+D@2,t+2:D_std,0.0266
+試行ごと,XGBoost,B+D@2,t-2:D_grid,0.0178
+試行ごと,XGBoost,B+D@2,t+1:D_grid,0.0164
+試行ごと,XGBoost,B+D@2,t+2:D_grid,0.0111
+試行ごと,XGBoost,B+D@2,B_moving_ratio,0.0047
+試行ごと,XGBoost,B+D@2,t-1:B_spread,0.0030
+試行ごと,XGBoost,B+D@2,t-1:B_speed2_x_cadence,0.0022
+試行ごと,XGBoost,B+D@2,t-1:B_cadence,0.0017
+試行ごと,XGBoost,B+D@2,B_speed2_x_cadence,0.0017
+試行ごと,XGBoost,B+D@2,t-2:B_mean_speed2,0.0017
+試行ごと,XGBoost,B+D@2,t-2:B_speed2_x_cadence,0.0015
+試行ごと,XGBoost,B+D@2,t-1:B_mean_speed,0.0013
+試行ごと,XGBoost,B+D@2,t+1:B_mean_speed,0.0012
+試行ごと,XGBoost,B+D@2,t+1:B_log_total,0.0011
+試行ごと,XGBoost,B+D@2,t-1:B_mean_speed2,0.0011
+試行ごと,XGBoost,B+D@2,t-2:B_cadence,0.0011
+試行ごと,XGBoost,B+D@2,t+1:B_log_moving,0.0010
+試行ごと,XGBoost,B+D@2,t-2:B_spread,0.0010
+試行ごと,XGBoost,B+D@2,B_cadence,0.0010
+試行ごと,XGBoost,B+D@2,B_log_moving,0.0009
+試行ごと,XGBoost,B+D@2,t+1:B_speed2_x_cadence,0.0009
+試行ごと,XGBoost,B+D@2,t-2:B_log_total,0.0007
+試行ごと,XGBoost,B+D@2,t+2:B_log_moving,0.0007
+試行ごと,XGBoost,B+D@2,t+1:B_cadence,0.0007
+試行ごと,XGBoost,B+D@2,t+2:B_log_total,0.0006
+試行ごと,XGBoost,B+D@2,B_log_total,0.0006
+試行ごと,XGBoost,B+D@2,t-1:B_log_total,0.0006
+試行ごと,XGBoost,B+D@2,t+2:B_std_speed,0.0004
+試行ごと,XGBoost,B+D@2,t+2:B_cadence,0.0004
+試行ごと,XGBoost,B+D@2,B_v95,0.0004
+試行ごと,XGBoost,B+D@2,B_mean_speed,0.0004
+試行ごと,XGBoost,B+D@2,t+1:B_moving_ratio,0.0004
+試行ごと,XGBoost,B+D@2,t-1:B_log_moving,0.0004
+試行ごと,XGBoost,B+D@2,t+2:B_speed2_x_cadence,0.0003
+試行ごと,XGBoost,B+D@2,t-1:B_std_speed,0.0003
+試行ごと,XGBoost,B+D@2,t+1:B_std_speed,0.0003
+試行ごと,XGBoost,B+D@2,t-2:B_log_moving,0.0003
+試行ごと,XGBoost,B+D@2,t+2:B_moving_ratio,0.0003
+試行ごと,XGBoost,B+D@2,B_std_speed,0.0002
+試行ごと,XGBoost,B+D@2,B_mean_speed2,0.0002
+試行ごと,XGBoost,B+D@2,t-2:B_std_speed,0.0002
+試行ごと,XGBoost,B+D@2,t-1:B_moving_ratio,0.0002
+試行ごと,XGBoost,B+D@2,t+1:B_mean_speed2,0.0002
+試行ごと,XGBoost,B+D@2,t+2:B_spread,0.0001
+試行ごと,XGBoost,B+D@2,t-2:B_mean_speed,0.0001
+試行ごと,XGBoost,B+D@2,t+2:B_mean_speed2,0.0001
+試行ごと,XGBoost,B+D@2,t-2:B_moving_ratio,0.0001
+試行ごと,XGBoost,B+D@2,t+2:B_mean_speed,0.0001
+試行ごと,XGBoost,B+D@2,t-2:B_v95,0.0000
+試行ごと,XGBoost,B+D@2,t+1:B_spread,0.0000
+試行ごと,XGBoost,B+D@2,t+2:B_v95,0.0000
+試行ごと,XGBoost,B+D@2,t-1:B_v95,0.0000
+試行ごと,XGBoost,B+D@2,t+1:B_v95,0.0000
