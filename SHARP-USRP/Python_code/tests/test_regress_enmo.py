@@ -9,6 +9,8 @@
       1. 3 つのドップラーの版・5 モデル + 基準 (平均値) が最後まで動き、表と図ができること
       2. 物理特徴量 B の線形回帰などが、平均値で予測する基準よりはっきり良いこと (R² > 0.5)
       3. 区間が加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
+      4. 特徴量 C (速さの時間微分): 足踏みのテンポが試行ごとに違い、ENMO = 速さ x テンポ (加速度) のとき、
+         線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
     を確かめる。
 
     実行:  python3 tests/test_regress_enmo.py   (CNN は TensorFlow があるときだけ)
@@ -87,6 +89,50 @@ def make_trial(root, k, old_meta=False):
             w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
 
 
+def check_feature_c(tmp):
+    """ENMO proportional to acceleration (speed x cadence), cadence different in each trial.
+    ENMO が加速度 (速さ x テンポ) に比例し、テンポが試行ごとに違うとき、特徴量 C が効くか"""
+    import argparse
+    root = os.path.join(tmp, "in_c")
+    v = (np.arange(N_FFT) - N_FFT // 2) * DV
+    for k, cad in enumerate((0.7, 1.0, 1.3, 1.6, 1.9, 2.2)):
+        name = f"C{k + 1}"
+        rng = np.random.default_rng(50 + k)
+        d = os.path.join(root, name)
+        folder = os.path.join(d, ro.VARIANT_DIRS["nowinnorm"])
+        os.makedirs(folder)
+        t_frames = np.arange(0, 80.5, FRAME_DT)
+        amp = intensity(t_frames, k)                           # how big the steps are / 動きの大きさ
+        swing = np.abs(np.sin(2 * np.pi * cad * t_frames))
+        for ant, gain in (("antenna1", 1.0), ("antenna2", 0.6)):
+            width = 0.15 + 0.6 * amp * swing
+            S = (np.exp(-0.5 * (v[None, :] / width[:, None]) ** 2) * gain + 3.0 * gain * (np.abs(v) < 1e-9)[None, :])
+            S = S * (1 + 0.1 * rng.standard_normal(S.shape)) ** 2 + 1e-3
+            base = os.path.join(folder, f"{name}_{ant}_stream_0")
+            with open(base + ".txt", "wb") as fp:
+                pickle.dump(S, fp)
+            np.save(base + "_time.npy", t_frames)
+            with open(base + "_meta.json", "w") as fp:
+                json.dump(dict(delta_v_bin=DV, n_fft=N_FFT, time_origin_s=0.0), fp)
+        t50 = np.arange(0, 80.0, 0.02)
+        en = 60 * intensity(t50, k) * cad + rng.normal(0, 2.0, len(t50))   # acceleration-like / 加速度に比例
+        with open(os.path.join(d, f"{name}_power_timeseries.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+            for a, b in zip(t50, en):
+                w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
+    res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_c"), doppler="nowinnorm",
+                                             models="linear", features="B,C,B+C", windows=[1.0], blocks=5,
+                                             epochs=5, seed=0, no_plots=True, pairs=None))
+    r2 = {x["features"]: x["R2"] for x in res if x["model"] == "linear"}
+    with open(os.path.join(out_dir, "features_nowinnorm_1s.csv"), encoding="utf-8") as f:
+        head = next(csv.reader(f))
+    good = r2["B+C"] > r2["B"] + 0.1 and r2["C"] > 0.5 and "C_ant1_acc_v95_rms" in head
+    print(f"  {'OK ' if good else 'NG '} 特徴量 C: ENMO が速さ x テンポのとき、線形回帰の R² "
+          f"B {r2['B']:.3f} → B+C {r2['B+C']:.3f}（C だけ {r2['C']:.3f}）、特徴量の表に C の列")
+    return good
+
+
 def dataset_layout(tmp, related_names=True):
     """The layout of a dataset folder (everything of A1 together). / データセットのフォルダにまとめた置き方
         <in>/A1/imu/<trial>/imu/<trial>_power_timeseries.csv
@@ -144,6 +190,7 @@ def main():
             label = "名前で対応" if related else "組み合わせの一覧で対応"
             print(f"  {'OK ' if good else 'NG '} データセットのフォルダの置き方（{label}）: {names}, R² {r['R2']:.3f}")
             ok &= good
+        ok &= check_feature_c(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,cnn"
@@ -159,7 +206,7 @@ def main():
             '3 つの版 x 2 つの区間 x (基準 + モデル) が全部ある':
                 all((v, w, "baseline", "-") in got for v in ro.VARIANT_DIRS for w in W)
                 and all((v, w, m, f) in got for v in ro.VARIANT_DIRS for w in W
-                        for m in ("linear", "rf", "xgboost", "mlp") for f in ("A", "B")),
+                        for m in ("linear", "rf", "xgboost", "mlp") for f in ("A", "B", "C")),
             '基準 (平均値) の R² は 0 前後以下':
                 all(got[(v, w, "baseline", "-")]["R2"] < 0.1 for v in ro.VARIANT_DIRS for w in W),
             '線形回帰 (特徴量 B, nowinnorm) の R² > 0.5 (1 秒・5 秒)':
@@ -199,7 +246,7 @@ def main():
 
 def ro_args(inp, out_dir, models):
     import argparse
-    return argparse.Namespace(input=inp, out=out_dir, doppler="all", models=models, features="A,B",
+    return argparse.Namespace(input=inp, out=out_dir, doppler="all", models=models, features="A,B,C",
                               windows=[1.0, 5.0], blocks=5, epochs=40, seed=0, no_plots=False)
 
 

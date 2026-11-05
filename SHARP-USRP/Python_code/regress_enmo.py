@@ -6,14 +6,17 @@
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
     モデル (5 種類):
-      線形回帰 (Ridge)    : 特徴量 A / B
-      ランダムフォレスト  : 特徴量 A / B
-      XGBoost             : 特徴量 A / B
-      MLP                 : 特徴量 A / B
+      線形回帰 (Ridge)    : 特徴量 A / B / C / A+C / B+C
+      ランダムフォレスト  : 同上
+      XGBoost             : 同上
+      MLP                 : 同上
       CNN                 : 1 秒分のドップラーの 2 次元配列 (時間 x 速度 x アンテナ 2 本)
     特徴量 A = 1 秒の中で速度ビンごとに平均したスペクトル (log10, アンテナ 2 本で 200 個)
     特徴量 B = 物理に基づく特徴量 (速さの平均・2 乗平均・広がり・最大速度・足踏みの周期など,
                アンテナごと)
+    特徴量 C = 加速度に当たる特徴量 (ENMO は加速度なので、速さの時間微分を入れる。アンテナごと):
+               フレームごとの平均速度 (向きつき) と 95 % の速さを 6 Hz で平滑化して微分した
+               |dv/dt| の平均・2 乗平均の平方根・95 % 値、スペクトルのフレーム間の変化の速さ
     どのモデルも出力は区間ごとの ENMO の値 (数値)。最後に予測と正解を図にする。
 
     評価: 試行ごとに分ける (1 試行をテスト、残りで学習、を全試行について繰り返す)。
@@ -62,6 +65,8 @@ MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレス
 ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "cnn"]
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
 TARGET = "ENMO(mg)"      # target column in the work-rate software's output / 正解の列
+ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
+ACC_FC = 6.0             # feature C: low-pass before differentiating [Hz] / 特徴量 C: 微分の前の平滑化
 EPS = 1e-12
 
 
@@ -292,6 +297,69 @@ B_NAMES = ["log_total", "log_moving", "moving_ratio", "mean_speed", "std_speed",
            "spread", "v95", "cadence", "speed2_x_cadence"]
 
 
+def accel_traces(d):
+    """Acceleration-like traces of one antenna for feature set C (computed once per trial).
+    The Doppler frames (one per packet) are averaged onto a 50 Hz grid, low-passed at 6 Hz (differentiating
+    amplifies noise) and differentiated.
+    特徴量 C のための、加速度に当たる時系列（アンテナ 1 本・試行ごとに 1 回）。ドップラーのフレーム（パケットごと）を
+    50 Hz の格子に平均し、6 Hz で平滑化してから（微分は雑音を大きくするため）微分する
+    Returns dict(tu, a_mean, a_v95, flux): grid times, d/dt of the signed mean velocity, d/dt of the 95 % speed
+    [m/s^2], and how fast the speed distribution changes [1/s]."""
+    from scipy.signal import butter, filtfilt
+    S, t, v = d["S"], d["t"], d["v"]
+    P = np.clip(S, 0, None)
+    av = np.abs(v)
+    move = av > 1.5 * np.min(av[av > 0]) if np.any(av > 0) else np.ones_like(av, bool)
+    w = P[:, move] / (P[:, move].sum(axis=1, keepdims=True) + EPS)   # speed distribution / 速さの分布
+    vs = (w * v[move]).sum(axis=1)                                  # signed mean velocity / 向きつき平均速度
+    order = np.argsort(av[move])
+    cs = np.cumsum(w[:, order], axis=1)
+    v_sorted = av[move][order]
+    v95 = v_sorted[np.minimum(np.argmax(cs >= 0.95, axis=1), len(v_sorted) - 1)]
+    dt = 1.0 / ACC_RATE
+    tu = np.arange(t[0], t[-1] + 1e-9, dt)
+    idx = np.clip(np.round((t - tu[0]) / dt).astype(int), 0, len(tu) - 1)
+    cnt = np.bincount(idx, minlength=len(tu)).astype(float)
+    have = cnt > 0
+
+    def to_grid(x):  # average of the frames in each cell; empty cells interpolated / 格子ごとの平均（空はつなぐ）
+        x = np.asarray(x, float)
+        if x.ndim == 1:
+            g = np.bincount(idx, weights=x, minlength=len(tu))[have] / cnt[have]
+            return np.interp(tu, tu[have], g)
+        out = np.empty((len(tu), x.shape[1]))
+        for j in range(x.shape[1]):
+            g = np.bincount(idx, weights=x[:, j], minlength=len(tu))[have] / cnt[have]
+            out[:, j] = np.interp(tu, tu[have], g)
+        return out
+
+    vs_g, v95_g, w_g = to_grid(vs), to_grid(v95), to_grid(w)
+    if len(tu) > 15:
+        b, a = butter(2, ACC_FC / (ACC_RATE / 2))
+        vs_g, v95_g = filtfilt(b, a, vs_g), filtfilt(b, a, v95_g)
+        w_g = filtfilt(b, a, w_g, axis=0)
+    a_mean = np.gradient(vs_g, dt)
+    a_v95 = np.gradient(v95_g, dt)
+    flux = np.concatenate([[0.0], np.abs(np.diff(w_g, axis=0)).sum(axis=1) / dt])
+    return dict(tu=tu, a_mean=a_mean, a_v95=a_v95, flux=flux)
+
+
+def accel_features(tr, a, b):
+    """Feature set C for one antenna and one window. / 特徴量 C（アンテナ 1 本・1 区間）"""
+    m = (tr["tu"] >= a) & (tr["tu"] < b)
+    if m.sum() < 2:
+        return np.full(len(C_NAMES), np.nan)
+    am, a95, fl = np.abs(tr["a_mean"][m]), np.abs(tr["a_v95"][m]), tr["flux"][m]
+    rms = lambda x: float(np.sqrt(np.mean(x ** 2)))  # noqa: E731
+    return np.array([np.mean(am), rms(am), np.percentile(am, 95),
+                     np.mean(a95), rms(a95), np.percentile(a95, 95),
+                     np.mean(fl)])
+
+
+C_NAMES = ["acc_mean_abs", "acc_mean_rms", "acc_mean_p95", "acc_v95_abs", "acc_v95_rms", "acc_v95_p95",
+           "spec_change_rate"]
+
+
 def cnn_input(S, t, a, b):
     """Window's Doppler resampled to a fixed number of frames (log10). / CNN の入力（時間を一定数にそろえる）"""
     n = int(min(320, round(CNN_FRAMES * (b - a))))
@@ -303,13 +371,14 @@ def cnn_input(S, t, a, b):
 
 
 def build_trial(spec, variant, window, out):
-    """Windows of one trial: features A, B, CNN input and the target. / 1 試行分の区間"""
+    """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
     missing = [a for a in ("antenna1", "antenna2") if a not in files]
     if missing:
         raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
     ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
+    acc = [accel_traces(d) for d in ants]
     tgt = load_target(spec, window)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
@@ -321,7 +390,7 @@ def build_trial(spec, variant, window, out):
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, y, kept = [], [], [], [], []
+    XA, XB, XC, XN, y, kept = [], [], [], [], [], []
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
     dropped = 0
     for i, (a, b) in enumerate(wins):
@@ -333,9 +402,9 @@ def build_trial(spec, variant, window, out):
             yv = float(np.mean(tgt["y"][m]))
         else:
             yv = float(tgt["y"][i])
-        fa, fb, fc = [], [], []
+        fa, fb, fc, fn = [], [], [], []
         ok = True
-        for d in ants:
+        for d, ac in zip(ants, acc):
             sel = (d["t"] >= a) & (d["t"] < b)
             if sel.sum() < 0.5 * rate * (b - a):  # too few frames (packet gap) / フレームが少なすぎる
                 ok = False
@@ -345,13 +414,15 @@ def build_trial(spec, variant, window, out):
             S = d["S"][sel]
             fa.append(np.log10(np.clip(S.mean(axis=0), EPS, None)))
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
-            fc.append(cnn_input(d["S"], d["t"], a, b))
+            fc.append(accel_features(ac, a, b))
+            fn.append(cnn_input(d["S"], d["t"], a, b))
         if not ok:
             dropped += 1
             continue
         XA.append(np.concatenate(fa))
         XB.append(np.concatenate(fb))
-        XC.append(np.stack(fc, axis=-1))
+        XC.append(np.concatenate(fc))
+        XN.append(np.stack(fn, axis=-1))
         y.append(yv)
         kept.append((a, b))
     if not y:
@@ -359,7 +430,7 @@ def build_trial(spec, variant, window, out):
     log(f"  {name}: {len(y)} 区間（{window:g} 秒ごと、CSI の {kept[0][0]:.1f}〜{kept[-1][1]:.1f} s）"
         + (f"、{dropped} 区間はデータ不足で除外" if dropped else "")
         + f"  [{ants[0]['file']}, {ants[1]['file']}, {tgt['file']}]", out)
-    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), y=np.array(y),
+    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XN=np.array(XN), y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"])
 
 
@@ -434,7 +505,10 @@ def run(opts):
     bad = [m for m in models if m not in ALL_MODELS]
     if bad:
         raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS)}）")
-    feats = [f.strip().upper() for f in opts.features.split(",") if f.strip()]
+    feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
+    badf = [f for f in feats if not f or any(p not in ("A", "B", "C") for p in f.split("+"))]
+    if badf:
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C と、その組み合わせ A+C など）")
     results, pred_rows = [], []
     windows = opts.windows
     for variant, window in [(v, w) for v in variants for w in windows]:
@@ -459,10 +533,12 @@ def run(opts):
         XA = np.concatenate([tr["XA"] for tr in trials])
         XB = np.concatenate([tr["XB"] for tr in trials])
         XC = np.concatenate([tr["XC"] for tr in trials])
+        XN = np.concatenate([tr["XN"] for tr in trials])
+        fsets = {"A": XA, "B": XB, "C": XC}
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
         win = np.concatenate([tr["win"] for tr in trials])
-        _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, y,
+        _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, XC, y,
                        trials[0]["v"])
         configs = [("baseline", "-")]
         for m in models:
@@ -479,13 +555,13 @@ def run(opts):
                     pred[te_i] = y[tr_i].mean()
                 elif model == "cnn":
                     try:
-                        pred[te_i] = fit_predict_cnn(XC[tr_i], y[tr_i], XC[te_i], opts.seed, opts.epochs)
+                        pred[te_i] = fit_predict_cnn(XN[tr_i], y[tr_i], XN[te_i], opts.seed, opts.epochs)
                     except ImportError:
                         log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
                         pred[:] = np.nan
                         break
                 else:
-                    X = XA if feat == "A" else XB
+                    X = np.hstack([fsets[p] for p in feat.split("+")])
                     est = make_tabular(model, opts.seed)
                     est.fit(X[tr_i], y[tr_i])
                     pred[te_i] = est.predict(X[te_i])
@@ -513,15 +589,16 @@ def run(opts):
     return results, out_dir
 
 
-def _dump_features(path, tname, win, XA, XB, y, v):
+def _dump_features(path, tname, win, XA, XB, XC, y, v):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
         w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
+                   + [f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES]
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
         for i in range(len(y)):
             w.writerow([tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}", f"{y[i]:.3f}"]
-                       + [f"{x:.6g}" for x in XB[i]] + [f"{x:.6g}" for x in XA[i]])
+                       + [f"{x:.6g}" for x in XB[i]] + [f"{x:.6g}" for x in XC[i]] + [f"{x:.6g}" for x in XA[i]])
 
 
 def B_NAMES_full():
@@ -614,7 +691,8 @@ def _plots(out_dir, results):
         plt.close(fig)
     # comparison / 比較
     groups = list(dict.fromkeys((r["variant"], r["window"]) for r in results))
-    fig, ax = plt.subplots(len(groups), 2, figsize=(14, 4.2 * len(groups)), squeeze=False)
+    nmax = max(sum(1 for r in results if (r["variant"], r["window"]) == g) for g in groups)
+    fig, ax = plt.subplots(len(groups), 2, figsize=(max(14, 1.25 * nmax), 4.2 * len(groups)), squeeze=False)
     for vi, (var, wl) in enumerate(groups):
         rs = [r for r in results if r["variant"] == var and r["window"] == wl]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
@@ -666,7 +744,8 @@ def main(argv=None):
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")
-    ap.add_argument("--features", default="A,B", help="CNN 以外のモデルの特徴量（A, B。既定 A,B）")
+    ap.add_argument("--features", default="A,B,C,A+C,B+C",
+                    help="CNN 以外のモデルの特徴量（A, B, C と、その組み合わせ A+C など。既定 A,B,C,A+C,B+C）")
     ap.add_argument("--windows", default="1,5", help="区間の長さ [s]（カンマ区切り。既定 1,5）")
     ap.add_argument("--blocks", type=int, default=5, help="試行が 1 本のとき、時間を分けるかたまりの数（既定 5）")
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
