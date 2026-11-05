@@ -11,6 +11,8 @@
       3. 区間が加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
       4. 特徴量 C (速さの時間微分): 足踏みのテンポが試行ごとに違い、ENMO = 速さ x テンポ (加速度) のとき、
          線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
+      5. regression_input/A1 と A2 を並べて置いたとき: データセットをまたいで名前で組にしないこと、
+         --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
 
     実行:  python3 tests/test_regress_enmo.py   (CNN は TensorFlow があるときだけ)
@@ -133,6 +135,57 @@ def check_feature_c(tmp):
     return good
 
 
+def check_two_datasets(tmp):
+    """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
+    import argparse
+    src = os.path.join(tmp, "src_two")
+    for k in range(8):
+        make_trial(src, k)
+    root = os.path.join(tmp, "in_two")
+    trials = {"A1": [0, 1, 2, 3], "A2": [4, 5, 6, 7]}
+    for ds, ks in trials.items():
+        for j, k in enumerate(ks):
+            tn, trial = f"T{k + 1}", f"{ds}_XR{j + 1}"
+            tdir = os.path.join(root, ds, "imu", trial)
+            os.makedirs(tdir, exist_ok=True)
+            ts = os.path.join(src, tn, "imu", f"{tn}_power_timeseries.csv")
+            shutil.copy(ts if os.path.exists(ts) else os.path.join(src, tn, f"{tn}_power_timeseries.csv"),
+                        os.path.join(tdir, f"{trial}_power_timeseries.csv"))
+            if trial == "A2_XR3":
+                continue  # no Doppler for A2_XR3: it must not take A1_XR3's / A2_XR3 はドップラーなし（A1_XR3 と組にしない）
+            folder = ro.VARIANT_DIRS["nowinnorm"]
+            os.makedirs(os.path.join(root, ds, folder), exist_ok=True)
+            for f in os.listdir(os.path.join(src, tn, folder)):
+                shutil.copy(os.path.join(src, tn, folder, f),
+                            os.path.join(root, ds, folder, f.replace(f"{tn}_antenna", f"{trial}_antenna")))
+    out_dir = os.path.join(tmp, "out_two")
+    res, _ = ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                       windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False, pairs=None,
+                                       split=["A1:A2", "A1,A2_XR1:A2_XR2", "cv"]))
+    by = {r["split"]: r for r in res if r["model"] == "linear"}
+    s1, s2 = "学習 A1 → テスト A2", "学習 A1+A2_XR1 → テスト A2_XR2"
+    names_all = sorted(set(by["試行ごと"]["tname"]))
+    good = (set(by) == {s1, s2, "試行ごと"}
+            and sorted(set(by[s1]["tname"])) == ["A2_XR1", "A2_XR2", "A2_XR4"]
+            and sorted(set(by[s2]["tname"])) == ["A2_XR2"] and len(by[s2]["y"]) == 80
+            and "A2_XR3" not in names_all and len(names_all) == 7
+            and all(by[k]["R2"] > 0.5 for k in by))
+    files = os.listdir(out_dir)
+    good &= any(f.startswith("pred_train_A1_test_A2_") for f in files)
+    with open(os.path.join(out_dir, "metrics.csv"), encoding="utf-8") as f:
+        good &= next(csv.reader(f))[2] == "split"
+    try:  # a name that does not exist / ない名前
+        ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                  windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True, pairs=None,
+                                  split=["A1:A3"]))
+        good = False
+    except ro.RegError as e:
+        good &= "A3" in str(e)
+    print(f"  {'OK ' if good else 'NG '} A1 と A2 を並べた置き方と --split: 試行 {names_all}（A2_XR3 はドップラーなしで飛ばす）、"
+          + "、".join(f"{k}: R² {v['R2']:.3f}" for k, v in by.items()))
+    return good
+
+
 def dataset_layout(tmp, related_names=True):
     """The layout of a dataset folder (everything of A1 together). / データセットのフォルダにまとめた置き方
         <in>/A1/imu/<trial>/imu/<trial>_power_timeseries.csv
@@ -191,6 +244,7 @@ def main():
             print(f"  {'OK ' if good else 'NG '} データセットのフォルダの置き方（{label}）: {names}, R² {r['R2']:.3f}")
             ok &= good
         ok &= check_feature_c(tmp)
+        ok &= check_two_datasets(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,cnn"

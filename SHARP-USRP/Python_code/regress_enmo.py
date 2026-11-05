@@ -181,9 +181,14 @@ def discover(root, out, pairs_csv=None):
         m = re.match(r"(.+)_windows_([\d.]+)s\.csv$", os.path.basename(p))
         if m:
             truths.setdefault(m.group(1), dict(name=m.group(1), win={}))["win"][float(m.group(2))] = p
+    def dataset_of(path):  # first folder under the input folder (A1, A2, ... or the trial folder) / データセット名
+        rel = os.path.relpath(path, root)
+        return "" if rel in (".", "") else rel.split(os.sep)[0]
+
     for t in truths.values():
         d = os.path.dirname(t.get("ts") or next(iter(t["win"].values())))
         t["dir"] = os.path.dirname(d) if os.path.basename(d).lower() == "imu" else d
+        t["ds"] = dataset_of(t["dir"])
 
     # Doppler groups (antenna1 + antenna2 of one capture), keyed by the name without the antenna number
     # ドップラーのまとまり（同じ収集の antenna1 と antenna2）。アンテナ番号を除いた名前で分ける
@@ -198,20 +203,22 @@ def discover(root, out, pairs_csv=None):
                 if not ant:
                     continue
                 key = (os.path.dirname(d), _dop_key(stem))
-                g = groups.setdefault(key, dict(key=key[1], parent=key[0], files={}))
+                g = groups.setdefault(key, dict(key=key[1], parent=key[0], ds=dataset_of(key[0]), files={}))
                 g["files"].setdefault(variant, {})[ant] = txt
 
     # pairing list of the batch run: IMU CSV name -> CSI name / 一括処理の組み合わせ（IMU の名前 → CSI の名前）
     mapping = {}
-    if pairs_csv is None:
-        found = sorted(glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True))
-        pairs_csv = found[-1] if found else None
-    if pairs_csv:
-        with open(pairs_csv, encoding="utf-8-sig") as f:
+    # every pairing list found (A1, A2, ... may each have one; newer files win) / 見つかった一覧をすべて使う
+    lists = [pairs_csv] if pairs_csv else sorted(glob.glob(os.path.join(root, "**", "batch_pairs_*.csv"), recursive=True),
+                                                 key=os.path.getmtime)
+    for pc in lists:
+        n0 = len(mapping)
+        with open(pc, encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 if r.get("imu") and r.get("csi"):
                     mapping[os.path.splitext(r["imu"].strip())[0]] = os.path.splitext(r["csi"].strip())[0]
-        log(f"  組み合わせの一覧を使います: {pairs_csv}（{len(mapping)} 組）", out)
+        log(f"  組み合わせの一覧を使います: {pc}（{len(mapping) - n0} 組）", out)
+    ds_with_doppler = {g["ds"] for g in groups.values()}
 
     cand = []
     for tn, t in truths.items():
@@ -221,6 +228,8 @@ def discover(root, out, pairs_csv=None):
                 cand.append((3, 1.0, tn, gk, "同じフォルダ"))
             elif tn in mapping and _dop_key(mapping[tn]).lower() in g["key"].lower():
                 cand.append((2, 1.0, tn, gk, "組み合わせの一覧"))
+            elif t["ds"] != g["ds"] and t["ds"] in ds_with_doppler:
+                continue  # never pair by name across datasets (A1_XR1 vs A2_XR1) / 名前ではデータセットをまたがない
             else:
                 a, b = tn.lower(), pre.lower()
                 r = difflib.SequenceMatcher(None, a, b).ratio()
@@ -237,7 +246,8 @@ def discover(root, out, pairs_csv=None):
     specs.sort(key=lambda s_: s_["name"])
     log(f"  試行: {len(specs)} 本（正解データとドップラーの組）", out)
     for sp in specs:
-        log(f"    {sp['name']}  ↔  {sp['dop_name']}  （{sp['how']}で対応）", out)
+        log(f"    {sp['name']}  ↔  {sp['dop_name']}  （{sp['how']}で対応" +
+            (f"、データセット {sp['ds']}）" if sp["ds"] and sp["ds"] != sp["name"] else "）"), out)
     for tn in sorted(set(truths) - used_t):
         log(f"  注意: ドップラーが見つからない正解データ: {tn}（飛ばします）", out)
     for gk in sorted(set(groups) - used_g):
@@ -491,6 +501,70 @@ def metrics(y, p):
 
 
 # ============================================================ run
+def parse_splits(items):
+    """--split "A1:A2" / "A1,A2_XR1:A2_XR2" / "cv" -> [("cv", None, None) | (label, train tokens, test tokens)].
+    学習とテストの分け方。左が学習、右がテスト（データセット名・試行名・A2_* のような書き方、カンマ区切り）"""
+    if not items:
+        return [("cv", None, None)]
+    out = []
+    for it in items:
+        it = it.strip()
+        if it.lower() == "cv":
+            out.append(("cv", None, None))
+            continue
+        if it.count(":") != 1:
+            raise RegError(f"--split は「学習:テスト」の形で書きます（例 \"A1:A2\"、\"A1,A2_XR1:A2_XR2\"）: {it}")
+        a, b = it.split(":")
+        tr = [x.strip() for x in a.split(",") if x.strip()]
+        te = [x.strip() for x in b.split(",") if x.strip()]
+        if not tr or not te:
+            raise RegError(f"--split の学習とテストの両方を書いてください: {it}")
+        out.append((f"学習 {'+'.join(tr)} → テスト {'+'.join(te)}", tr, te))
+    return out
+
+
+def _pick_trials(tokens, specs):
+    """Trial names matched by dataset names, trial names or patterns (A2_*). / データセット名・試行名・パターンで選ぶ"""
+    import fnmatch
+    names = set()
+    for tok in tokens:
+        hit = {sp["name"] for sp in specs
+               if tok.lower() in (sp["name"].lower(), (sp.get("ds") or "").lower())
+               or fnmatch.fnmatch(sp["name"].lower(), tok.lower())}
+        if not hit:
+            dss = sorted({sp.get("ds") for sp in specs if sp.get("ds")})
+            raise RegError(f"--split の「{tok}」に当たる試行がありません（データセット: {', '.join(dss) or 'なし'}、"
+                           f"試行: {', '.join(sp['name'] for sp in specs)}）")
+        names |= hit
+    return names
+
+
+def make_evaluations(splits, trials, specs, tname, blocks, out):
+    """[(label, [(train mask, test mask), ...])] for each requested split. / 分け方ごとの学習・テストの区間"""
+    evals = []
+    for kind, tr_tok, te_tok in splits:
+        if kind == "cv":
+            if len(trials) >= 2:
+                g = np.concatenate([np.full(len(tr["y"]), k) for k, tr in enumerate(trials)])
+                how = f"試行ごと（{len(trials)} 試行。1 試行をテスト、残りで学習）"
+            else:
+                n = len(trials[0]["y"])
+                g = np.minimum((np.arange(n) * blocks) // n, blocks - 1)
+                how = f"試行が 1 本なので、時間を {blocks} つのかたまりに分けて交互にテスト（参考値）"
+            log(f"  評価: {how}", out)
+            evals.append(("試行ごと", [(g != k, g == k) for k in np.unique(g)]))
+            continue
+        tr_names, te_names = _pick_trials(tr_tok, specs), _pick_trials(te_tok, specs)
+        both = tr_names & te_names
+        if both:
+            raise RegError(f"学習とテストの両方に入っている試行があります: {', '.join(sorted(both))}（{kind}）")
+        tr_m, te_m = np.isin(tname, sorted(tr_names)), np.isin(tname, sorted(te_names))
+        log(f"  評価: {kind}（学習 {len(tr_names)} 試行・{int(tr_m.sum())} 区間: {', '.join(sorted(tr_names))} ／ "
+            f"テスト {len(te_names)} 試行・{int(te_m.sum())} 区間: {', '.join(sorted(te_names))}）", out)
+        evals.append((kind, [(tr_m, te_m)]))
+    return evals
+
+
 def run(opts):
     out = []
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -509,6 +583,12 @@ def run(opts):
     badf = [f for f in feats if not f or any(p not in ("A", "B", "C") for p in f.split("+"))]
     if badf:
         raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C と、その組み合わせ A+C など）")
+    splits = parse_splits(getattr(opts, "split", None))
+    for kind, tr_tok, te_tok in splits:  # check the names before the slow part / 時間の掛かる処理の前に名前を確かめる
+        if tr_tok:
+            both = _pick_trials(tr_tok, specs) & _pick_trials(te_tok, specs)
+            if both:
+                raise RegError(f"学習とテストの両方に入っている試行があります: {', '.join(sorted(both))}（{kind}）")
     results, pred_rows = [], []
     windows = opts.windows
     for variant, window in [(v, w) for v in variants for w in windows]:
@@ -520,16 +600,6 @@ def run(opts):
                 log(f"  この版は飛ばします: {e}", out)
                 continue
             raise
-        # folds / 学習とテストの分け方
-        if len(trials) >= 2:
-            groups = [np.full(len(tr["y"]), k) for k, tr in enumerate(trials)]
-            how = f"試行ごと（{len(trials)} 試行。1 試行をテスト、残りで学習）"
-        else:
-            n = len(trials[0]["y"])
-            groups = [np.minimum((np.arange(n) * opts.blocks) // n, opts.blocks - 1)]
-            how = f"試行が 1 本なので、時間を {opts.blocks} つのかたまりに分けて交互にテスト（参考値）"
-        log(f"  評価: {how}", out)
-        g = np.concatenate(groups)
         XA = np.concatenate([tr["XA"] for tr in trials])
         XB = np.concatenate([tr["XB"] for tr in trials])
         XC = np.concatenate([tr["XC"] for tr in trials])
@@ -538,6 +608,7 @@ def run(opts):
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
         win = np.concatenate([tr["win"] for tr in trials])
+        evals = make_evaluations(splits, trials, specs, tname, opts.blocks, out)
         _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, XC, y,
                        trials[0]["v"])
         configs = [("baseline", "-")]
@@ -546,38 +617,42 @@ def run(opts):
                 configs.append(("cnn", "Doppler 2D"))
             else:
                 configs += [(m, f) for f in feats]
-        for model, feat in configs:
-            t_start = time.time()
-            pred = np.full(len(y), np.nan)
-            for k in np.unique(g):
-                tr_i, te_i = g != k, g == k
-                if model == "baseline":
-                    pred[te_i] = y[tr_i].mean()
-                elif model == "cnn":
-                    try:
-                        pred[te_i] = fit_predict_cnn(XN[tr_i], y[tr_i], XN[te_i], opts.seed, opts.epochs)
-                    except ImportError:
-                        log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
-                        pred[:] = np.nan
-                        break
-                else:
-                    X = np.hstack([fsets[p] for p in feat.split("+")])
-                    est = make_tabular(model, opts.seed)
-                    est.fit(X[tr_i], y[tr_i])
-                    pred[te_i] = est.predict(X[te_i])
-            if np.isnan(pred).all():
-                continue
-            mt = metrics(y, pred)
-            per = {tn: metrics(y[tname == tn], pred[tname == tn]) for tn in dict.fromkeys(tname)}
-            label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
-            results.append(dict(variant=variant, window=window, model=model, label=label, features=feat, **mt,
-                                per_trial=per,
-                                seconds=time.time() - t_start, pred=pred, y=y, tname=tname, win=win))
-            log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
-                f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
-            for i in range(len(y)):
-                pred_rows.append([variant, f"{window:g}", model, feat, tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}",
-                                  f"{y[i]:.3f}", f"{pred[i]:.3f}"])
+        for sp_label, folds in evals:
+            if len(evals) > 1 or sp_label != "試行ごと":
+                log(f"  -- 学習とテスト: {sp_label}", out)
+            for model, feat in configs:
+                t_start = time.time()
+                pred = np.full(len(y), np.nan)
+                for tr_i, te_i in folds:
+                    if model == "baseline":
+                        pred[te_i] = y[tr_i].mean()
+                    elif model == "cnn":
+                        try:
+                            pred[te_i] = fit_predict_cnn(XN[tr_i], y[tr_i], XN[te_i], opts.seed, opts.epochs)
+                        except ImportError:
+                            log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
+                            pred[:] = np.nan
+                            break
+                    else:
+                        X = np.hstack([fsets[p] for p in feat.split("+")])
+                        est = make_tabular(model, opts.seed)
+                        est.fit(X[tr_i], y[tr_i])
+                        pred[te_i] = est.predict(X[te_i])
+                te = np.any([f[1] for f in folds], axis=0)   # the test windows of this evaluation / テストの区間
+                if np.isnan(pred[te]).all():
+                    continue
+                yy, pp, tn_, ww = y[te], pred[te], tname[te], win[te]
+                mt = metrics(yy, pp)
+                per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
+                label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
+                results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
+                                    features=feat, **mt, per_trial=per, seconds=time.time() - t_start,
+                                    pred=pp, y=yy, tname=tn_, win=ww))
+                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
+                    f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
+                for i in range(len(yy)):
+                    pred_rows.append([variant, f"{window:g}", sp_label, model, feat, tn_[i], f"{ww[i][0]:.3f}",
+                                      f"{ww[i][1]:.3f}", f"{yy[i]:.3f}", f"{pp[i]:.3f}"])
     if not results:
         raise RegError("どの版でも計算できませんでした")
     _save(out_dir, results, pred_rows, opts, out)
@@ -608,29 +683,29 @@ def B_NAMES_full():
 def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds"])
         for r in results:
-            w.writerow([r["variant"], f"{r['window']:g}", r["label"], r["features"], f"{r['MAE']:.3f}", f"{r['RMSE']:.3f}",
-                        f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}"])
+            w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
+                        f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "model", "features", "trial", "MAE(mg)", "RMSE(mg)", "R2", "r"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mg)", "RMSE(mg)", "R2", "r"])
         for r in results:
             for tn, m in r["per_trial"].items():
-                w.writerow([r["variant"], f"{r['window']:g}", r["label"], r["features"], tn, f"{m['MAE']:.3f}", f"{m['RMSE']:.3f}",
-                            f"{m['R2']:.4f}", f"{m['r']:.4f}"])
+                w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], tn, f"{m['MAE']:.3f}",
+                            f"{m['RMSE']:.3f}", f"{m['R2']:.4f}", f"{m['r']:.4f}"])
     with open(os.path.join(out_dir, "predictions.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
                     "true_ENMO(mg)", "pred_ENMO(mg)"])
         w.writerows(pred_rows)
     with open(os.path.join(out_dir, "config.json"), "w", encoding="utf-8") as f:
         json.dump(vars(opts), f, ensure_ascii=False, indent=2)
-    for wl in dict.fromkeys(r["window"] for r in results):
-        best = min((r for r in results if r["model"] != "baseline" and r["window"] == wl), key=lambda r: r["MAE"],
-                   default=None)
+    for sp, wl in dict.fromkeys((r["split"], r["window"]) for r in results):
+        best = min((r for r in results if r["model"] != "baseline" and r["window"] == wl and r["split"] == sp),
+                   key=lambda r: r["MAE"], default=None)
         if best:
-            log(f"\n{wl:g} 秒の区間で一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、"
+            log(f"\n[{sp}] {wl:g} 秒の区間で一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、"
                 f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mg、R² {best['R2']:.3f}", out)
 
 
@@ -647,6 +722,14 @@ def _setup_plt():
                       "WenQuanYi Zen Hei") if f in have]
     plt.rcParams["font.family"] = jp + ["DejaVu Sans"]
     return plt
+
+
+def _split_tag(sp):
+    """File-name tag of a split ('' for the usual leave-one-trial-out). / 分け方のファイル名用の印"""
+    if sp == "試行ごと":
+        return ""
+    t = sp.replace("学習 ", "train_").replace(" → テスト ", "_test_").replace("+", "-")
+    return re.sub(r"[^\w.-]", "", t) + "_"
 
 
 def _plots(out_dir, results):
@@ -684,17 +767,18 @@ def _plots(out_dir, results):
         ax.set_ylabel("予測 [mg]")
         ax.set_title(f"全体: MAE {r['MAE']:.1f} mg / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
-        fig.suptitle(f"{r['label']}（特徴量 {r['features']}、ドップラー {r['variant']}、区間 {r['window']:g} 秒）")
+        fig.suptitle(f"{r['label']}（特徴量 {r['features']}、ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
+                     + ("" if r["split"] == "試行ごと" else f"\n{r['split']}"))
         fig.tight_layout()
-        fig.savefig(os.path.join(out_dir, f"pred_{r['variant']}_{r['window']:g}s_{r['model']}_"
+        fig.savefig(os.path.join(out_dir, f"pred_{_split_tag(r['split'])}{r['variant']}_{r['window']:g}s_{r['model']}_"
                                           f"{r['features'].split()[0]}.png"), dpi=110)
         plt.close(fig)
     # comparison / 比較
-    groups = list(dict.fromkeys((r["variant"], r["window"]) for r in results))
-    nmax = max(sum(1 for r in results if (r["variant"], r["window"]) == g) for g in groups)
+    groups = list(dict.fromkeys((r["variant"], r["window"], r["split"]) for r in results))
+    nmax = max(sum(1 for r in results if (r["variant"], r["window"], r["split"]) == g) for g in groups)
     fig, ax = plt.subplots(len(groups), 2, figsize=(max(14, 1.25 * nmax), 4.2 * len(groups)), squeeze=False)
-    for vi, (var, wl) in enumerate(groups):
-        rs = [r for r in results if r["variant"] == var and r["window"] == wl]
+    for vi, (var, wl, sp) in enumerate(groups):
+        rs = [r for r in results if r["variant"] == var and r["window"] == wl and r["split"] == sp]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
                  "mlp": "MLP", "cnn": "CNN"}
         labels = [short[r["model"]] + ("" if r["model"] in ("baseline", "cnn") else f"\n特徴量{r['features']}")
@@ -710,10 +794,11 @@ def _plots(out_dir, results):
             ax[vi, j].set_xticks(x)
             ax[vi, j].set_xticklabels(labels, fontsize=9)
             ax[vi, j].set_ylabel(("R²" if key == "R2" else key) + unit)
-            ax[vi, j].set_title(f"ドップラー: {var}、区間 {wl:g} 秒", loc="left", fontsize=10)
+            ax[vi, j].set_title(f"ドップラー: {var}、区間 {wl:g} 秒" + ("" if sp == "試行ごと" else f"、{sp}"),
+                                loc="left", fontsize=10)
             if key == "R2":
                 ax[vi, j].axhline(0, color="#333333", lw=0.8)
-    fig.suptitle("モデルの比較（試行ごとに分けた評価。RF = ランダムフォレスト、線形 = 線形回帰 (Ridge)）")
+    fig.suptitle("モデルの比較（RF = ランダムフォレスト、線形 = 線形回帰 (Ridge)）")
     fig.tight_layout()
     fig.savefig(os.path.join(out_dir, "comparison.png"), dpi=110)
     plt.close(fig)
@@ -747,6 +832,10 @@ def main(argv=None):
     ap.add_argument("--features", default="A,B,C,A+C,B+C",
                     help="CNN 以外のモデルの特徴量（A, B, C と、その組み合わせ A+C など。既定 A,B,C,A+C,B+C）")
     ap.add_argument("--windows", default="1,5", help="区間の長さ [s]（カンマ区切り。既定 1,5）")
+    ap.add_argument("--split", action="append", default=None,
+                    help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"
+                         "書き方をカンマで並べる。例 --split A1:A2 --split A1,A2_XR1:A2_XR2。cv で今までの"
+                         "「1 試行をテスト、残りで学習」。指定しなければ cv")
     ap.add_argument("--blocks", type=int, default=5, help="試行が 1 本のとき、時間を分けるかたまりの数（既定 5）")
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--seed", type=int, default=0, help="乱数の種（既定 0）")
