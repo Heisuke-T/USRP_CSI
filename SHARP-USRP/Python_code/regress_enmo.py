@@ -2,7 +2,7 @@
     ドップラーから腰の加速度の指標 (ENMO) を推定する回帰モデルを作り、比べる。
 
     正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す腰の ENMO
-          (max(合成加速度 - 1 g, 0) [mg]) の区間 (既定 1 秒と 5 秒) ごとの平均
+          (max(合成加速度 - 1 g, 0) [mg]) の 1 秒ごとの平均 (--windows で変更できる)
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
     モデル (5 種類):
@@ -34,7 +34,7 @@
           doppler_traces_raw/        同上
 
     例:
-      python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒と 5 秒の区間
+      python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒ごと
       python regress_enmo.py --doppler all          # 3 つの版それぞれで比べる
       python regress_enmo.py --windows 1            # 1 秒の区間だけ
       python regress_enmo.py --models linear,rf     # 一部のモデルだけ
@@ -842,7 +842,7 @@ def main(argv=None):
     ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")
     ap.add_argument("--features", default="A,B,C,A+C,B+C",
                     help="CNN 以外のモデルの特徴量（A, B, C と、その組み合わせ A+C など。既定 A,B,C,A+C,B+C）")
-    ap.add_argument("--windows", default="1,5", help="区間の長さ [s]（カンマ区切り。既定 1,5）")
+    ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")
     ap.add_argument("--split", action="append", default=None,
                     help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"
                          "書き方をカンマで並べる。例 --split A1:A2 --split A1,A2_XR1:A2_XR2。cv で今までの"
