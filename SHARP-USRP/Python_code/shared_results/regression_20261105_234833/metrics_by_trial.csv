@@ -1,0 +1,13 @@
+doppler,window(s),split,model,features,trial,MAE(mg),RMSE(mg),R2,r
+nowinnorm,1,学習 A1 → テスト A2,平均値で予測（基準）,-,A2_XR1,178.712,263.306,-0.0528,0.0000
+nowinnorm,1,学習 A1 → テスト A2,平均値で予測（基準）,-,A2_XR2,223.636,269.857,-0.0000,-0.0000
+nowinnorm,1,学習 A1 → テスト A2,CNN,Doppler 2D,A2_XR1,87.299,129.463,0.7455,0.9342
+nowinnorm,1,学習 A1 → テスト A2,CNN,Doppler 2D,A2_XR2,94.642,125.681,0.7831,0.9153
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR1,85.417,119.441,0.7834,0.9119
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR2,80.452,108.984,0.8369,0.9276
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 2 秒も入力）,Doppler 2D 5秒,A2_XR1,87.646,121.375,0.7763,0.9135
+nowinnorm,1,学習 A1 → テスト A2,CNN（前後 2 秒も入力）,Doppler 2D 5秒,A2_XR2,84.601,110.537,0.8322,0.9354
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,平均値で予測（基準）,-,A2_XR2,223.277,269.996,-0.0010,0.0000
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN,Doppler 2D,A2_XR2,91.203,120.566,0.8004,0.9160
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN（前後 1 秒も入力）,Doppler 2D 3秒,A2_XR2,82.234,107.519,0.8413,0.9271
+nowinnorm,1,学習 A1+A2_XR1 → テスト A2_XR2,CNN（前後 2 秒も入力）,Doppler 2D 5秒,A2_XR2,82.321,104.023,0.8514,0.9312
