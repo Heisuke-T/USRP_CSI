@@ -10,6 +10,8 @@
       ランダムフォレスト  : 同上
       XGBoost             : 同上
       MLP                 : 同上
+      SVR                 : 同上（RBF カーネル）
+      ガウス過程回帰       : 同上（推定の幅も出す）
       CNN                 : 1 秒分のドップラーの 2 次元配列 (時間 x 速度 x アンテナ 2 本)
     特徴量 A = 1 秒の中で速度ビンごとに平均したスペクトル (log10, アンテナ 2 本で 200 個)
     特徴量 B = 物理に基づく特徴量 (速さの平均・2 乗平均・広がり・最大速度・足踏みの周期など,
@@ -53,6 +55,7 @@ import pickle
 import re
 import sys
 import time
+import warnings
 from datetime import datetime
 
 import numpy as np
@@ -61,8 +64,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VARIANT_DIRS = {"normalized": "doppler_traces", "nowinnorm": "doppler_traces_nowinnorm",
                 "raw": "doppler_traces_raw"}
 MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレスト", "xgboost": "XGBoost",
-               "mlp": "MLP", "cnn": "CNN"}
-ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "cnn"]
+               "mlp": "MLP", "svr": "SVR", "gpr": "ガウス過程回帰", "cnn": "CNN",
+               "cnn_shuffle": "CNN（時間の順番を入れ替え）", "cnn_timemean": "CNN（時間で平均）",
+               "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）"}
+ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "svr", "gpr", "cnn"]
+# extra CNNs for checking why the CNN works (--cnn_study) / CNN が効く理由を確かめるための CNN
+STUDY_MODELS = ["cnn_shuffle", "cnn_timemean", "cnn1d", "cnn3s"]
+CNN_KINDS = ["cnn"] + STUDY_MODELS
+CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
+            "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒"}
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
 TARGET = "ENMO(mg)"      # target column in the work-rate software's output / 正解の列
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
@@ -391,7 +401,7 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out, need_c=True):
+def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -411,7 +421,7 @@ def build_trial(spec, variant, window, out, need_c=True):
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, XN, y, kept = [], [], [], [], [], []
+    XA, XB, XC, XN, XN3, y, kept = [], [], [], [], [], [], []
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
     dropped = 0
     for i, (a, b) in enumerate(wins):
@@ -423,7 +433,7 @@ def build_trial(spec, variant, window, out, need_c=True):
             yv = float(np.mean(tgt["y"][m]))
         else:
             yv = float(tgt["y"][i])
-        fa, fb, fc, fn = [], [], [], []
+        fa, fb, fc, fn, fn3 = [], [], [], [], []
         ok = True
         for d, ac in zip(ants, acc):
             sel = (d["t"] >= a) & (d["t"] < b)
@@ -437,13 +447,17 @@ def build_trial(spec, variant, window, out, need_c=True):
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
             fc.append(accel_features(ac, a, b) if ac is not None else np.full(len(C_NAMES), np.nan))
             fn.append(cnn_input(d["S"], d["t"], a, b))
+            if need_ctx:  # the window and 1 s before and after / 区間と前後 1 秒
+                fn3.append(cnn_input(d["S"], d["t"], a - 1.0, b + 1.0))
         if not ok:
             dropped += 1
             continue
         XA.append(np.concatenate(fa))
         XB.append(np.concatenate(fb))
         XC.append(np.concatenate(fc))
-        XN.append(np.stack(fn, axis=-1))
+        XN.append(np.stack(fn, axis=-1).astype(np.float32))
+        if need_ctx:
+            XN3.append(np.stack(fn3, axis=-1).astype(np.float32))
         y.append(yv)
         kept.append((a, b))
     if not y:
@@ -451,7 +465,8 @@ def build_trial(spec, variant, window, out, need_c=True):
     log(f"  {name}: {len(y)} 区間（{window:g} 秒ごと、CSI の {kept[0][0]:.1f}〜{kept[-1][1]:.1f} s）"
         + (f"、{dropped} 区間はデータ不足で除外" if dropped else "")
         + f"  [{ants[0]['file']}, {ants[1]['file']}, {tgt['file']}]", out)
-    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XN=np.array(XN), y=np.array(y),
+    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XN=np.array(XN),
+                XN3=np.array(XN3) if need_ctx else None, y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"])
 
 
@@ -469,6 +484,23 @@ def make_tabular(kind, seed):
         from xgboost import XGBRegressor
         return XGBRegressor(n_estimators=300, max_depth=3, learning_rate=0.05, subsample=0.8,
                             colsample_bytree=0.8, random_state=seed, n_jobs=1)
+    if kind == "svr":
+        # RBF kernel; the target is standardized so epsilon and C do not depend on the mg scale
+        # RBF カーネル。正解も標準化するので、epsilon と C は mg の大きさに依らない
+        from sklearn.compose import TransformedTargetRegressor
+        from sklearn.svm import SVR
+        return TransformedTargetRegressor(
+            regressor=make_pipeline(StandardScaler(), SVR(kernel="rbf", C=1.0, epsilon=0.1, gamma="scale")),
+            transformer=StandardScaler())
+    if kind == "gpr":
+        # RBF + noise; kernel parameters fitted by the marginal likelihood on the training data
+        # RBF + 雑音。カーネルのパラメータは学習データの周辺尤度で決める
+        from sklearn.gaussian_process import GaussianProcessRegressor
+        from sklearn.gaussian_process.kernels import RBF, ConstantKernel, WhiteKernel
+        k = (ConstantKernel(1.0, (1e-2, 1e2)) * RBF(length_scale=10.0, length_scale_bounds=(1e-1, 1e4))
+             + WhiteKernel(0.1, (1e-4, 1e1)))
+        return make_pipeline(StandardScaler(), GaussianProcessRegressor(kernel=k, normalize_y=True,
+                                                                        random_state=seed))
     if kind == "mlp":
         from sklearn.neural_network import MLPRegressor
         return make_pipeline(StandardScaler(), MLPRegressor(hidden_layer_sizes=(64, 32), alpha=1e-2,
@@ -478,28 +510,64 @@ def make_tabular(kind, seed):
     raise ValueError(kind)
 
 
-def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs):
-    """Small 2D CNN on (frames x bins x antennas). / 小さな 2 次元 CNN"""
+def _cnn_model(tf, shape, kind):
+    """2D CNN on (frames x bins x channels), or 1D CNN along time on (frames x features).
+    2 次元 CNN（時間 x 速度 x チャネル）、または時間方向だけの 1 次元 CNN（時間 x 特徴）"""
+    L = tf.keras.layers
+    inp = L.Input(shape=shape)
+    x = inp
+    if kind == "1d":
+        for i, (n, k) in enumerate(((32, 5), (64, 5), (64, 3))):
+            x = L.BatchNormalization()(L.Conv1D(n, k, padding="same")(x))
+            x = L.ReLU(name="last_conv" if i == 2 else None)(x)
+            if i < 2:
+                x = L.MaxPooling1D(2)(x)
+        x = L.GlobalAveragePooling1D()(x)
+    else:
+        for i, n in enumerate((16, 32, 64)):
+            x = L.BatchNormalization()(L.Conv2D(n, 3, padding="same")(x))
+            x = L.ReLU(name="last_conv" if i == 2 else None)(x)
+            if i < 2:
+                x = L.MaxPooling2D(2)(x)
+        x = L.GlobalAveragePooling2D()(x)
+    x = L.Dense(32, activation="relu")(L.Dropout(0.3)(x))
+    return tf.keras.Model(inp, L.Dense(1)(x))
+
+
+def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False):
+    """Train a small CNN and predict. With cam=True, also the Grad-CAM map of each test window
+    (where in time x velocity the CNN looked; the same size as the input, max 1).
+    小さな CNN を学習して予測する。cam=True なら、テストの区間ごとの Grad-CAM（CNN が時間 x 速度の
+    どこを見たか。入力と同じ大きさ、最大 1）も返す。戻り値 (予測, Grad-CAM または None)"""
     os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
     import tensorflow as tf
     tf.get_logger().setLevel("ERROR")
     tf.keras.utils.set_random_seed(seed)
-    mu = Xtr.mean(axis=(0, 1, 2), keepdims=True)
-    sd = Xtr.std(axis=(0, 1, 2), keepdims=True) + 1e-6
+    ax = tuple(range(Xtr.ndim - 1))
+    mu = Xtr.mean(axis=ax, keepdims=True)
+    sd = Xtr.std(axis=ax, keepdims=True) + 1e-6
     ym, ys = ytr.mean(), ytr.std() + 1e-9
-    L = tf.keras.layers
-    model = tf.keras.Sequential([
-        L.Input(shape=Xtr.shape[1:]),
-        L.Conv2D(16, 3, padding="same"), L.BatchNormalization(), L.ReLU(), L.MaxPooling2D(2),
-        L.Conv2D(32, 3, padding="same"), L.BatchNormalization(), L.ReLU(), L.MaxPooling2D(2),
-        L.Conv2D(64, 3, padding="same"), L.BatchNormalization(), L.ReLU(),
-        L.GlobalAveragePooling2D(), L.Dropout(0.3), L.Dense(32, activation="relu"), L.Dense(1),
-    ])
+    model = _cnn_model(tf, Xtr.shape[1:], kind)
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="mse")
     cb = [tf.keras.callbacks.EarlyStopping(patience=20, restore_best_weights=True)]
-    model.fit((Xtr - mu) / sd, (ytr - ym) / ys, validation_split=0.15, epochs=epochs, batch_size=16,
-              verbose=0, callbacks=cb, shuffle=True)
-    return model.predict((Xte - mu) / sd, verbose=0).ravel() * ys + ym
+    model.fit(((Xtr - mu) / sd).astype(np.float32), (ytr - ym) / ys, validation_split=0.15, epochs=epochs,
+              batch_size=16, verbose=0, callbacks=cb, shuffle=True)
+    Xn = ((Xte - mu) / sd).astype(np.float32)
+    pred = model.predict(Xn, verbose=0).ravel() * ys + ym
+    if not cam or kind == "1d":
+        return pred, None
+    gm = tf.keras.Model(model.input, [model.get_layer("last_conv").output, model.output])
+    maps = []
+    for i in range(0, len(Xn), 64):
+        xb = tf.convert_to_tensor(Xn[i:i + 64])
+        with tf.GradientTape() as tape:
+            f, yb = gm(xb, training=False)
+        g = tape.gradient(yb, f)
+        w = tf.reduce_mean(g, axis=(1, 2), keepdims=True)                  # weight of each feature map / 重み
+        m = tf.nn.relu(tf.reduce_sum(w * f, axis=-1))[..., None]            # where it raises ENMO / ENMO を上げる場所
+        m = tf.image.resize(m, Xte.shape[1:3])[..., 0].numpy()
+        maps.append(m / (m.reshape(len(m), -1).max(axis=1)[:, None, None] + 1e-12))
+    return pred, np.concatenate(maps).astype(np.float32)
 
 
 def metrics(y, p):
@@ -587,9 +655,13 @@ def run(opts):
     specs = discover(opts.input, out, getattr(opts, "pairs", None))
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
-    bad = [m for m in models if m not in ALL_MODELS]
+    bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS]
     if bad:
-        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS)}）")
+        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS + STUDY_MODELS)}）")
+    study = bool(getattr(opts, "cnn_study", False))
+    if study:  # the CNN and its check variants / CNN と、理由を確かめるための CNN
+        models += [m for m in ["cnn"] + STUDY_MODELS if m not in models]
+    n_seeds = max(1, int(getattr(opts, "cnn_seeds", 1) or 1))
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
     badf = [f for f in feats if not f or any(p not in ("A", "B", "C") for p in f.split("+"))]
     if badf:
@@ -605,7 +677,8 @@ def run(opts):
     for variant, window in [(v, w) for v in variants for w in windows]:
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
-            trials = [build_trial(sp, variant, window, out, need_c=any("C" in f for f in feats)) for sp in specs]
+            trials = [build_trial(sp, variant, window, out, need_c=any("C" in f for f in feats),
+                                  need_ctx="cnn3s" in models) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -615,6 +688,27 @@ def run(opts):
         XB = np.concatenate([tr["XB"] for tr in trials])
         XC = np.concatenate([tr["XC"] for tr in trials])
         XN = np.concatenate([tr["XN"] for tr in trials])
+        cnn_cache = {}
+
+        def cnn_data(kind):
+            """Input of each CNN variant (made once). / CNN の種類ごとの入力（1 回だけ作る）"""
+            if kind not in cnn_cache:
+                if kind == "cnn":
+                    cnn_cache[kind] = (XN, "2d")
+                elif kind == "cnn_shuffle":  # frames in a random order in each window / 区間の中で時間の順番を入れ替え
+                    rng = np.random.default_rng(1234)
+                    cnn_cache[kind] = (np.stack([x[rng.permutation(len(x))] for x in XN]), "2d")
+                elif kind == "cnn_timemean":  # every frame = the window's mean / どの時刻も区間の平均
+                    cnn_cache[kind] = (np.repeat(XN.mean(axis=1, keepdims=True), XN.shape[1], axis=1), "2d")
+                elif kind == "cnn1d":  # time x (velocity bins x antennas) / 時間 x (速度 x アンテナ)
+                    cnn_cache[kind] = (XN.reshape(len(XN), XN.shape[1], -1), "1d")
+                elif kind == "cnn3s":  # 3 s around the window + a channel marking the window / 前後 1 秒 + 区間の印
+                    X3 = np.concatenate([tr["XN3"] for tr in trials])
+                    nf = X3.shape[1]
+                    mark = np.zeros((1, nf, X3.shape[2], 1), np.float32)
+                    mark[:, nf // 3: nf - nf // 3] = 1.0
+                    cnn_cache[kind] = (np.concatenate([X3, np.broadcast_to(mark, X3.shape[:3] + (1,))], axis=-1), "2d")
+            return cnn_cache[kind]
         fsets = {"A": XA, "B": XB, "C": XC}
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
@@ -624,8 +718,8 @@ def run(opts):
                        trials[0]["v"])
         configs = [("baseline", "-")]
         for m in models:
-            if m == "cnn":
-                configs.append(("cnn", "Doppler 2D"))
+            if m in CNN_KINDS:
+                configs.append((m, CNN_FEAT[m]))
             else:
                 configs += [(m, f) for f in feats]
         for sp_label, folds in evals:
@@ -633,34 +727,75 @@ def run(opts):
                 log(f"  -- 学習とテスト: {sp_label}", out)
             for model, feat in configs:
                 t_start = time.time()
-                pred = np.full(len(y), np.nan)
-                for tr_i, te_i in folds:
-                    if model == "baseline":
-                        pred[te_i] = y[tr_i].mean()
-                    elif model == "cnn":
-                        try:
-                            pred[te_i] = fit_predict_cnn(XN[tr_i], y[tr_i], XN[te_i], opts.seed, opts.epochs)
-                        except ImportError:
-                            log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
-                            pred[:] = np.nan
-                            break
-                    else:
-                        X = np.hstack([fsets[p] for p in feat.split("+")])
-                        est = make_tabular(model, opts.seed)
-                        est.fit(X[tr_i], y[tr_i])
-                        pred[te_i] = est.predict(X[te_i])
+                seeds = [opts.seed + k for k in range(n_seeds)] if model in CNN_KINDS else [opts.seed]
+                preds, skip = [], False
+                gp_sd = np.full(len(y), np.nan) if model == "gpr" else None
+                cams = None
+                for si, seed in enumerate(seeds):
+                    pred = np.full(len(y), np.nan)
+                    for tr_i, te_i in folds:
+                        if model == "baseline":
+                            pred[te_i] = y[tr_i].mean()
+                        elif model in CNN_KINDS:
+                            Xin, ck = cnn_data(model)
+                            want_cam = study and model == "cnn" and si == 0 and not opts.no_plots
+                            try:
+                                p_, cm = fit_predict_cnn(Xin[tr_i], y[tr_i], Xin[te_i], seed, opts.epochs, kind=ck,
+                                                         cam=want_cam)
+                            except ImportError:
+                                log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
+                                skip = True
+                                break
+                            pred[te_i] = p_
+                            if cm is not None:
+                                if cams is None:
+                                    cams = np.full((len(y),) + cm.shape[1:], np.nan, np.float32)
+                                cams[te_i] = cm
+                        else:
+                            X = np.hstack([fsets[p] for p in feat.split("+")])
+                            est = make_tabular(model, seed)
+                            with warnings.catch_warnings():
+                                warnings.simplefilter("ignore")  # GPR / SVR convergence notes / 収束の注意は出さない
+                                est.fit(X[tr_i], y[tr_i])
+                                if model == "gpr":
+                                    pred[te_i], gp_sd[te_i] = est.predict(X[te_i], return_std=True)
+                                else:
+                                    pred[te_i] = est.predict(X[te_i])
+                    if skip:
+                        break
+                    preds.append(pred)
+                if skip or not preds:
+                    continue
+                pred = np.mean(preds, axis=0)  # several seeds: their average / 複数回なら予測の平均
                 te = np.any([f[1] for f in folds], axis=0)   # the test windows of this evaluation / テストの区間
                 if np.isnan(pred[te]).all():
                     continue
                 yy, pp, tn_, ww = y[te], pred[te], tname[te], win[te]
                 mt = metrics(yy, pp)
+                seed_m = [metrics(yy, p_[te]) for p_ in preds] if len(preds) > 1 else []
+                extra = dict(n_seeds=len(preds), seed_metrics=seed_m,
+                             MAE_sd=float(np.std([m_["MAE"] for m_ in seed_m])) if seed_m else float("nan"),
+                             R2_sd=float(np.std([m_["R2"] for m_ in seed_m])) if seed_m else float("nan"))
                 per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
                                     features=feat, **mt, per_trial=per, seconds=time.time() - t_start,
-                                    pred=pp, y=yy, tname=tn_, win=ww))
+                                    pred=pp, y=yy, tname=tn_, win=ww, **extra))
                 log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
+                if seed_m:
+                    each = ", ".join("%.2f" % m_["R2"] for m_ in seed_m)
+                    log(f"      乱数の種 {len(seed_m)} 回: R² {np.mean([m_['R2'] for m_ in seed_m]):.3f} ± {extra['R2_sd']:.3f}"
+                        f"（{each}）、MAE {np.mean([m_['MAE'] for m_ in seed_m]):.1f}"
+                        f" ± {extra['MAE_sd']:.1f} mg。上の値は {len(seed_m)} 回の予測の平均", out)
+                if gp_sd is not None:
+                    sdv = gp_sd[te]
+                    cover = float(np.mean(np.abs(yy - pp) <= 1.96 * sdv))
+                    log(f"      ガウス過程の予測の幅（±1.96σ、平均 ±{1.96 * np.mean(sdv):.0f} mg）に正解が入った割合 "
+                        f"{cover:.0%}（95 % に近いほど幅が正しい）", out)
+                if cams is not None:
+                    _plot_gradcam(out_dir, f"{_split_tag(sp_label)}{variant}_{window:g}s", XN[te], cams[te], yy,
+                                  trials[0]["v"], window, sp_label, out)
                 for i in range(len(yy)):
                     pred_rows.append([variant, f"{window:g}", sp_label, model, feat, tn_[i], f"{ww[i][0]:.3f}",
                                       f"{ww[i][1]:.3f}", f"{yy[i]:.3f}", f"{pp[i]:.3f}"])
@@ -696,10 +831,21 @@ def B_NAMES_full():
 def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds",
+                    "n_seeds", "MAE_sd(mg)", "R2_sd"])
         for r in results:
+            sd_ = r.get("seed_metrics")
             w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
-                        f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}"])
+                        f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}",
+                        r.get("n_seeds", 1), f"{r['MAE_sd']:.3f}" if sd_ else "", f"{r['R2_sd']:.4f}" if sd_ else ""])
+    if any(r.get("seed_metrics") for r in results):
+        with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["doppler", "window(s)", "split", "model", "seed", "MAE(mg)", "RMSE(mg)", "R2", "r"])
+            for r in results:
+                for k, m_ in enumerate(r.get("seed_metrics") or []):
+                    w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], opts.seed + k,
+                                f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mg)", "RMSE(mg)", "R2", "r"])
@@ -737,6 +883,43 @@ def _setup_plt():
     return plt
 
 
+def _plot_gradcam(out_dir, tag, X, cams, y, v, window, sp_label, out):
+    """Where the CNN looked (Grad-CAM), averaged over the test windows in 3 groups of true ENMO.
+    CNN が見た場所（Grad-CAM）。テストの区間を正解の ENMO で 3 つに分けて平均する"""
+    try:
+        plt = _setup_plt()
+        q = np.quantile(y, [1 / 3, 2 / 3])
+        groups = [("ENMO 低", y <= q[0]), ("ENMO 中", (y > q[0]) & (y <= q[1])), ("ENMO 高", y > q[1])]
+        fig, ax = plt.subplots(3, 3, figsize=(14, 10), gridspec_kw=dict(width_ratios=[1, 1, 0.7]))
+        ext = [0, window, v[0], v[-1]]
+        for i, (name, m) in enumerate(groups):
+            if not m.any():
+                continue
+            img = X[m].mean(axis=(0, 3))   # time x velocity, both antennas / 時間 x 速度（アンテナ 2 本の平均）
+            cam = np.nanmean(cams[m], axis=0)
+            ax[i, 0].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="viridis")
+            ax[i, 0].set_title(f"{name}（{m.sum()} 区間、平均 {y[m].mean():.0f} mg）: 入力のドップラー（log10）",
+                               loc="left", fontsize=9)
+            ax[i, 1].imshow(cam.T, aspect="auto", origin="lower", extent=ext, cmap="inferno", vmin=0)
+            ax[i, 1].set_title("Grad-CAM（明るいほど ENMO を上げる方向に効いた）", loc="left", fontsize=9)
+            ax[i, 2].plot(cam.mean(axis=0), v, color="#B5487A")
+            ax[i, 2].set_title("速度ごとの効き（時間で平均）", loc="left", fontsize=9)
+            for a in ax[i, :2]:
+                a.set_ylabel("速度 [m/s]")
+            ax[i, 2].set_ylim(v[0], v[-1])
+        for a in ax[-1, :2]:
+            a.set_xlabel("区間の中の時刻 [s]")
+        ax[-1, 2].set_xlabel("Grad-CAM（平均）")
+        fig.suptitle(f"CNN が見た場所（{sp_label}）")
+        fig.tight_layout()
+        path = os.path.join(out_dir, f"cnn_gradcam_{tag}.png")
+        fig.savefig(path, dpi=110)
+        plt.close(fig)
+        log(f"      CNN が見た場所の図: {os.path.basename(path)}", out)
+    except Exception as e:  # the figure is optional / 図は失敗しても続ける
+        log(f"      注意: Grad-CAM の図を作れませんでした（{e}）", out)
+
+
 def _split_tag(sp):
     """File-name tag of a split ('' for the usual leave-one-trial-out). / 分け方のファイル名用の印"""
     if sp == "試行ごと":
@@ -748,7 +931,8 @@ def _split_tag(sp):
 def _plots(out_dir, results):
     plt = _setup_plt()
     colors = {"baseline": "#999999", "linear": "#2A6FDB", "rf": "#3A9D5D", "xgboost": "#D9822B",
-              "mlp": "#B5487A", "cnn": "#6A4FB3"}
+              "mlp": "#B5487A", "svr": "#1F9E9E", "gpr": "#8C6D31", "cnn": "#6A4FB3",
+              "cnn_shuffle": "#A895D8", "cnn_timemean": "#C9BEEA", "cnn1d": "#4B3590", "cnn3s": "#8E44AD"}
     # one figure per model: each trial's true vs predicted over time + scatter
     # モデルごと: 試行ごとの正解と予測の時間変化 + 散布図
     for r in results:
@@ -793,17 +977,20 @@ def _plots(out_dir, results):
     for vi, (var, wl, sp) in enumerate(groups):
         rs = [r for r in results if r["variant"] == var and r["window"] == wl and r["split"] == sp]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
-                 "mlp": "MLP", "cnn": "CNN"}
-        labels = [short[r["model"]] + ("" if r["model"] in ("baseline", "cnn") else f"\n特徴量{r['features']}")
+                 "mlp": "MLP", "svr": "SVR", "gpr": "ガウス\n過程", "cnn": "CNN", "cnn_shuffle": "CNN\n時間入替",
+                 "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒"}
+        labels = [short[r["model"]] + ("" if r["model"] in ["baseline"] + CNN_KINDS else f"\n特徴量{r['features']}")
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
         for j, (key, unit) in enumerate((("MAE", " [mg]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
             vals = [r[key] for r in rs]
             ax[vi, j].bar(x, vals, color=cols)
-            for xi, val in zip(x, vals):
-                ax[vi, j].text(xi, val, f"{val:.2f}" if key == "R2" else f"{val:.1f}", ha="center",
-                               va="bottom" if val >= 0 else "top", fontsize=8)
+            for xi, val, r in zip(x, vals, rs):
+                txt = f"{val:.2f}" if key == "R2" else f"{val:.1f}"
+                if r.get("seed_metrics"):  # spread over the seeds / 乱数の種によるばらつき
+                    txt += f"\n±{r['R2_sd']:.2f}" if key == "R2" else f"\n±{r['MAE_sd']:.1f}"
+                ax[vi, j].text(xi, val, txt, ha="center", va="bottom" if val >= 0 else "top", fontsize=8)
             ax[vi, j].set_xticks(x)
             ax[vi, j].set_xticklabels(labels, fontsize=9)
             ax[vi, j].set_ylabel(("R²" if key == "R2" else key) + unit)
@@ -851,6 +1038,11 @@ def main(argv=None):
                          "「1 試行をテスト、残りで学習」。指定しなければ cv")
     ap.add_argument("--blocks", type=int, default=5, help="試行が 1 本のとき、時間を分けるかたまりの数（既定 5）")
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
+    ap.add_argument("--cnn_seeds", type=int, default=1,
+                    help="CNN を乱数の種を変えて何回学習するか（既定 1。例 5 で平均とばらつきを出し、予測は 5 回の平均）")
+    ap.add_argument("--cnn_study", action="store_true",
+                    help="CNN が効く理由を確かめる: 時間の順番を入れ替えた CNN・時間で平均した CNN・1 次元 CNN・"
+                         "前後 1 秒も入れた CNN を足し、CNN が見た場所の図（Grad-CAM）を作る")
     ap.add_argument("--seed", type=int, default=0, help="乱数の種（既定 0）")
     ap.add_argument("--no_plots", action="store_true", help="図を作らない")
     opts = ap.parse_args(argv)
