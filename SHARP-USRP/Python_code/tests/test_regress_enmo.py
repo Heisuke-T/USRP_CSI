@@ -9,6 +9,10 @@
       1. 3 つのドップラーの版・5 モデル + 基準 (平均値) が最後まで動き、表と図ができること
       2. 物理特徴量 B の線形回帰などが、平均値で予測する基準よりはっきり良いこと (R² > 0.5)
       3. 区間が加速度計算ソフトと同じ 0, 1, 2 … 秒の区切りになり、古い形式の meta (time_origin_s なし) でも動くこと
+      4. 特徴量 C (速さの時間微分): 足踏みのテンポが試行ごとに違い、ENMO = 速さ x テンポ (加速度) のとき、
+         線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
+      5. regression_input/A1 と A2 を並べて置いたとき: データセットをまたいで名前で組にしないこと、
+         --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
 
     実行:  python3 tests/test_regress_enmo.py   (CNN は TensorFlow があるときだけ)
@@ -87,6 +91,101 @@ def make_trial(root, k, old_meta=False):
             w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
 
 
+def check_feature_c(tmp):
+    """ENMO proportional to acceleration (speed x cadence), cadence different in each trial.
+    ENMO が加速度 (速さ x テンポ) に比例し、テンポが試行ごとに違うとき、特徴量 C が効くか"""
+    import argparse
+    root = os.path.join(tmp, "in_c")
+    v = (np.arange(N_FFT) - N_FFT // 2) * DV
+    for k, cad in enumerate((0.7, 1.0, 1.3, 1.6, 1.9, 2.2)):
+        name = f"C{k + 1}"
+        rng = np.random.default_rng(50 + k)
+        d = os.path.join(root, name)
+        folder = os.path.join(d, ro.VARIANT_DIRS["nowinnorm"])
+        os.makedirs(folder)
+        t_frames = np.arange(0, 80.5, FRAME_DT)
+        amp = intensity(t_frames, k)                           # how big the steps are / 動きの大きさ
+        swing = np.abs(np.sin(2 * np.pi * cad * t_frames))
+        for ant, gain in (("antenna1", 1.0), ("antenna2", 0.6)):
+            width = 0.15 + 0.6 * amp * swing
+            S = (np.exp(-0.5 * (v[None, :] / width[:, None]) ** 2) * gain + 3.0 * gain * (np.abs(v) < 1e-9)[None, :])
+            S = S * (1 + 0.1 * rng.standard_normal(S.shape)) ** 2 + 1e-3
+            base = os.path.join(folder, f"{name}_{ant}_stream_0")
+            with open(base + ".txt", "wb") as fp:
+                pickle.dump(S, fp)
+            np.save(base + "_time.npy", t_frames)
+            with open(base + "_meta.json", "w") as fp:
+                json.dump(dict(delta_v_bin=DV, n_fft=N_FFT, time_origin_s=0.0), fp)
+        t50 = np.arange(0, 80.0, 0.02)
+        en = 60 * intensity(t50, k) * cad + rng.normal(0, 2.0, len(t50))   # acceleration-like / 加速度に比例
+        with open(os.path.join(d, f"{name}_power_timeseries.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+            for a, b in zip(t50, en):
+                w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
+    res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_c"), doppler="nowinnorm",
+                                             models="linear", features="B,C,B+C", windows=[1.0], blocks=5,
+                                             epochs=5, seed=0, no_plots=True, pairs=None))
+    r2 = {x["features"]: x["R2"] for x in res if x["model"] == "linear"}
+    with open(os.path.join(out_dir, "features_nowinnorm_1s.csv"), encoding="utf-8") as f:
+        head = next(csv.reader(f))
+    good = r2["B+C"] > r2["B"] + 0.1 and r2["C"] > 0.5 and "C_ant1_acc_v95_rms" in head
+    print(f"  {'OK ' if good else 'NG '} 特徴量 C: ENMO が速さ x テンポのとき、線形回帰の R² "
+          f"B {r2['B']:.3f} → B+C {r2['B+C']:.3f}（C だけ {r2['C']:.3f}）、特徴量の表に C の列")
+    return good
+
+
+def check_two_datasets(tmp):
+    """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
+    import argparse
+    src = os.path.join(tmp, "src_two")
+    for k in range(8):
+        make_trial(src, k)
+    root = os.path.join(tmp, "in_two")
+    trials = {"A1": [0, 1, 2, 3], "A2": [4, 5, 6, 7]}
+    for ds, ks in trials.items():
+        for j, k in enumerate(ks):
+            tn, trial = f"T{k + 1}", f"{ds}_XR{j + 1}"
+            tdir = os.path.join(root, ds, "imu", trial)
+            os.makedirs(tdir, exist_ok=True)
+            ts = os.path.join(src, tn, "imu", f"{tn}_power_timeseries.csv")
+            shutil.copy(ts if os.path.exists(ts) else os.path.join(src, tn, f"{tn}_power_timeseries.csv"),
+                        os.path.join(tdir, f"{trial}_power_timeseries.csv"))
+            if trial == "A2_XR3":
+                continue  # no Doppler for A2_XR3: it must not take A1_XR3's / A2_XR3 はドップラーなし（A1_XR3 と組にしない）
+            folder = ro.VARIANT_DIRS["nowinnorm"]
+            os.makedirs(os.path.join(root, ds, folder), exist_ok=True)
+            for f in os.listdir(os.path.join(src, tn, folder)):
+                shutil.copy(os.path.join(src, tn, folder, f),
+                            os.path.join(root, ds, folder, f.replace(f"{tn}_antenna", f"{trial}_antenna")))
+    out_dir = os.path.join(tmp, "out_two")
+    res, _ = ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                       windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False, pairs=None,
+                                       split=["A1:A2", "A1,A2_XR1:A2_XR2", "cv"]))
+    by = {r["split"]: r for r in res if r["model"] == "linear"}
+    s1, s2 = "学習 A1 → テスト A2", "学習 A1+A2_XR1 → テスト A2_XR2"
+    names_all = sorted(set(by["試行ごと"]["tname"]))
+    good = (set(by) == {s1, s2, "試行ごと"}
+            and sorted(set(by[s1]["tname"])) == ["A2_XR1", "A2_XR2", "A2_XR4"]
+            and sorted(set(by[s2]["tname"])) == ["A2_XR2"] and len(by[s2]["y"]) == 80
+            and "A2_XR3" not in names_all and len(names_all) == 7
+            and all(by[k]["R2"] > 0.5 for k in by))
+    files = os.listdir(out_dir)
+    good &= any(f.startswith("pred_train_A1_test_A2_") for f in files)
+    with open(os.path.join(out_dir, "metrics.csv"), encoding="utf-8") as f:
+        good &= next(csv.reader(f))[2] == "split"
+    try:  # a name that does not exist / ない名前
+        ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                  windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True, pairs=None,
+                                  split=["A1:A3"]))
+        good = False
+    except ro.RegError as e:
+        good &= "A3" in str(e)
+    print(f"  {'OK ' if good else 'NG '} A1 と A2 を並べた置き方と --split: 試行 {names_all}（A2_XR3 はドップラーなしで飛ばす）、"
+          + "、".join(f"{k}: R² {v['R2']:.3f}" for k, v in by.items()))
+    return good
+
+
 def dataset_layout(tmp, related_names=True):
     """The layout of a dataset folder (everything of A1 together). / データセットのフォルダにまとめた置き方
         <in>/A1/imu/<trial>/imu/<trial>_power_timeseries.csv
@@ -144,6 +243,8 @@ def main():
             label = "名前で対応" if related else "組み合わせの一覧で対応"
             print(f"  {'OK ' if good else 'NG '} データセットのフォルダの置き方（{label}）: {names}, R² {r['R2']:.3f}")
             ok &= good
+        ok &= check_feature_c(tmp)
+        ok &= check_two_datasets(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,cnn"
@@ -159,7 +260,7 @@ def main():
             '3 つの版 x 2 つの区間 x (基準 + モデル) が全部ある':
                 all((v, w, "baseline", "-") in got for v in ro.VARIANT_DIRS for w in W)
                 and all((v, w, m, f) in got for v in ro.VARIANT_DIRS for w in W
-                        for m in ("linear", "rf", "xgboost", "mlp") for f in ("A", "B")),
+                        for m in ("linear", "rf", "xgboost", "mlp") for f in ("A", "B", "C")),
             '基準 (平均値) の R² は 0 前後以下':
                 all(got[(v, w, "baseline", "-")]["R2"] < 0.1 for v in ro.VARIANT_DIRS for w in W),
             '線形回帰 (特徴量 B, nowinnorm) の R² > 0.5 (1 秒・5 秒)':
@@ -199,7 +300,7 @@ def main():
 
 def ro_args(inp, out_dir, models):
     import argparse
-    return argparse.Namespace(input=inp, out=out_dir, doppler="all", models=models, features="A,B",
+    return argparse.Namespace(input=inp, out=out_dir, doppler="all", models=models, features="A,B,C",
                               windows=[1.0, 5.0], blocks=5, epochs=40, seed=0, no_plots=False)
 
 

@@ -22,6 +22,9 @@ regression_input/
 - 名前が対応しないとき（CSI の名前と IMU の名前が違うとき）は、加速度計算ソフトの一括処理が保存した
   **`batch_pairs_<日時>.csv`**（IMU と CSI の組み合わせ）を入力フォルダのどこかに置くか、`--pairs` で指定すると、それで対応づけます
 - 実行すると、最初に「試行: ○ 本」と組み合わせの一覧がログに出ます。違っていないか確かめてください
+- **データセットを並べて置いてよい**（`regression_input/A1/`、`regression_input/A2/` …）。全部の試行をまとめて読みます。
+  名前で組にするときはデータセットをまたぎません（A2_XR1 の正解データが A1 のドップラーと組になることはない）。
+  各データセットに `batch_pairs_*.csv` があれば全部使います
 
 ## 置き方 2: 試行ごとのフォルダ
 
@@ -63,3 +66,18 @@ python regress_enmo.py --doppler all    # 3 つの版それぞれで比べる
 ```
 
 結果は `outputs/regression_<日時>/`（比較の表 `metrics.csv`・図 `comparison.png`・モデルごとの予測の図 `pred_*.png` など）。
+
+## 学習とテストを選ぶ（--split）
+
+指定しなければ、今まで通り「1 試行をテスト、残りの全試行で学習」を全試行で繰り返します（`cv`）。
+`--split "学習:テスト"` で、学習とテストに使う試行を決められます。データセット名（`A1`）・試行名（`A2_XR1`）・
+`A2_*` のような書き方を、カンマで並べます。何回でも指定でき、1 回の実行でまとめて計算します。
+
+```
+python regress_enmo.py --split A1:A2                         # 学習 A1 → テスト A2
+python regress_enmo.py --split A1,A2_XR1:A2_XR2              # 学習 A1 と A2_XR1 → テスト A2_XR2
+python regress_enmo.py --split A1:A2 --split A1,A2_XR1:A2_XR2 --split cv   # 3 つまとめて
+```
+
+- 結果の表（`metrics.csv` など）には `split` の列が付き、図のファイル名にも分け方が入ります（`pred_train_A1_test_A2_…png`）
+- 学習とテストに同じ試行が入っている・ない名前を書いた、などのときは計算の前にエラーで止まります
