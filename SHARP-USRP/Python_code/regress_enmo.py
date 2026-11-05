@@ -409,6 +409,30 @@ C_NAMES = ["acc_mean_abs", "acc_mean_rms", "acc_mean_p95", "acc_v95_abs", "acc_v
            "spec_change_rate"]
 
 
+D_GRID = (4, 10)   # feature D: coarse map of time x velocity cells / 特徴量 D の粗いマス（時間 x 速度）
+
+
+def temporal_features(S):
+    """Feature set D for one antenna and one window: how the Doppler changes inside the window.
+    (1) the spread over time of each velocity bin's power (log10), (2) the Doppler map shrunk to
+    4 time x 10 velocity cells (mean log10 power).
+    特徴量 D（アンテナ 1 本・1 区間）: 区間の中の時間変化。(1) 速度ビンごとの強さの時間方向のばらつき、
+    (2) ドップラーの図を時間 4 x 速度 10 のマスに縮めたもの"""
+    L = np.log10(np.clip(S, EPS, None))
+    tb = np.array_split(np.arange(L.shape[0]), D_GRID[0])
+    vb = np.array_split(np.arange(L.shape[1]), D_GRID[1])
+    grid = [L[np.ix_(ti, vi)].mean() for ti in tb for vi in vb]
+    return np.concatenate([L.std(axis=0), grid])
+
+
+def shape_spectrum(S):
+    """Feature set E for one antenna and one window: the mean spectrum divided by its total (log10),
+    i.e. only the shape of the speed distribution, not how strong the signal is.
+    特徴量 E（アンテナ 1 本・1 区間）: 平均スペクトルを全体の強さで割ったもの（log10）。分布の形だけ"""
+    m = np.clip(S, 0, None).mean(axis=0)
+    return np.log10(np.clip(m / (m.sum() + EPS), EPS, None))
+
+
 def cnn_input(S, t, a, b):
     """Window's Doppler resampled to a fixed number of frames (log10). / CNN の入力（時間を一定数にそろえる）"""
     n = int(min(320, round(CNN_FRAMES * (b - a))))
@@ -419,7 +443,7 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
+def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -439,7 +463,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, XN, y, kept = [], [], [], [], [], []
+    XA, XB, XC, XD, XE, XN, y, kept = [], [], [], [], [], [], [], []
     need_ctx = sorted(set(need_ctx or ()))
     XNctx = {c: [] for c in need_ctx}
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
@@ -453,7 +477,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
             yv = float(np.mean(tgt["y"][m]))
         else:
             yv = float(tgt["y"][i])
-        fa, fb, fc, fn = [], [], [], []
+        fa, fb, fc, fd, fe, fn = [], [], [], [], [], []
         fctx = {c: [] for c in need_ctx}
         ok = True
         for d, ac in zip(ants, acc):
@@ -467,6 +491,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
             fa.append(np.log10(np.clip(S.mean(axis=0), EPS, None)))
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
             fc.append(accel_features(ac, a, b) if ac is not None else np.full(len(C_NAMES), np.nan))
+            fd.append(temporal_features(S) if need_d else np.zeros(0))   # only when used / 使うときだけ
+            fe.append(shape_spectrum(S) if need_e else np.zeros(0))
             fn.append(cnn_input(d["S"], d["t"], a, b))
             for c in need_ctx:  # the window and c seconds before and after / 区間と前後 c 秒
                 fctx[c].append(cnn_input(d["S"], d["t"], a - c, b + c))
@@ -476,6 +502,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
         XA.append(np.concatenate(fa))
         XB.append(np.concatenate(fb))
         XC.append(np.concatenate(fc))
+        XD.append(np.concatenate(fd))
+        XE.append(np.concatenate(fe))
         XN.append(np.stack(fn, axis=-1).astype(np.float32))
         for c in need_ctx:
             XNctx[c].append(np.stack(fctx[c], axis=-1).astype(np.float32))
@@ -486,7 +514,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
     log(f"  {name}: {len(y)} 区間（{window:g} 秒ごと、CSI の {kept[0][0]:.1f}〜{kept[-1][1]:.1f} s）"
         + (f"、{dropped} 区間はデータ不足で除外" if dropped else "")
         + f"  [{ants[0]['file']}, {ants[1]['file']}, {tgt['file']}]", out)
-    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XN=np.array(XN),
+    return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XD=np.array(XD), XE=np.array(XE),
+                XN=np.array(XN),
                 XNctx={c: np.array(v) for c, v in XNctx.items()}, y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"])
 
@@ -684,9 +713,10 @@ def run(opts):
         models += [m for m in ["cnn"] + STUDY_MODELS if m not in models]
     n_seeds = max(1, int(getattr(opts, "cnn_seeds", 1) or 1))
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
-    badf = [f for f in feats if not f or any(p not in ("A", "B", "C") for p in f.split("+"))]
+    badf = [f for f in feats if not f or any(p not in ("A", "B", "C", "D", "E") for p in f.split("+"))]
     if badf:
-        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C と、その組み合わせ A+C など）")
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E と、その組み合わせ A+D など）")
+    used = {p for f in feats for p in f.split("+")}
     splits = parse_splits(getattr(opts, "split", None))
     for kind, tr_tok, te_tok in splits:  # check the names before the slow part / 時間の掛かる処理の前に名前を確かめる
         if tr_tok:
@@ -698,7 +728,7 @@ def run(opts):
     for variant, window in [(v, w) for v in variants for w in windows]:
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
-            trials = [build_trial(sp, variant, window, out, need_c=any("C" in f for f in feats),
+            trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
                                   need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S]) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
@@ -733,13 +763,15 @@ def run(opts):
                     mark[:, i0:i1] = 1.0
                     cnn_cache[kind] = (np.concatenate([X3, np.broadcast_to(mark, X3.shape[:3] + (1,))], axis=-1), "2d")
             return cnn_cache[kind]
-        fsets = {"A": XA, "B": XB, "C": XC}
+        XD = np.concatenate([tr["XD"] for tr in trials])
+        XE = np.concatenate([tr["XE"] for tr in trials])
+        fsets = {"A": XA, "B": XB, "C": XC, "D": XD, "E": XE}
         y = np.concatenate([tr["y"] for tr in trials])
         tname = np.concatenate([[tr["name"]] * len(tr["y"]) for tr in trials])
         win = np.concatenate([tr["win"] for tr in trials])
         evals = make_evaluations(splits, trials, specs, tname, opts.blocks, out)
         _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, XC, y,
-                       trials[0]["v"])
+                       trials[0]["v"], XD, XE)
         configs = [("baseline", "-")]
         for m in models:
             if m in CNN_KINDS:
@@ -834,17 +866,28 @@ def run(opts):
     return results, out_dir
 
 
-def _dump_features(path, tname, win, XA, XB, XC, y, v):
+def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
         has_c = bool(np.isfinite(XC).any())  # feature C only when it was computed / C は計算したときだけ
+        has_d = XD is not None and XD.ndim == 2 and XD.shape[1] > 0
+        has_e = XE is not None and XE.ndim == 2 and XE.shape[1] > 0
+        vb = np.array_split(np.arange(len(v)), D_GRID[1])
+        d_names = []
+        if has_d:  # per antenna, as built: std (100) then grid (40) / 作った順: ばらつき 100 個、マス 40 個
+            for a in (1, 2):
+                d_names += [f"D_ant{a}_std_v{x:+.3f}" for x in v]
+                d_names += [f"D_ant{a}_grid_t{i + 1}_v{v[b_[0]]:+.1f}to{v[b_[-1]]:+.1f}"
+                            for i in range(D_GRID[0]) for b_ in vb]
         w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
                    + ([f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES] if has_c else [])
+                   + d_names + ([f"E_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v] if has_e else [])
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
         for i in range(len(y)):
             w.writerow([tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}", f"{y[i]:.3f}"]
                        + [f"{x:.6g}" for x in XB[i]] + ([f"{x:.6g}" for x in XC[i]] if has_c else [])
+                       + ([f"{x:.6g}" for x in XD[i]] if has_d else []) + ([f"{x:.6g}" for x in XE[i]] if has_e else [])
                        + [f"{x:.6g}" for x in XA[i]])
 
 
@@ -1083,7 +1126,8 @@ def main(argv=None):
     ap.add_argument("--models", default=",".join(ALL_MODELS),
                     help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）など）")
     ap.add_argument("--features", default="A,B",
-                    help="CNN 以外のモデルの特徴量（A, B。既定 A,B。速さの時間微分の C と組み合わせ A+C なども指定できる）")
+                    help="CNN 以外のモデルの特徴量（既定 A,B。ほかに C: 速さの時間微分、D: 1 秒の中の時間変化、"
+                         "E: 強さをそろえたスペクトル。組み合わせは A+B、A+D など）")
     ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")
     ap.add_argument("--split", action="append", default=None,
                     help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"

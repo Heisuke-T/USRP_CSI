@@ -13,6 +13,8 @@
          線形回帰で B に C を足すと はっきり良くなること (速さだけでは当たらない分を C が拾う)
       6. CNN の確認 (--cnn_study, --cnn_seeds): 理由を確かめる CNN 4 種・乱数の種ごとの結果・Grad-CAM の図ができること
       7. SVR とガウス過程回帰 (特徴量 B) も基準よりはっきり良いこと
+      8. 特徴量 D・E: どちらも動き、試行ごとに受信の強さが違うとき E (強さをそろえたスペクトル) が A より良いこと
+         (ランダムフォレストで比べる。線形回帰は強さの違いを係数で打ち消せるので差が出にくい)
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -167,6 +169,53 @@ def check_cnn_study(tmp):
     return good
 
 
+def check_feature_de(tmp):
+    """D and E run; with a different receive gain in each trial, E (shape only) beats A (absolute level).
+    D・E が動くこと。試行ごとに受信の強さ（ゲイン）が違うとき、形だけの E が強さそのものの A より良いこと"""
+    import argparse
+    root = os.path.join(tmp, "in_de")
+    v = (np.arange(N_FFT) - N_FFT // 2) * DV
+    for k, gain in enumerate((0.3, 1.0, 3.0, 0.5, 2.0, 1.5)):
+        name = f"G{k + 1}"
+        rng = np.random.default_rng(70 + k)
+        folder = os.path.join(root, name, ro.VARIANT_DIRS["nowinnorm"])
+        os.makedirs(folder)
+        t_frames = np.arange(0, 80.5, FRAME_DT)
+        s_ = intensity(t_frames, k)
+        swing = np.abs(np.sin(2 * np.pi * 0.9 * t_frames))
+        for ant, g2 in (("antenna1", 1.0), ("antenna2", 0.6)):
+            width = 0.15 + 0.6 * s_ * swing
+            S = (np.exp(-0.5 * (v[None, :] / width[:, None]) ** 2) * s_[:, None] + 3.0 * (np.abs(v) < 1e-9)[None, :])
+            S = gain * g2 * S * (1 + 0.1 * rng.standard_normal(S.shape)) ** 2 + 1e-4
+            base = os.path.join(folder, f"{name}_{ant}_stream_0")
+            with open(base + ".txt", "wb") as fp:
+                pickle.dump(S, fp)
+            np.save(base + "_time.npy", t_frames)
+            with open(base + "_meta.json", "w") as fp:
+                json.dump(dict(delta_v_bin=DV, n_fft=N_FFT, time_origin_s=0.0), fp)
+        t50 = np.arange(0, 80.0, 0.02)
+        en = 60 * intensity(t50, k) + rng.normal(0, 2.0, len(t50))
+        with open(os.path.join(root, name, f"{name}_power_timeseries.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+            for a, b in zip(t50, en):
+                w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
+    res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_de"), doppler="nowinnorm",
+                                             models="rf", features="A,D,E,A+D", windows=[1.0], blocks=5,
+                                             epochs=5, seed=0, no_plots=True, pairs=None))
+    r2 = {x["features"]: x["R2"] for x in res if x["model"] == "rf"}
+    mae = {x["features"]: x["MAE"] for x in res if x["model"] == "rf"}
+    with open(os.path.join(out_dir, "features_nowinnorm_1s.csv"), encoding="utf-8") as f:
+        head = next(csv.reader(f))
+    nd = sum(h.startswith("D_") for h in head)
+    ne = sum(h.startswith("E_") for h in head)
+    good = mae["E"] < 0.6 * mae["A"] and r2["E"] > r2["A"] and "A+D" in r2 and nd == 280 and ne == 200
+    print(f"  {'OK ' if good else 'NG '} 特徴量 D・E: 試行ごとに受信の強さが違うとき、ランダムフォレストの R² "
+          f"A {r2['A']:.3f}（MAE {mae['A']:.1f}）→ E {r2['E']:.3f}（MAE {mae['E']:.1f}）、D {r2['D']:.3f}、A+D {r2['A+D']:.3f}、"
+          f"表の列 D {nd} 個・E {ne} 個")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -286,6 +335,7 @@ def main():
             ok &= good
         ok &= check_feature_c(tmp)
         ok &= check_two_datasets(tmp)
+        ok &= check_feature_de(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
