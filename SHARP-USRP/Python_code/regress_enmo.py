@@ -66,13 +66,15 @@ VARIANT_DIRS = {"normalized": "doppler_traces", "nowinnorm": "doppler_traces_now
 MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレスト", "xgboost": "XGBoost",
                "mlp": "MLP", "svr": "SVR", "gpr": "ガウス過程回帰", "cnn": "CNN",
                "cnn_shuffle": "CNN（時間の順番を入れ替え）", "cnn_timemean": "CNN（時間で平均）",
-               "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）"}
+               "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）", "cnn5s": "CNN（前後 2 秒も入力）"}
 ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "svr", "gpr", "cnn"]
 # extra CNNs for checking why the CNN works (--cnn_study) / CNN が効く理由を確かめるための CNN
 STUDY_MODELS = ["cnn_shuffle", "cnn_timemean", "cnn1d", "cnn3s"]
-CNN_KINDS = ["cnn"] + STUDY_MODELS
+EXTRA_MODELS = ["cnn5s"]   # only when named in --models (heavy) / --models で指定したときだけ（重い）
+CNN_KINDS = ["cnn"] + STUDY_MODELS + EXTRA_MODELS
+CONTEXT_S = {"cnn3s": 1.0, "cnn5s": 2.0}   # seconds of Doppler before and after the window / 区間の前後に足す秒数
 CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
-            "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒"}
+            "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒"}
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
 TARGET = "ENMO(mg)"      # target column in the work-rate software's output / 正解の列
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
@@ -401,7 +403,7 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
+def build_trial(spec, variant, window, out, need_c=True, need_ctx=()):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -421,7 +423,9 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, XN, XN3, y, kept = [], [], [], [], [], [], []
+    XA, XB, XC, XN, y, kept = [], [], [], [], [], []
+    need_ctx = sorted(set(need_ctx or ()))
+    XNctx = {c: [] for c in need_ctx}
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
     dropped = 0
     for i, (a, b) in enumerate(wins):
@@ -433,7 +437,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
             yv = float(np.mean(tgt["y"][m]))
         else:
             yv = float(tgt["y"][i])
-        fa, fb, fc, fn, fn3 = [], [], [], [], []
+        fa, fb, fc, fn = [], [], [], []
+        fctx = {c: [] for c in need_ctx}
         ok = True
         for d, ac in zip(ants, acc):
             sel = (d["t"] >= a) & (d["t"] < b)
@@ -447,8 +452,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
             fb.append(physics_features(S, d["v"], d["t"][sel], d["t"][ctx], d["S"][ctx]))
             fc.append(accel_features(ac, a, b) if ac is not None else np.full(len(C_NAMES), np.nan))
             fn.append(cnn_input(d["S"], d["t"], a, b))
-            if need_ctx:  # the window and 1 s before and after / 区間と前後 1 秒
-                fn3.append(cnn_input(d["S"], d["t"], a - 1.0, b + 1.0))
+            for c in need_ctx:  # the window and c seconds before and after / 区間と前後 c 秒
+                fctx[c].append(cnn_input(d["S"], d["t"], a - c, b + c))
         if not ok:
             dropped += 1
             continue
@@ -456,8 +461,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
         XB.append(np.concatenate(fb))
         XC.append(np.concatenate(fc))
         XN.append(np.stack(fn, axis=-1).astype(np.float32))
-        if need_ctx:
-            XN3.append(np.stack(fn3, axis=-1).astype(np.float32))
+        for c in need_ctx:
+            XNctx[c].append(np.stack(fctx[c], axis=-1).astype(np.float32))
         y.append(yv)
         kept.append((a, b))
     if not y:
@@ -466,7 +471,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=False):
         + (f"、{dropped} 区間はデータ不足で除外" if dropped else "")
         + f"  [{ants[0]['file']}, {ants[1]['file']}, {tgt['file']}]", out)
     return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XN=np.array(XN),
-                XN3=np.array(XN3) if need_ctx else None, y=np.array(y),
+                XNctx={c: np.array(v) for c, v in XNctx.items()}, y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"])
 
 
@@ -655,9 +660,9 @@ def run(opts):
     specs = discover(opts.input, out, getattr(opts, "pairs", None))
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
-    bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS]
+    bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS]
     if bad:
-        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS + STUDY_MODELS)}）")
+        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS + STUDY_MODELS + EXTRA_MODELS)}）")
     study = bool(getattr(opts, "cnn_study", False))
     if study:  # the CNN and its check variants / CNN と、理由を確かめるための CNN
         models += [m for m in ["cnn"] + STUDY_MODELS if m not in models]
@@ -678,7 +683,7 @@ def run(opts):
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
             trials = [build_trial(sp, variant, window, out, need_c=any("C" in f for f in feats),
-                                  need_ctx="cnn3s" in models) for sp in specs]
+                                  need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S]) for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -702,11 +707,14 @@ def run(opts):
                     cnn_cache[kind] = (np.repeat(XN.mean(axis=1, keepdims=True), XN.shape[1], axis=1), "2d")
                 elif kind == "cnn1d":  # time x (velocity bins x antennas) / 時間 x (速度 x アンテナ)
                     cnn_cache[kind] = (XN.reshape(len(XN), XN.shape[1], -1), "1d")
-                elif kind == "cnn3s":  # 3 s around the window + a channel marking the window / 前後 1 秒 + 区間の印
-                    X3 = np.concatenate([tr["XN3"] for tr in trials])
+                elif kind in CONTEXT_S:  # window +- c s, and a channel marking the window / 区間と前後 c 秒 + 区間の印
+                    c = CONTEXT_S[kind]
+                    X3 = np.concatenate([tr["XNctx"][c] for tr in trials])
                     nf = X3.shape[1]
+                    i0 = int(round(nf * c / (window + 2 * c)))
+                    i1 = int(round(nf * (c + window) / (window + 2 * c)))
                     mark = np.zeros((1, nf, X3.shape[2], 1), np.float32)
-                    mark[:, nf // 3: nf - nf // 3] = 1.0
+                    mark[:, i0:i1] = 1.0
                     cnn_cache[kind] = (np.concatenate([X3, np.broadcast_to(mark, X3.shape[:3] + (1,))], axis=-1), "2d")
             return cnn_cache[kind]
         fsets = {"A": XA, "B": XB, "C": XC}
@@ -916,6 +924,30 @@ def _plot_gradcam(out_dir, tag, X, cams, y, v, window, sp_label, out):
         fig.savefig(path, dpi=110)
         plt.close(fig)
         log(f"      CNN が見た場所の図: {os.path.basename(path)}", out)
+        # one real window per group (not averaged), the one closest to the group's median ENMO
+        # 平均しない 1 区間ずつの例（グループの中央値に一番近い区間）
+        fig, ax = plt.subplots(3, 2, figsize=(12, 10))
+        for i, (name, m) in enumerate(groups):
+            if not m.any():
+                continue
+            idx = np.where(m)[0]
+            k = idx[np.argmin(np.abs(y[idx] - np.median(y[idx])))]
+            img = X[k].mean(axis=-1)
+            ax[i, 0].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="viridis")
+            ax[i, 0].set_title(f"{name}: 1 区間の実際のドップラー（log10、正解 ENMO {y[k]:.0f} mg）", loc="left", fontsize=9)
+            ax[i, 1].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="gray")
+            ax[i, 1].imshow(cams[k].T, aspect="auto", origin="lower", extent=ext, cmap="inferno", alpha=0.55, vmin=0)
+            ax[i, 1].set_title("同じ区間の Grad-CAM（重ねて表示）", loc="left", fontsize=9)
+            for a in ax[i]:
+                a.set_ylabel("速度 [m/s]")
+        for a in ax[-1]:
+            a.set_xlabel("区間の中の時刻 [s]")
+        fig.suptitle(f"1 区間ずつの例（{sp_label}）")
+        fig.tight_layout()
+        path = os.path.join(out_dir, f"cnn_gradcam_examples_{tag}.png")
+        fig.savefig(path, dpi=110)
+        plt.close(fig)
+        log(f"      1 区間ずつの例: {os.path.basename(path)}", out)
     except Exception as e:  # the figure is optional / 図は失敗しても続ける
         log(f"      注意: Grad-CAM の図を作れませんでした（{e}）", out)
 
@@ -932,7 +964,8 @@ def _plots(out_dir, results):
     plt = _setup_plt()
     colors = {"baseline": "#999999", "linear": "#2A6FDB", "rf": "#3A9D5D", "xgboost": "#D9822B",
               "mlp": "#B5487A", "svr": "#1F9E9E", "gpr": "#8C6D31", "cnn": "#6A4FB3",
-              "cnn_shuffle": "#A895D8", "cnn_timemean": "#C9BEEA", "cnn1d": "#4B3590", "cnn3s": "#8E44AD"}
+              "cnn_shuffle": "#A895D8", "cnn_timemean": "#C9BEEA", "cnn1d": "#4B3590", "cnn3s": "#8E44AD",
+              "cnn5s": "#5B2C83"}
     # one figure per model: each trial's true vs predicted over time + scatter
     # モデルごと: 試行ごとの正解と予測の時間変化 + 散布図
     for r in results:
@@ -978,7 +1011,8 @@ def _plots(out_dir, results):
         rs = [r for r in results if r["variant"] == var and r["window"] == wl and r["split"] == sp]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
                  "mlp": "MLP", "svr": "SVR", "gpr": "ガウス\n過程", "cnn": "CNN", "cnn_shuffle": "CNN\n時間入替",
-                 "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒"}
+                 "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒",
+                 "cnn5s": "CNN\n前後2秒"}
         labels = [short[r["model"]] + ("" if r["model"] in ["baseline"] + CNN_KINDS else f"\n特徴量{r['features']}")
                   for r in rs]
         x = np.arange(len(rs))
@@ -1028,7 +1062,8 @@ def main(argv=None):
                          "ドップラーと正解データの名前が対応しないときに使う（入力フォルダの中にあれば自動で使う）")
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
-    ap.add_argument("--models", default=",".join(ALL_MODELS), help=f"使うモデル（既定 {','.join(ALL_MODELS)}）")
+    ap.add_argument("--models", default=",".join(ALL_MODELS),
+                    help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）など）")
     ap.add_argument("--features", default="A,B",
                     help="CNN 以外のモデルの特徴量（A, B。既定 A,B。速さの時間微分の C と組み合わせ A+C なども指定できる）")
     ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")

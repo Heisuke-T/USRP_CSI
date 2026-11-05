@@ -153,9 +153,15 @@ def check_cnn_study(tmp):
                                        split=["T1,T2,T3:T4"], cnn_study=True, cnn_seeds=2))
     got = {r["model"]: r for r in res}
     files = os.listdir(out_dir)
-    good = (all(m in got for m in ro.CNN_KINDS) and all(got[m]["n_seeds"] == 2 and len(got[m]["seed_metrics"]) == 2
-                                                         for m in ro.CNN_KINDS)
-            and "cnn_seeds.csv" in files and any(f.startswith("cnn_gradcam_") for f in files))
+    study = ["cnn"] + ro.STUDY_MODELS
+    good = (all(m in got for m in study) and all(got[m]["n_seeds"] == 2 and len(got[m]["seed_metrics"]) == 2
+                                                 for m in study)
+            and "cnn_seeds.csv" in files and any(f.startswith("cnn_gradcam_examples_") for f in files))
+    # the 5 s input (2 s before and after) / 前後 2 秒の入力
+    res5, _ = ro.run(argparse.Namespace(input=inp, out=out_dir + "_5s", doppler="nowinnorm", models="cnn5s",
+                                        features="B", windows=[1.0], blocks=5, epochs=2, seed=0, no_plots=True,
+                                        pairs=None, split=["T1,T2,T3:T4"], cnn_study=False, cnn_seeds=1))
+    good &= any(r["model"] == "cnn5s" for r in res5)
     print(f"  {'OK ' if good else 'NG '} CNN の確認: {', '.join(sorted(got))}、乱数の種 2 回、Grad-CAM の図 "
           f"{[f for f in files if f.startswith('cnn_gradcam_')]}")
     return good

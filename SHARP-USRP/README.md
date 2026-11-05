@@ -560,7 +560,11 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   `cnn_seeds.csv`) を出す (予測は 5 回の平均)。`--cnn_study` で、CNN が効く理由を確かめる CNN を足す:
   時間の順番を入れ替えた CNN・時間で平均した CNN (どちらも下がれば、1 秒の中の時間変化を使っている)、
   時間方向だけの 1 次元 CNN、前後 1 秒も入れた CNN (時間の文脈が効くか)。あわせて CNN が時間 x 速度のどこを
-  見たかの図 (Grad-CAM、`cnn_gradcam_*.png`、ENMO の低・中・高ごと) を作る。
+  見たかの図 (Grad-CAM、`cnn_gradcam_*.png`、ENMO の低・中・高ごとの平均と、平均しない 1 区間ずつの例
+  `cnn_gradcam_examples_*.png`) を作る。Grad-CAM は、学習した CNN に実データの区間を入れたとき、入力の図の
+  どこが予測の ENMO を上げる方向に効いたかを色で示す (最後の畳み込み層の勾配から計算)。
+- **前後の時間も入れた CNN**: `--models cnn3s` (前後 1 秒、3 秒分の入力)、`--models cnn5s` (前後 2 秒、5 秒分の入力)。
+  区間がどこかを示す印のチャネルを足して、真ん中の 1 秒の ENMO を推定する。cnn5s は入力が大きく、メモリと時間が掛かる
   例 `python regress_enmo.py --split A1:A2 --models cnn --cnn_study --cnn_seeds 5`
 - 学習とテストは `--split "学習:テスト"` で選べる (例 `--split A1:A2`、`--split A1,A2_XR1:A2_XR2`。データセット名・試行名・
   `A2_*`。何回でも指定できる)。指定しなければ「1 試行をテスト、残りで学習」(`cv`)。`regression_input/A1/`・`A2/` のように

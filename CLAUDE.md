@@ -49,7 +49,7 @@ B: 物理特徴量。C: 速さの時間微分は実データで効かなかっ�
 `regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない)、
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。
 `--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
-(時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)
+(時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)。前後 2 秒の CNN は `--models cnn5s`
 
 結果の受け渡し: ユーザーはワークステーションで回したあと `python share_results.py` を実行する。
 結果の軽いファイル (log.txt・metrics*.csv・predictions.csv・comparison.png・cnn_gradcam_*.png など) が
