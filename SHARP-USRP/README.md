@@ -586,6 +586,12 @@ python regress_enmo.py --models linear,rf     # 一部のモデルだけ
 (試行ごとの正解と予測の時間変化と散布図)、`features_<版>_<区間>.csv` (作った特徴量)。
 必要なパッケージ: `pip install scikit-learn xgboost tensorflow`。検証は `tests/test_regress_enmo.py`。
 
+結果を Claude に見せるときは、回したあとに `python share_results.py` を実行する。いちばん新しい
+`outputs/regression_*` の軽いファイル (log.txt・metrics.csv・metrics_by_trial.csv・cnn_seeds.csv・predictions.csv・
+comparison.png・cnn_gradcam_*.png) を `shared_results/<フォルダ名>/` にコピーし、`shared_results/` だけをコミットして
+今のブランチにプッシュする (ほかの作業中の変更は巻き込まない)。`--features` で特徴量の表、`--pred_png` で予測の図も入れる。
+フォルダを指定するときは `python share_results.py outputs/regression_20261105_203539`。
+
 ### 受信レートの低下を模擬する (packet_loss.py)
 
 実環境では他の通信・干渉・混雑などで CSI を受信できないパケットが出る。

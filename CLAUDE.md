@@ -51,6 +51,11 @@ B: 物理特徴量。C: 速さの時間微分は実データで効かなかっ�
 `--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
 (時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)
 
+結果の受け渡し: ユーザーはワークステーションで回したあと `python share_results.py` を実行する。
+結果の軽いファイル (log.txt・metrics*.csv・predictions.csv・comparison.png・cnn_gradcam_*.png など) が
+`SHARP-USRP/Python_code/shared_results/<結果のフォルダ名>/` に入ってこのブランチにプッシュされるので、
+「○○を見て」と言われたら `git pull` してそこを読む
+
 ## テスト
 
 ```powershell
@@ -68,4 +73,4 @@ python tests/test_regress_enmo.py      # ドップラー → ENMO の回帰 (合
 - ブランチは `claude/usrp-wifi-iq-capture-ur0hq1` の 1 本だけを使う (ユーザーの希望)。
   新しいブランチを作らない
 - 測定データ・中間生成物・モデル・結果 (`.mat`, `doppler_traces*/`, `*.keras`, `outputs/`)
-  はコミットしない (`.gitignore` 済み)
+  はコミットしない (`.gitignore` 済み)。例外は `share_results.py` が入れる `shared_results/` だけ

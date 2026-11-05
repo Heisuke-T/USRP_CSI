@@ -17,6 +17,8 @@ Python_code/outputs/
 # 図とログ
 Python_code/**/*.png
 Python_code/*.log
+# share_results.py で共有する結果 (軽いファイルだけ) はコミットする
+!Python_code/shared_results/**
 
 __pycache__/
 *.pyc
