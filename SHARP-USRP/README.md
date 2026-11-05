@@ -542,7 +542,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 
 ドップラーから、加速度計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
 (max(合成加速度 − 1 g, 0) [mg]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
-区間は 1 秒と 5 秒 (`--windows` で変更)。
+推定は 1 秒ごと (`--windows` で変更できる)。
 
 | モデル | 入力 |
 |---|---|
@@ -567,9 +567,9 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 入力は `regression_input/` に置く。データセットごとにまとめる置き方 (`A1/imu/<試行名>/`・`A1/doppler_traces_nowinnorm/`、名前か一括処理の `batch_pairs_*.csv` で対応づける) と、試行ごとのフォルダの置き方のどちらでもよい (詳しくは `regression_input/README.md`)。最初に、見つけた試行と組み合わせの一覧をログに出す。
 
 ```powershell
-python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒と 5 秒
+python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒ごと
 python regress_enmo.py --doppler all          # 3 つの版それぞれで
-python regress_enmo.py --windows 5            # 5 秒の区間だけ
+python regress_enmo.py --windows 1,5          # 1 秒と 5 秒の区間で比べる (ふつうは不要)
 python regress_enmo.py --models linear,rf     # 一部のモデルだけ
 ```
 

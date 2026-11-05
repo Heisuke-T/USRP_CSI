@@ -61,7 +61,7 @@ regression_input/
 
 ```
 cd SHARP-USRP/Python_code
-python regress_enmo.py                  # nowinnorm 版で 5 モデル、1 秒と 5 秒の区間
+python regress_enmo.py                  # nowinnorm 版で 5 モデル、1 秒ごと
 python regress_enmo.py --doppler all    # 3 つの版それぞれで比べる
 ```
 
