@@ -252,6 +252,17 @@ def discover(root, out, pairs_csv=None):
         log(f"  注意: ドップラーが見つからない正解データ: {tn}（飛ばします）", out)
     for gk in sorted(set(groups) - used_g):
         log(f"  注意: 正解データが見つからないドップラー: {groups[gk]['key']}（飛ばします）", out)
+    # datasets that have ground truth but no Doppler at all: say what is there / 正解だけでドップラーがないデータセット
+    for ds in sorted({truths[tn]["ds"] for tn in set(truths) - used_t} - ds_with_doppler - {""}):
+        base = os.path.join(root, ds)
+        dirs = sorted({os.path.relpath(d, base) for d in glob.glob(os.path.join(base, "**", "*"), recursive=True)
+                       if os.path.isdir(d) and "doppler" in os.path.basename(d).lower()})
+        txts = sorted(glob.glob(os.path.join(base, "**", "*.txt"), recursive=True))
+        no_ant = [os.path.basename(t_) for t_ in txts if not _antenna(os.path.basename(t_))]
+        log(f"  注意: {ds} にドップラーが見つかりません。ドップラーは {ds}/{VARIANT_DIRS['nowinnorm']}/ などのフォルダに、"
+            f"名前に antenna1 / antenna2 が入った .txt（_time.npy・_meta.json も）で置いてください", out)
+        log(f"        {ds} の中の doppler の付くフォルダ: {', '.join(dirs) or 'なし'}／.txt: {len(txts)} 個"
+            + (f"（antenna の入っていない名前: {', '.join(no_ant[:4])}{' …' if len(no_ant) > 4 else ''}）" if no_ant else ""), out)
     if not specs:
         raise RegError(f"{root} に、正解データとドップラーの組が見つかりません (README.md の置き方を参照)")
     return specs
