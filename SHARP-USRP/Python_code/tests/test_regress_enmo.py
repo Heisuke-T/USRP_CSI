@@ -241,6 +241,41 @@ def check_importance_context(tmp):
     return good
 
 
+def check_target_body(tmp):
+    """--target body: the whole-body ENMO column (ENMO_body(mg)) is the ground truth; trials without it are left out.
+    --target body: 全身の ENMO の列を正解にする。列がない試行（センサが 4 台そろっていない）は使わない"""
+    import argparse
+    inp = os.path.join(tmp, "in_body")
+    for k in range(4):
+        make_trial(inp, k)
+    for k in range(3):   # T4 keeps the waist column only / T4 は腰の列だけ
+        name = f"T{k + 1}"
+        path = os.path.join(inp, name, "imu" if k == 3 else "", f"{name}_power_timeseries.csv")
+        with open(path, encoding="utf-8") as f:
+            rows = list(csv.reader(f))
+        rng = np.random.default_rng(300 + k)
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(rows[0] + ["ENMO_body(mg)"])
+            for r in rows[1:]:
+                w.writerow(r + [f"{300 * intensity(float(r[0]), k) + rng.normal(0, 8.0):.3f}"])
+    out_dir = os.path.join(tmp, "out_body")
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                       windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True, pairs=None,
+                                       target="body"))
+    r = [x for x in res if x["model"] == "linear"][0]
+    names = sorted(str(n) for n in set(r["tname"]))
+    with open(os.path.join(out_dir, "metrics.csv"), encoding="utf-8") as f:
+        tg = {row["target"] for row in csv.DictReader(f)}
+    with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+        logtxt = f.read()
+    good = (names == ["T1", "T2", "T3"] and r["R2"] > 0.5 and r["y"].mean() > 150 and tg == {"body"}
+            and "全身の ENMO がない試行は使いません" in logtxt and "T4" in logtxt)
+    print(f"  {'OK ' if good else 'NG '} 正解を全身の ENMO に（--target body）: 試行 {names}（T4 は列がないので除外）、"
+          f"正解の平均 {r['y'].mean():.0f} mg、R² {r['R2']:.3f}")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -362,6 +397,7 @@ def main():
         ok &= check_two_datasets(tmp)
         ok &= check_feature_de(tmp)
         ok &= check_importance_context(tmp)
+        ok &= check_target_body(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):

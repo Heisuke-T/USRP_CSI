@@ -47,7 +47,8 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
 B: 物理特徴量。C: 速さの時間微分は実データで効かなかったので既定では使わない。D: 1 秒の中の時間変化、
 E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で前後 1 区間の特徴量も並べる。
 `--importance` で決定木の特徴量の重要度) から
-腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒ごと) を推定して比べる。入力は
+腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒ごと) を推定して比べる。`--target body` で
+全身の ENMO (腰・大腿・下腿・手首の 4 台の ENMO の合計、列 `ENMO_body(mg)`。4 台そろった試行だけ) を正解にする。入力は
 `regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない。
 `regression_input/その他/` はユーザーの希望で読まない: `--exclude` の既定)、
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。

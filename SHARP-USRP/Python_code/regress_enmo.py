@@ -1,8 +1,11 @@
 """
     ドップラーから腰の加速度の指標 (ENMO) を推定する回帰モデルを作り、比べる。
 
-    正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す腰の ENMO
-          (max(合成加速度 - 1 g, 0) [mg]) の 1 秒ごとの平均 (--windows で変更できる)
+    正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す ENMO
+          (max(合成加速度 - 1 g, 0) [mg]) の 1 秒ごとの平均。--target で選ぶ:
+            waist (既定) = 腰の ENMO (列 ENMO(mg))
+            body         = 全身の ENMO (腰・大腿・下腿・手首の 4 台の ENMO の合計、列 ENMO_body(mg)。
+                           4 台そろった試行だけ。列がない試行は使わない)
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
     モデル (5 種類):
@@ -40,6 +43,7 @@
       python regress_enmo.py --doppler all          # 3 つの版それぞれで比べる
       python regress_enmo.py --windows 1            # 1 秒の区間だけ
       python regress_enmo.py --models linear,rf     # 一部のモデルだけ
+      python regress_enmo.py --target body          # 全身の ENMO を正解にする
 
     Copyright (C) 2026 Heisuke Takeda
     Released under the GNU GPL v3 (see LICENSE).
@@ -76,7 +80,10 @@ CONTEXT_S = {"cnn3s": 1.0, "cnn5s": 2.0}   # seconds of Doppler before and after
 CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
             "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒"}
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
-TARGET = "ENMO(mg)"      # target column in the work-rate software's output / 正解の列
+TARGET = "ENMO(mg)"      # target column in the calculator's output (waist) / 正解の列（腰）
+# --target: which ENMO of the acceleration calculator is the ground truth / どの ENMO を正解にするか
+TARGETS = {"waist": "ENMO(mg)", "body": "ENMO_body(mg)"}
+TARGET_JA = {"waist": "腰の ENMO", "body": "全身の ENMO（腰・大腿・下腿・手首の合計）"}
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
 ACC_FC = 6.0             # feature C: low-pass before differentiating [Hz] / 特徴量 C: 微分の前の平滑化
 EPS = 1e-12
@@ -130,7 +137,24 @@ def load_doppler(txt, out):
     return dict(S=arr, t=t, v=v, meta=meta, file=os.path.basename(txt))
 
 
-def load_target(spec, window):
+def _target_file(spec, window):
+    if spec.get("ts"):
+        return spec["ts"], "timeseries"
+    if spec.get("win", {}).get(window):
+        return spec["win"][window], "windows"
+    return None, None
+
+
+def has_target(spec, window, column):
+    """True if the trial's ground-truth file has this ENMO column. / 正解のファイルにこの ENMO の列があるか"""
+    path, _ = _target_file(spec, window)
+    if not path:
+        return True   # reported later by load_target / 後で load_target が知らせる
+    with open(path, encoding="utf-8") as f:
+        return column in next(csv.reader(f), [])
+
+
+def load_target(spec, window, column=TARGET):
     """ENMO per sample (t_csi, value), or per window. / ENMO（各時刻、または区間ごと）"""
     if spec.get("ts"):
         path, kind = spec["ts"], "timeseries"
@@ -140,16 +164,19 @@ def load_target(spec, window):
         raise RegError(f"{spec['name']}: *_power_timeseries.csv (または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    if not rows or TARGET not in rows[0]:
-        raise RegError(f"{os.path.basename(path)} に ENMO の列 ({TARGET}) がありません。"
+    if rows and column != TARGET and column not in rows[0]:
+        raise RegError(f"{os.path.basename(path)} に全身の ENMO の列 ({column}) がありません。センサが 4 台そろっていない"
+                       "試行か、加速度計算ソフトが古いです（v2.0 で計算し直してください）")
+    if not rows or column not in rows[0]:
+        raise RegError(f"{os.path.basename(path)} に ENMO の列 ({column}) がありません。"
                        "加速度計算ソフトを最新にして計算し直してください")
     if kind == "timeseries":
         t = np.array([float(r["t_csi(s)"]) for r in rows])
-        y = np.array([float(r[TARGET]) for r in rows])
+        y = np.array([float(r[column]) for r in rows])
         return dict(kind=kind, t=t, y=y, file=os.path.basename(path))
     a = np.array([float(r["start_csi(s)"]) for r in rows])
     b = np.array([float(r["end_csi(s)"]) for r in rows])
-    y = np.array([float(r[TARGET]) for r in rows])
+    y = np.array([float(r[column]) for r in rows])
     return dict(kind=kind, a=a, b=b, y=y, file=os.path.basename(path))
 
 
@@ -443,7 +470,7 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False):
+def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -452,7 +479,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
     ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
     acc = [accel_traces(d) if need_c else None for d in ants]  # feature C only when used / C は使うときだけ
-    tgt = load_target(spec, window)
+    tgt = load_target(spec, window, column)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
@@ -703,6 +730,21 @@ def run(opts):
     if not os.path.isdir(opts.input):
         raise RegError(f"入力フォルダがありません: {opts.input}")
     specs = discover(opts.input, out, getattr(opts, "pairs", None), getattr(opts, "exclude", EXCLUDE_DEFAULT))
+    target = getattr(opts, "target", "waist") or "waist"
+    if target not in TARGETS:
+        raise RegError(f"--target は {' / '.join(TARGETS)} です（{target}）")
+    column = TARGETS[target]
+    log(f"正解: {TARGET_JA[target]}（列 {column}）", out)
+    if target != "waist":
+        # trials without the whole-body ENMO (fewer than four sensors) are left out / 全身の ENMO がない試行は使わない
+        lack = [sp["name"] for sp in specs if not has_target(sp, opts.windows[0], column)]
+        if lack:
+            log(f"  注意: 全身の ENMO がない試行は使いません（センサが 4 台そろっていない、または加速度計算ソフトが古い）: "
+                f"{', '.join(lack)}", out)
+            specs = [sp for sp in specs if sp["name"] not in lack]
+        if not specs:
+            raise RegError("全身の ENMO（ENMO_body(mg)）がある試行がありません。4 台そろった試行を加速度計算ソフト v2.0 で"
+                           "計算し直してください")
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
     bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS]
@@ -734,7 +776,8 @@ def run(opts):
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
-                                  need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S]) for sp in specs]
+                                  need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column)
+                      for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
@@ -789,7 +832,7 @@ def run(opts):
         win = np.concatenate([tr["win"] for tr in trials])
         evals = make_evaluations(splits, trials, specs, tname, opts.blocks, out)
         _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, XC, y,
-                       trials[0]["v"], XD, XE)
+                       trials[0]["v"], XD, XE, column=column)
         configs = [("baseline", "-")]
         for m in models:
             if m in CNN_KINDS:
@@ -859,7 +902,7 @@ def run(opts):
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
                                     features=feat, **mt, per_trial=per, seconds=time.time() - t_start,
-                                    pred=pp, y=yy, tname=tn_, win=ww, **extra))
+                                    pred=pp, y=yy, tname=tn_, win=ww, target=target, **extra))
                 if imp_n:
                     imp = imp_sum / imp_n
                     results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
@@ -995,7 +1038,7 @@ def _save_importance(out_dir, results, out, plots=True, top=20):
             log(f"  注意: 重要度の図を作れませんでした（{e}）", out)
 
 
-def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None):
+def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None, column=TARGET):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
@@ -1003,7 +1046,7 @@ def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None):
         has_d = XD is not None and XD.ndim == 2 and XD.shape[1] > 0
         has_e = XE is not None and XE.ndim == 2 and XE.shape[1] > 0
         d_names = d_feature_names(v) if has_d else []
-        w.writerow(["trial", "start_csi(s)", "end_csi(s)", TARGET] + B_NAMES_full()
+        w.writerow(["trial", "start_csi(s)", "end_csi(s)", column] + B_NAMES_full()
                    + ([f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES] if has_c else [])
                    + d_names + ([f"E_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v] if has_e else [])
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
@@ -1022,12 +1065,13 @@ def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds",
-                    "n_seeds", "MAE_sd(mg)", "R2_sd"])
+                    "n_seeds", "MAE_sd(mg)", "R2_sd", "target"])
         for r in results:
             sd_ = r.get("seed_metrics")
             w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
                         f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}",
-                        r.get("n_seeds", 1), f"{r['MAE_sd']:.3f}" if sd_ else "", f"{r['R2_sd']:.4f}" if sd_ else ""])
+                        r.get("n_seeds", 1), f"{r['MAE_sd']:.3f}" if sd_ else "", f"{r['R2_sd']:.4f}" if sd_ else "",
+                        r.get("target", "waist")])
     if any(r.get("seed_metrics") for r in results):
         with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
@@ -1179,7 +1223,8 @@ def _plots(out_dir, results):
         ax.set_ylabel("予測 [mg]")
         ax.set_title(f"全体: MAE {r['MAE']:.1f} mg / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
-        fig.suptitle(f"{r['label']}（特徴量 {r['features']}、ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
+        fig.suptitle(f"{r['label']}（正解 {TARGET_JA[r.get('target', 'waist')].split('（')[0]}、特徴量 {r['features']}、"
+                     f"ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
                      + ("" if r["split"] == "試行ごと" else f"\n{r['split']}"))
         fig.tight_layout()
         fig.savefig(os.path.join(out_dir, f"pred_{_split_tag(r['split'])}{r['variant']}_{r['window']:g}s_{r['model']}_"
@@ -1214,7 +1259,8 @@ def _plots(out_dir, results):
                                 loc="left", fontsize=10)
             if key == "R2":
                 ax[vi, j].axhline(0, color="#333333", lw=0.8)
-    fig.suptitle("モデルの比較（RF = ランダムフォレスト、線形 = 線形回帰 (Ridge)）")
+    fig.suptitle(f"モデルの比較（正解: {TARGET_JA[results[0].get('target', 'waist')]}。RF = ランダムフォレスト、"
+                 "線形 = 線形回帰 (Ridge)）")
     fig.tight_layout()
     fig.savefig(os.path.join(out_dir, "comparison.png"), dpi=110)
     plt.close(fig)
@@ -1251,6 +1297,9 @@ def main(argv=None):
     ap.add_argument("--features", default="A,B",
                     help="CNN 以外のモデルの特徴量（既定 A,B。ほかに C: 速さの時間微分、D: 1 秒の中の時間変化、"
                          "E: 強さをそろえたスペクトル。組み合わせは A+B、A+D など。B+D@1 で前後 1 区間の特徴量も並べる）")
+    ap.add_argument("--target", choices=list(TARGETS), default="waist",
+                    help="正解にする ENMO（既定 waist = 腰の ENMO。body = 全身の ENMO（腰・大腿・下腿・手首の 4 台の合計。"
+                         "加速度計算ソフト v2.0 で 4 台そろった試行だけ）")
     ap.add_argument("--windows", default="1", help="区間の長さ [s]（既定 1 = 1 秒ごとに推定。カンマ区切りで複数も可）")
     ap.add_argument("--split", action="append", default=None,
                     help="学習とテストの分け方「学習:テスト」（何回でも指定できる）。データセット名・試行名・A2_* のような"
