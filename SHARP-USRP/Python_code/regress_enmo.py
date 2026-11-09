@@ -2,9 +2,9 @@
     ドップラーから腰の加速度の指標 (ENMO) を推定する回帰モデルを作り、比べる。
 
     正解: 加速度計算ソフト (witmotion_wt011 の compute_power.py) が出す ENMO
-          (max(合成加速度 - 1 g, 0) [mg]) の 1 秒ごとの平均。--target で選ぶ:
-            waist (既定) = 腰の ENMO (列 ENMO(mg))
-            body         = 全身の ENMO (腰・大腿・下腿・手首の 4 台の ENMO の合計、列 ENMO_body(mg)。
+          (max(合成加速度 - 1 g, 0) [mG]。mG = ミリ G = 0.001 g。ミリグラムではない) の 1 秒ごとの平均。--target で選ぶ:
+            waist (既定) = 腰の ENMO (列 ENMO(mG))
+            body         = 全身の ENMO (腰・大腿・下腿・手首の 4 台の ENMO の合計、列 ENMO_body(mG)。
                            4 台そろった試行だけ。列がない試行は使わない)
     入力: SHARP-USRP のドップラー (doppler_traces*/ の数値の配列。PNG ではない)
 
@@ -80,9 +80,9 @@ CONTEXT_S = {"cnn3s": 1.0, "cnn5s": 2.0}   # seconds of Doppler before and after
 CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
             "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒"}
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
-TARGET = "ENMO(mg)"      # target column in the calculator's output (waist) / 正解の列（腰）
+TARGET = "ENMO(mG)"      # target column in the calculator's output (waist) / 正解の列（腰）
 # --target: which ENMO of the acceleration calculator is the ground truth / どの ENMO を正解にするか
-TARGETS = {"waist": "ENMO(mg)", "body": "ENMO_body(mg)"}
+TARGETS = {"waist": "ENMO(mG)", "body": "ENMO_body(mG)"}
 TARGET_JA = {"waist": "腰の ENMO", "body": "全身の ENMO（腰・大腿・下腿・手首の合計）"}
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
 ACC_FC = 6.0             # feature C: low-pass before differentiating [Hz] / 特徴量 C: 微分の前の平滑化
@@ -145,13 +145,22 @@ def _target_file(spec, window):
     return None, None
 
 
+def _column(header, column):
+    """The ENMO column as written in the file: the calculator before v2.1 wrote the unit as mg instead of mG.
+    ファイルの中の ENMO の列名（加速度計算ソフト v2.1 より前は単位を mG ではなく mg と書いていた）"""
+    if column in header:
+        return column
+    old = column.replace("(mG)", "(mg)")
+    return old if old in header else None
+
+
 def has_target(spec, window, column):
     """True if the trial's ground-truth file has this ENMO column. / 正解のファイルにこの ENMO の列があるか"""
     path, _ = _target_file(spec, window)
     if not path:
         return True   # reported later by load_target / 後で load_target が知らせる
     with open(path, encoding="utf-8") as f:
-        return column in next(csv.reader(f), [])
+        return _column(next(csv.reader(f), []), column) is not None
 
 
 def load_target(spec, window, column=TARGET):
@@ -164,19 +173,20 @@ def load_target(spec, window, column=TARGET):
         raise RegError(f"{spec['name']}: *_power_timeseries.csv (または *_windows_{window:g}s.csv) がありません")
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    if rows and column != TARGET and column not in rows[0]:
+    found = _column(list(rows[0]), column) if rows else None
+    if rows and column != TARGET and found is None:
         raise RegError(f"{os.path.basename(path)} に全身の ENMO の列 ({column}) がありません。センサが 4 台そろっていない"
                        "試行か、加速度計算ソフトが古いです（v2.0 で計算し直してください）")
-    if not rows or column not in rows[0]:
+    if not rows or found is None:
         raise RegError(f"{os.path.basename(path)} に ENMO の列 ({column}) がありません。"
                        "加速度計算ソフトを最新にして計算し直してください")
     if kind == "timeseries":
         t = np.array([float(r["t_csi(s)"]) for r in rows])
-        y = np.array([float(r[column]) for r in rows])
+        y = np.array([float(r[found]) for r in rows])
         return dict(kind=kind, t=t, y=y, file=os.path.basename(path))
     a = np.array([float(r["start_csi(s)"]) for r in rows])
     b = np.array([float(r["end_csi(s)"]) for r in rows])
-    y = np.array([float(r[column]) for r in rows])
+    y = np.array([float(r[found]) for r in rows])
     return dict(kind=kind, a=a, b=b, y=y, file=os.path.basename(path))
 
 
@@ -562,8 +572,8 @@ def make_tabular(kind, seed):
         return XGBRegressor(n_estimators=300, max_depth=3, learning_rate=0.05, subsample=0.8,
                             colsample_bytree=0.8, random_state=seed, n_jobs=1)
     if kind == "svr":
-        # RBF kernel; the target is standardized so epsilon and C do not depend on the mg scale
-        # RBF カーネル。正解も標準化するので、epsilon と C は mg の大きさに依らない
+        # RBF kernel; the target is standardized so epsilon and C do not depend on the mG scale
+        # RBF カーネル。正解も標準化するので、epsilon と C は mG の大きさに依らない
         from sklearn.compose import TransformedTargetRegressor
         from sklearn.svm import SVR
         return TransformedTargetRegressor(
@@ -743,7 +753,7 @@ def run(opts):
                 f"{', '.join(lack)}", out)
             specs = [sp for sp in specs if sp["name"] not in lack]
         if not specs:
-            raise RegError("全身の ENMO（ENMO_body(mg)）がある試行がありません。4 台そろった試行を加速度計算ソフト v2.0 で"
+            raise RegError("全身の ENMO（ENMO_body(mG)）がある試行がありません。4 台そろった試行を加速度計算ソフト v2.0 で"
                            "計算し直してください")
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
@@ -906,17 +916,17 @@ def run(opts):
                 if imp_n:
                     imp = imp_sum / imp_n
                     results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
-                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mg  RMSE {mt['RMSE']:7.2f}  "
+                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mG  RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
                 if seed_m:
                     each = ", ".join("%.2f" % m_["R2"] for m_ in seed_m)
                     log(f"      乱数の種 {len(seed_m)} 回: R² {np.mean([m_['R2'] for m_ in seed_m]):.3f} ± {extra['R2_sd']:.3f}"
                         f"（{each}）、MAE {np.mean([m_['MAE'] for m_ in seed_m]):.1f}"
-                        f" ± {extra['MAE_sd']:.1f} mg。上の値は {len(seed_m)} 回の予測の平均", out)
+                        f" ± {extra['MAE_sd']:.1f} mG。上の値は {len(seed_m)} 回の予測の平均", out)
                 if gp_sd is not None:
                     sdv = gp_sd[te]
                     cover = float(np.mean(np.abs(yy - pp) <= 1.96 * sdv))
-                    log(f"      ガウス過程の予測の幅（±1.96σ、平均 ±{1.96 * np.mean(sdv):.0f} mg）に正解が入った割合 "
+                    log(f"      ガウス過程の予測の幅（±1.96σ、平均 ±{1.96 * np.mean(sdv):.0f} mG）に正解が入った割合 "
                         f"{cover:.0%}（95 % に近いほど幅が正しい）", out)
                 if cams is not None:
                     _plot_gradcam(out_dir, f"{_split_tag(sp_label)}{variant}_{window:g}s", XN[te], cams[te], yy,
@@ -1064,8 +1074,8 @@ def B_NAMES_full():
 def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mg)", "RMSE(mg)", "R2", "r", "seconds",
-                    "n_seeds", "MAE_sd(mg)", "R2_sd", "target"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mG)", "RMSE(mG)", "R2", "r", "seconds",
+                    "n_seeds", "MAE_sd(mG)", "R2_sd", "target"])
         for r in results:
             sd_ = r.get("seed_metrics")
             w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
@@ -1075,14 +1085,14 @@ def _save(out_dir, results, pred_rows, opts, out):
     if any(r.get("seed_metrics") for r in results):
         with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["doppler", "window(s)", "split", "model", "seed", "MAE(mg)", "RMSE(mg)", "R2", "r"])
+            w.writerow(["doppler", "window(s)", "split", "model", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r"])
             for r in results:
                 for k, m_ in enumerate(r.get("seed_metrics") or []):
                     w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], opts.seed + k,
                                 f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mg)", "RMSE(mg)", "R2", "r"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mG)", "RMSE(mG)", "R2", "r"])
         for r in results:
             for tn, m in r["per_trial"].items():
                 w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], tn, f"{m['MAE']:.3f}",
@@ -1090,7 +1100,7 @@ def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "predictions.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
-                    "true_ENMO(mg)", "pred_ENMO(mg)"])
+                    "true_ENMO(mG)", "pred_ENMO(mG)"])
         w.writerows(pred_rows)
     with open(os.path.join(out_dir, "config.json"), "w", encoding="utf-8") as f:
         json.dump(vars(opts), f, ensure_ascii=False, indent=2)
@@ -1099,7 +1109,7 @@ def _save(out_dir, results, pred_rows, opts, out):
                    key=lambda r: r["MAE"], default=None)
         if best:
             log(f"\n[{sp}] {wl:g} 秒の区間で一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、"
-                f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mg、R² {best['R2']:.3f}", out)
+                f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mG、R² {best['R2']:.3f}", out)
 
 
 # ============================================================ plots
@@ -1132,7 +1142,7 @@ def _plot_gradcam(out_dir, tag, X, cams, y, v, window, sp_label, out):
             img = X[m].mean(axis=(0, 3))   # time x velocity, both antennas / 時間 x 速度（アンテナ 2 本の平均）
             cam = np.nanmean(cams[m], axis=0)
             ax[i, 0].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="viridis")
-            ax[i, 0].set_title(f"{name}（{m.sum()} 区間、平均 {y[m].mean():.0f} mg）: 入力のドップラー（log10）",
+            ax[i, 0].set_title(f"{name}（{m.sum()} 区間、平均 {y[m].mean():.0f} mG）: 入力のドップラー（log10）",
                                loc="left", fontsize=9)
             ax[i, 1].imshow(cam.T, aspect="auto", origin="lower", extent=ext, cmap="inferno", vmin=0)
             ax[i, 1].set_title("Grad-CAM（明るいほど ENMO を上げる方向に効いた）", loc="left", fontsize=9)
@@ -1160,7 +1170,7 @@ def _plot_gradcam(out_dir, tag, X, cams, y, v, window, sp_label, out):
             k = idx[np.argmin(np.abs(y[idx] - np.median(y[idx])))]
             img = X[k].mean(axis=-1)
             ax[i, 0].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="viridis")
-            ax[i, 0].set_title(f"{name}: 1 区間の実際のドップラー（log10、正解 ENMO {y[k]:.0f} mg）", loc="left", fontsize=9)
+            ax[i, 0].set_title(f"{name}: 1 区間の実際のドップラー（log10、正解 ENMO {y[k]:.0f} mG）", loc="left", fontsize=9)
             ax[i, 1].imshow(img.T, aspect="auto", origin="lower", extent=ext, cmap="gray")
             ax[i, 1].imshow(cams[k].T, aspect="auto", origin="lower", extent=ext, cmap="inferno", alpha=0.55, vmin=0)
             ax[i, 1].set_title("同じ区間の Grad-CAM（重ねて表示）", loc="left", fontsize=9)
@@ -1207,8 +1217,8 @@ def _plots(out_dir, results):
             ax.plot(mid, r["y"][m], color="#333333", lw=1.4, label="正解（ENMO）")
             ax.plot(mid, r["pred"][m], color=colors[r["model"]], lw=1.2, label="予測")
             pt = r["per_trial"][tn]
-            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mg / R² {pt['R2']:.2f}", loc="left", fontsize=10)
-            ax.set_ylabel("ENMO [mg]")
+            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mG / R² {pt['R2']:.2f}", loc="left", fontsize=10)
+            ax.set_ylabel("ENMO [mG]")
             if i == 0:
                 ax.legend(loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=2, fontsize=9, frameon=False)
             if i == len(names) - 1:
@@ -1219,9 +1229,9 @@ def _plots(out_dir, results):
             m = r["tname"] == tn
             ax.scatter(r["y"][m], r["pred"][m], s=12, alpha=0.7, label=tn)
         ax.plot([lo, hi], [lo, hi], color="#333333", lw=0.8, ls="--")
-        ax.set_xlabel("正解 [mg]")
-        ax.set_ylabel("予測 [mg]")
-        ax.set_title(f"全体: MAE {r['MAE']:.1f} mg / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
+        ax.set_xlabel("正解 [mG]")
+        ax.set_ylabel("予測 [mG]")
+        ax.set_title(f"全体: MAE {r['MAE']:.1f} mG / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
         fig.suptitle(f"{r['label']}（正解 {TARGET_JA[r.get('target', 'waist')].split('（')[0]}、特徴量 {r['features']}、"
                      f"ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
@@ -1244,7 +1254,7 @@ def _plots(out_dir, results):
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
-        for j, (key, unit) in enumerate((("MAE", " [mg]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
+        for j, (key, unit) in enumerate((("MAE", " [mG]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
             vals = [r[key] for r in rs]
             ax[vi, j].bar(x, vals, color=cols)
             for xi, val, r in zip(x, vals, rs):

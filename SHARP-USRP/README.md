@@ -541,7 +541,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 ### ドップラーから腰の ENMO を推定する回帰 (regress_enmo.py)
 
 ドップラーから、加速度計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
-(max(合成加速度 − 1 g, 0) [mg]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
+(max(合成加速度 − 1 g, 0) [mG]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
 推定は 1 秒ごと (`--windows` で変更できる)。
 
 | モデル | 入力 |
@@ -574,7 +574,7 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   `cnn_gradcam_examples_*.png`) を作る。Grad-CAM は、学習した CNN に実データの区間を入れたとき、入力の図の
   どこが予測の ENMO を上げる方向に効いたかを色で示す (最後の畳み込み層の勾配から計算)。
 - **正解の ENMO**: `--target waist` (既定、腰の ENMO) / `--target body` (全身の ENMO = 腰・大腿・下腿・手首の 4 台の
-  ENMO の合計、加速度計算ソフト v2.0 の `ENMO_body(mg)` の列)。全身の ENMO がない試行 (センサが 4 台そろっていない) は
+  ENMO の合計、加速度計算ソフト v2.0 の `ENMO_body(mG)` の列)。全身の ENMO がない試行 (センサが 4 台そろっていない) は
   使わずにログに出す。腰と全身は大きさが違うので、別々に学習して比べる (`metrics.csv` の `target` の列に残る)
 - **前後の時間も入れた CNN**: `--models cnn3s` (前後 1 秒、3 秒分の入力)、`--models cnn5s` (前後 2 秒、5 秒分の入力)。
   区間がどこかを示す印のチャネルを足して、真ん中の 1 秒の ENMO を推定する。cnn5s は入力が大きく、メモリと時間が掛かる

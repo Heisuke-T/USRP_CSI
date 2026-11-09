@@ -55,9 +55,10 @@ regression_input/
 - 加速度計算ソフトの「正解データの保存先」にこの試行のフォルダ（例 `regression_input/T1`）を指定すると、
   計算のたびに自動でここに保存されます。一括処理なら親フォルダ `regression_input` を指定すると、`<IMU の名前>/` に入ります
   （前の置き方の `<試行名>/imu/` に置いても読めます）
-- IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mg)` が入った版。6 面キャリブレーションを指定して計算したもの）。
-  なければ `*_windows_1s.csv` でも可。加速度計算ソフト v2.0 で 4 台そろった試行には全身の ENMO の列 `ENMO_body(mg)` も
+- IMU は `*_power_timeseries.csv`（ENMO の列 `ENMO(mG)` が入った版。6 面キャリブレーションを指定して計算したもの）。
+  なければ `*_windows_1s.csv` でも可。加速度計算ソフト v2.0 で 4 台そろった試行には全身の ENMO の列 `ENMO_body(mG)` も
   入る（`--target body` で使う）
+- ENMO の単位は mG（ミリ G = 0.001 g。ミリグラムではない）。加速度計算ソフト v2.1 より前の列名 `ENMO(mg)` もそのまま読める
 - ドップラーと IMU は、どちらも alignCSI.m でそろえた同じ 80 秒の CSI から作ったものを使う（時間軸が同じになる）
 
 実行:

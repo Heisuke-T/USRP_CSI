@@ -4,7 +4,7 @@
     5 試行ぶんの入力フォルダを作る。各試行の中で動きの強さ s(t) が変わり (試行ごとに違う運動)、
       ドップラー: 足踏みの周期で速さが揺れる反射。速度の広がりと強さが s(t) に比例
                   (アンテナ 2 本、時刻は alignCSI の時間軸、_meta.json に time_origin_s)
-      IMU:       ENMO = 60 * s(t) + 雑音 [mg] (加速度計算ソフトと同じ列の _power_timeseries.csv)
+      IMU:       ENMO = 60 * s(t) + 雑音 [mG] (加速度計算ソフトと同じ列の _power_timeseries.csv)
     これで regress_enmo.py を 1 秒と 5 秒の区間で回し、
       1. 3 つのドップラーの版・5 モデル + 基準 (平均値) が最後まで動き、表と図ができること
       2. 物理特徴量 B の線形回帰などが、平均値で予測する基準よりはっきり良いこと (R² > 0.5)
@@ -91,7 +91,7 @@ def make_trial(root, k, old_meta=False):
     en = 60 * intensity(t50, k) + rng.normal(0, 2.0, len(t50))
     with open(os.path.join(truth_dir, f"{name}_power_timeseries.csv"), "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+        w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])   # the old unit spelling still reads / 前の単位の書き方も読める
         for a, b in zip(t50, en):
             w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
 
@@ -125,7 +125,7 @@ def check_feature_c(tmp):
         en = 60 * intensity(t50, k) * cad + rng.normal(0, 2.0, len(t50))   # acceleration-like / 加速度に比例
         with open(os.path.join(d, f"{name}_power_timeseries.csv"), "w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mG)"])
             for a, b in zip(t50, en):
                 w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
     res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_c"), doppler="nowinnorm",
@@ -198,7 +198,7 @@ def check_feature_de(tmp):
         en = 60 * intensity(t50, k) + rng.normal(0, 2.0, len(t50))
         with open(os.path.join(root, name, f"{name}_power_timeseries.csv"), "w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mg)"])
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mG)"])
             for a, b in zip(t50, en):
                 w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{b:.3f}"])
     res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_de"), doppler="nowinnorm",
@@ -242,7 +242,7 @@ def check_importance_context(tmp):
 
 
 def check_target_body(tmp):
-    """--target body: the whole-body ENMO column (ENMO_body(mg)) is the ground truth; trials without it are left out.
+    """--target body: the whole-body ENMO column (ENMO_body(mG)) is the ground truth; trials without it are left out.
     --target body: 全身の ENMO の列を正解にする。列がない試行（センサが 4 台そろっていない）は使わない"""
     import argparse
     inp = os.path.join(tmp, "in_body")
@@ -256,7 +256,7 @@ def check_target_body(tmp):
         rng = np.random.default_rng(300 + k)
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(rows[0] + ["ENMO_body(mg)"])
+            w.writerow(rows[0] + ["ENMO_body(mG)"])
             for r in rows[1:]:
                 w.writerow(r + [f"{300 * intensity(float(r[0]), k) + rng.normal(0, 8.0):.3f}"])
     out_dir = os.path.join(tmp, "out_body")
@@ -272,7 +272,7 @@ def check_target_body(tmp):
     good = (names == ["T1", "T2", "T3"] and r["R2"] > 0.5 and r["y"].mean() > 150 and tg == {"body"}
             and "全身の ENMO がない試行は使いません" in logtxt and "T4" in logtxt)
     print(f"  {'OK ' if good else 'NG '} 正解を全身の ENMO に（--target body）: 試行 {names}（T4 は列がないので除外）、"
-          f"正解の平均 {r['y'].mean():.0f} mg、R² {r['R2']:.3f}")
+          f"正解の平均 {r['y'].mean():.0f} mG、R² {r['R2']:.3f}")
     return good
 
 
