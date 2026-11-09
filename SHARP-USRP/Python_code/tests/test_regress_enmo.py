@@ -276,6 +276,38 @@ def check_target_body(tmp):
     return good
 
 
+def check_feature_f(tmp):
+    """Feature F (Doppler summed over the moving bins -> time derivative -> 1 s mean of |d/dt|), the static-path
+    check, and several derivative windows. / 特徴量 F・静止成分の広がりの確認・微分の窓を複数"""
+    import argparse
+    inp = os.path.join(tmp, "in_f")
+    for k in range(4):
+        make_trial(inp, k)
+    out_dir = os.path.join(tmp, "out_f")
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="linear",
+                                       features="F1,F2a,F2b,F1+F2a+F2b", windows=[1.0], blocks=5, epochs=5, seed=0,
+                                       no_plots=False, pairs=None, static_v=0.65, deriv_window="0.2"))
+    r2 = {x["features"]: x["R2"] for x in res if x["model"] == "linear"}
+    with open(os.path.join(out_dir, "features_nowinnorm_1s.csv"), encoding="utf-8") as f:
+        head = next(csv.reader(f))
+    fcols = [h for h in head if h.startswith("F")]
+    files = os.listdir(out_dir)
+    with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+        logtxt = f.read()
+    res2, _ = ro.run(argparse.Namespace(input=inp, out=os.path.join(tmp, "out_f2"), doppler="nowinnorm",
+                                        models="linear", features="F2b", windows=[1.0], blocks=5, epochs=5, seed=0,
+                                        no_plots=False, pairs=None, deriv_window="0.1,0.4"))
+    labels = sorted({x["features"] for x in res2 if x["model"] == "linear"})
+    good = (fcols == ["F1_ant1", "F1_ant2", "F2A_ant1", "F2A_ant2", "F2B_ant1", "F2B_ant2"]
+            and r2["F2B"] > 0.5 and r2["F1+F2A+F2B"] > 0.5
+            and "static_spectrum_nowinnorm_1s.csv" in files and "static_spectrum_nowinnorm_1s.png" in files
+            and "静止成分の広がり" in logtxt and labels == ["F2B/0.1s", "F2B/0.4s"])
+    print(f"  {'OK ' if good else 'NG '} 特徴量 F: 線形回帰の R² " + "、".join(f"{k} {v:.3f}" for k, v in r2.items())
+          + f"、列 {fcols}、微分の窓を 2 つ → {labels}、静止成分の図 "
+          + str([f for f in files if f.startswith("static_spectrum")]))
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -398,6 +430,7 @@ def main():
         ok &= check_feature_de(tmp)
         ok &= check_importance_context(tmp)
         ok &= check_target_body(tmp)
+        ok &= check_feature_f(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):

@@ -4,7 +4,7 @@
 
     コピーするもの (既定):
       log.txt, config.json, metrics.csv, metrics_by_trial.csv, cnn_seeds.csv, predictions.csv,
-      comparison.png, cnn_gradcam_*.png, importance*.csv, importance_*.png
+      comparison.png, cnn_gradcam_*.png, importance*.csv, importance_*.png, static_spectrum_*
     --features で features_*.csv (作った特徴量)、--pred_png で pred_*.png (試行ごとの予測の図) も入れる
 
     使い方:
@@ -29,7 +29,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHARED = os.path.join(HERE, "shared_results")
 BASE_FILES = ["log.txt", "config.json", "metrics.csv", "metrics_by_trial.csv", "cnn_seeds.csv", "predictions.csv",
-              "comparison.png", "cnn_gradcam_*.png", "importance*.csv", "importance_*.png"]
+              "comparison.png", "cnn_gradcam_*.png", "importance*.csv", "importance_*.png",
+              "static_spectrum_*.csv", "static_spectrum_*.png"]
 MAX_MB = 20.0  # stop if the copy gets this large / これより大きければ止める
 
 

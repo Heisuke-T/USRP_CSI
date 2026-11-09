@@ -43,7 +43,9 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
 
 ## ドップラー → ENMO の回帰
 
-`regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・SVR・ガウス過程回帰・CNN で、ドップラー (特徴量 A: 平均スペクトル、
+`regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・SVR・ガウス過程回帰・CNN で、ドップラー (既定は特徴量 F:
+動いている速度ビン (|v| ≥ 0.65 m/s) で足したドップラーの時間微分 (Savitzky-Golay、窓 0.2 秒) の 1 秒平均。F1 / F2a / F2b。
+前に作った特徴量 A: 平均スペクトル、
 B: 物理特徴量。C: 速さの時間微分は実データで効かなかったので既定では使わない。D: 1 秒の中の時間変化、
 E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で前後 1 区間の特徴量も並べる。
 `--importance` で決定木の特徴量の重要度) から

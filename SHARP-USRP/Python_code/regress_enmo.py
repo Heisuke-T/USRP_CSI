@@ -16,6 +16,11 @@
       SVR                 : 同上（RBF カーネル）
       ガウス過程回帰       : 同上（推定の幅も出す）
       CNN                 : 1 秒分のドップラーの 2 次元配列 (時間 x 速度 x アンテナ 2 本)
+    特徴量 F (既定) = 動いている速度ビン (|v| >= 0.65 m/s、--static_v) で足したドップラーを 50 Hz にそろえ、
+               Savitzky-Golay (2 次式、微分の窓 0.2 秒、--deriv_window) で時間微分し、1 秒ごとに |微分| を平均
+               (アンテナごと)。F1: log10 Σ_動 D、F2a: Σ_動 |v| D ÷ Σ_静止 D、F2b: Σ_動 |v| D ÷ Σ_動 D (平均の速さ)
+               あわせて、ENMO の小さい区間の平均スペクトルで静止成分の広がりを確かめる (static_spectrum_*.png)
+    以下の特徴量 A〜E は前に作ったもの (--features で指定すれば使える)
     特徴量 A = 1 秒の中で速度ビンごとに平均したスペクトル (log10, アンテナ 2 本で 200 個)
     特徴量 B = 物理に基づく特徴量 (速さの平均・2 乗平均・広がり・最大速度・足踏みの周期など,
                アンテナごと)
@@ -446,6 +451,59 @@ C_NAMES = ["acc_mean_abs", "acc_mean_rms", "acc_mean_p95", "acc_v95_abs", "acc_v
            "spec_change_rate"]
 
 
+# ---- feature F: Doppler summed over the moving velocity bins -> time derivative -> 1 s mean of |d/dt| ----
+# 特徴量 F: 動いている速度ビンで足したドップラー → 時間微分 → 1 秒ごとに |微分| の平均
+F_PARTS = ("F1", "F2A", "F2B")
+F_DESC = {"F1": "log10 Σ_動 D の変化の速さ [1/s]", "F2A": "Σ_動 |v| D ÷ Σ_静止 D の変化の速さ（運動量 → 力に近い）",
+          "F2B": "平均の速さ Σ_動 |v| D ÷ Σ_動 D の変化の速さ [m/s²]（加速度相当）"}
+F_RATE = 50.0              # the series are averaged onto this grid before differentiating [Hz] / 微分の前にそろえる格子
+STATIC_V = 0.65            # |v| below this is the static path (main lobe of the Hann window, about 2 x resolution) [m/s]
+DERIV_WINDOW = 0.2         # Savitzky-Golay derivative window [s] (about the Doppler's own time resolution, 31 packets)
+
+
+def deriv_traces(d, static_v, deriv_windows):
+    """Feature F series of one antenna, over the whole trial (computed once per trial).
+    Per frame: P_mov = Σ_{|v|>=static_v} D, P_static = Σ_{|v|<static_v} D, S1 = Σ_{|v|>=static_v} |v| D;
+      F1 = log10 P_mov, F2A = S1 / P_static, F2B = S1 / P_mov.
+    Frames (one per packet, uneven) are averaged onto a 50 Hz grid, then differentiated with a Savitzky-Golay filter
+    (2nd order) over each derivative window. Returns dict(tu, {(part, window): derivative}).
+    特徴量 F の時系列（アンテナ 1 本、試行全体で 1 回）。フレームごとに動いているビン・静止ビンで足し、50 Hz の格子に
+    平均してから、Savitzky-Golay（2 次式）で微分の窓ごとに微分する"""
+    from scipy.signal import savgol_filter
+    S, t, v = d["S"], d["t"], d["v"]
+    P = np.clip(S, 0, None)
+    av = np.abs(v)
+    st = av < static_v
+    if st.all() or not st.any():
+        raise RegError(f"静止ビンの境目 {static_v:g} m/s が速度軸（±{av.max():.2f} m/s）に合いません（--static_v）")
+    p_mov = P[:, ~st].sum(axis=1)
+    p_st = P[:, st].sum(axis=1)
+    s1 = (P[:, ~st] * av[~st]).sum(axis=1)
+    series = {"F1": np.log10(p_mov + EPS), "F2A": s1 / (p_st + EPS), "F2B": s1 / (p_mov + EPS)}
+    dt = 1.0 / F_RATE
+    tu = np.arange(t[0], t[-1] + 1e-9, dt)
+    idx = np.clip(np.round((t - tu[0]) / dt).astype(int), 0, len(tu) - 1)
+    cnt = np.bincount(idx, minlength=len(tu)).astype(float)
+    have = cnt > 0
+    out = {"tu": tu}
+    for part, x in series.items():
+        g = np.bincount(idx, weights=x, minlength=len(tu))[have] / cnt[have]
+        g = np.interp(tu, tu[have], g)          # empty cells joined by lines / 空のマスは直線でつなぐ
+        for w in deriv_windows:
+            n = max(5, int(round(w / dt)) | 1)  # odd number of samples / サンプル数は奇数
+            n = min(n, len(g) if len(g) % 2 else len(g) - 1)
+            out[(part, w)] = savgol_filter(g, n, 2, deriv=1, delta=dt, mode="interp")
+    return out
+
+
+def deriv_features(tr, a, b):
+    """Feature F of one window: the mean of |derivative| inside [a, b). / 区間の中の |微分| の平均"""
+    m = (tr["tu"] >= a) & (tr["tu"] < b)
+    if m.sum() < 2:
+        return {k: np.nan for k in tr if k != "tu"}
+    return {k: float(np.mean(np.abs(x[m]))) for k, x in tr.items() if k != "tu"}
+
+
 D_GRID = (4, 10)   # feature D: coarse map of time x velocity cells / 特徴量 D の粗いマス（時間 x 速度）
 
 
@@ -480,7 +538,8 @@ def cnn_input(S, t, a, b):
     return np.log10(np.clip(out, EPS, None))
 
 
-def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET):
+def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET,
+                need_f=None):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -489,6 +548,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         raise RegError(f"{name}: {VARIANT_DIRS[variant]}/ に {', '.join(missing)} のドップラーがありません")
     ants = [load_doppler(files[a], out) for a in ("antenna1", "antenna2")]
     acc = [accel_traces(d) if need_c else None for d in ants]  # feature C only when used / C は使うときだけ
+    der = [deriv_traces(d, *need_f) if need_f else None for d in ants]  # feature F only when used / F は使うときだけ
+    XF = {}
     tgt = load_target(spec, window, column)
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
@@ -514,10 +575,10 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
             yv = float(np.mean(tgt["y"][m]))
         else:
             yv = float(tgt["y"][i])
-        fa, fb, fc, fd, fe, fn = [], [], [], [], [], []
+        fa, fb, fc, fd, fe, fn, ff = [], [], [], [], [], [], []
         fctx = {c: [] for c in need_ctx}
         ok = True
-        for d, ac in zip(ants, acc):
+        for d, ac, de in zip(ants, acc, der):
             sel = (d["t"] >= a) & (d["t"] < b)
             if sel.sum() < 0.5 * rate * (b - a):  # too few frames (packet gap) / フレームが少なすぎる
                 ok = False
@@ -530,6 +591,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
             fc.append(accel_features(ac, a, b) if ac is not None else np.full(len(C_NAMES), np.nan))
             fd.append(temporal_features(S) if need_d else np.zeros(0))   # only when used / 使うときだけ
             fe.append(shape_spectrum(S) if need_e else np.zeros(0))
+            if de is not None:
+                ff.append(deriv_features(de, a, b))
             fn.append(cnn_input(d["S"], d["t"], a, b))
             for c in need_ctx:  # the window and c seconds before and after / 区間と前後 c 秒
                 fctx[c].append(cnn_input(d["S"], d["t"], a - c, b + c))
@@ -541,6 +604,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         XC.append(np.concatenate(fc))
         XD.append(np.concatenate(fd))
         XE.append(np.concatenate(fe))
+        for key in (ff[0] if ff else {}):
+            XF.setdefault(key, []).append([f_[key] for f_ in ff])
         XN.append(np.stack(fn, axis=-1).astype(np.float32))
         for c in need_ctx:
             XNctx[c].append(np.stack(fctx[c], axis=-1).astype(np.float32))
@@ -554,7 +619,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
     return dict(name=name, XA=np.array(XA), XB=np.array(XB), XC=np.array(XC), XD=np.array(XD), XE=np.array(XE),
                 XN=np.array(XN),
                 XNctx={c: np.array(v) for c, v in XNctx.items()}, y=np.array(y),
-                win=np.array(kept), v=ants[0]["v"])
+                win=np.array(kept), v=ants[0]["v"], meta=ants[0]["meta"],
+                XF={k: np.array(v, float) for k, v in XF.items()})
 
 
 # ============================================================ models
@@ -767,13 +833,25 @@ def run(opts):
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
     def _ok(f):
         base, _, k = f.partition("@")
-        return bool(base) and all(p in ("A", "B", "C", "D", "E") for p in base.split("+")) and (
+        return bool(base) and all(p in ("A", "B", "C", "D", "E") + F_PARTS for p in base.split("+")) and (
             k == "" or (k.isdigit() and 1 <= int(k) <= 5))
     badf = [f for f in feats if not _ok(f)]
     if badf:
-        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E と、その組み合わせ A+D など。"
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E, F1, F2a, F2b と、その組み合わせ A+D など。"
                        "前後の区間も入れるときは B+D@1 のように @ と区間の数 1〜5）")
     used = {p for f in feats for p in f.partition("@")[0].split("+")}
+    static_v = float(getattr(opts, "static_v", None) or STATIC_V)
+    dws = getattr(opts, "deriv_window", None) or [DERIV_WINDOW]
+    dws = parse_windows(dws) if isinstance(dws, str) else [float(w) for w in dws]
+    need_f = (static_v, dws) if used & set(F_PARTS) else None
+    if need_f:
+        log(f"特徴量 F: 静止ビン |v| < {static_v:g} m/s を除き、{F_RATE:g} Hz にそろえて Savitzky-Golay で微分"
+            f"（微分の窓 {', '.join(f'{w:g}' for w in dws)} 秒）、1 秒ごとに |微分| を平均。"
+            + "、".join(f"{p}: {F_DESC[p]}" for p in F_PARTS if p in used), out)
+        if len(dws) > 1:   # one set of results per derivative window / 微分の窓ごとに別の結果
+            feats = [f if not set(f.partition("@")[0].split("+")) & set(F_PARTS) else
+                     f"{f.partition('@')[0]}/{w:g}s" + (f"@{f.partition('@')[2]}" if "@" in f else "")
+                     for f in feats for w in (dws if set(f.partition("@")[0].split("+")) & set(F_PARTS) else [None])]
     splits = parse_splits(getattr(opts, "split", None))
     for kind, tr_tok, te_tok in splits:  # check the names before the slow part / 時間の掛かる処理の前に名前を確かめる
         if tr_tok:
@@ -786,7 +864,8 @@ def run(opts):
         log(f"\n[ドップラー: {variant}（{VARIANT_DIRS[variant]}/）、区間 {window:g} 秒]", out)
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
-                                  need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column)
+                                  need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column,
+                                  need_f=need_f)
                       for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
@@ -825,14 +904,24 @@ def run(opts):
         XE = np.concatenate([tr["XE"] for tr in trials])
         fsets = {"A": XA, "B": XB, "C": XC, "D": XD, "E": XE}
         fnames = feature_names(trials[0]["v"])
+        XF = {}
+        if need_f:   # feature F, one set per derivative window / 特徴量 F（微分の窓ごと）
+            for key in trials[0]["XF"]:
+                XF[key] = np.concatenate([tr["XF"][key] for tr in trials])
+                part, w = key
+                fsets[(part, w)] = XF[key]
+                fnames[(part, w)] = [f"{part}{f'_w{w:g}' if len(dws) > 1 else ''}_ant{a}" for a in (1, 2)]
         x_cache = {}
 
         def tab_data(feat):
             """Input of a tabular model and its column names (made once). / 表の形のモデルの入力と列の名前"""
             if feat not in x_cache:
                 base, _, k = feat.partition("@")
-                X = np.hstack([fsets[p] for p in base.split("+")])
-                names = [n for p in base.split("+") for n in fnames[p]]
+                base, _, wtag = base.partition("/")
+                w = float(wtag[:-1]) if wtag else (dws[0] if need_f else None)
+                keys = [(p, w) if p in F_PARTS else p for p in base.split("+")]
+                X = np.hstack([fsets[q] for q in keys])
+                names = [n for q in keys for n in fnames[q]]
                 if k:
                     X, names = add_context(X, names, tname, int(k))
                 x_cache[feat] = (X, names)
@@ -842,7 +931,10 @@ def run(opts):
         win = np.concatenate([tr["win"] for tr in trials])
         evals = make_evaluations(splits, trials, specs, tname, opts.blocks, out)
         _dump_features(os.path.join(out_dir, f"features_{variant}_{window:g}s.csv"), tname, win, XA, XB, XC, y,
-                       trials[0]["v"], XD, XE, column=column)
+                       trials[0]["v"], XD, XE, column=column, XF={k: (XF[k], fnames[k]) for k in XF})
+        if need_f:
+            _static_check(out_dir, f"{variant}_{window:g}s", XA, y, trials[0]["v"], static_v, trials[0]["meta"], out,
+                          plots=not opts.no_plots)
         configs = [("baseline", "-")]
         for m in models:
             if m in CNN_KINDS:
@@ -1048,7 +1140,7 @@ def _save_importance(out_dir, results, out, plots=True, top=20):
             log(f"  注意: 重要度の図を作れませんでした（{e}）", out)
 
 
-def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None, column=TARGET):
+def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None, column=TARGET, XF=None):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         na = XA.shape[1] // 2
@@ -1059,11 +1151,13 @@ def _dump_features(path, tname, win, XA, XB, XC, y, v, XD=None, XE=None, column=
         w.writerow(["trial", "start_csi(s)", "end_csi(s)", column] + B_NAMES_full()
                    + ([f"C_ant{a}_{n}" for a in (1, 2) for n in C_NAMES] if has_c else [])
                    + d_names + ([f"E_ant{a}_v{x:+.3f}" for a in (1, 2) for x in v] if has_e else [])
+                   + [n for _, ns in (XF or {}).values() for n in ns]
                    + [f"A_ant{1 + j // na}_v{v[j % na]:+.3f}" for j in range(XA.shape[1])])
         for i in range(len(y)):
             w.writerow([tname[i], f"{win[i][0]:.3f}", f"{win[i][1]:.3f}", f"{y[i]:.3f}"]
                        + [f"{x:.6g}" for x in XB[i]] + ([f"{x:.6g}" for x in XC[i]] if has_c else [])
                        + ([f"{x:.6g}" for x in XD[i]] if has_d else []) + ([f"{x:.6g}" for x in XE[i]] if has_e else [])
+                       + [f"{x:.6g}" for X_, _ in (XF or {}).values() for x in X_[i]]
                        + [f"{x:.6g}" for x in XA[i]])
 
 
@@ -1113,6 +1207,68 @@ def _save(out_dir, results, pred_rows, opts, out):
 
 
 # ============================================================ plots
+def _static_check(out_dir, tag, XA, y, v, static_v, meta, out, plots=True, drop_db=20.0):
+    """How wide the static path is in the real data: the mean spectrum of the quietest windows (lowest 5 % of the
+    ENMO), in dB from its peak, and the smallest |v| where it has dropped by drop_db on both sides, next to the
+    Hann window's main lobe computed from the Doppler settings. Saves static_spectrum_<tag>.csv (and .png).
+    静止成分が実データでどれだけ広がっているか: ENMO が一番小さい 5 % の区間の平均スペクトル（ピークからの dB）と、
+    両側で drop_db 下がる |v|。ドップラーの設定から計算したハン窓の主ローブと並べる"""
+    n = XA.shape[1] // 2
+    k = max(3, int(round(0.05 * len(y))))
+    quiet = np.argsort(y)[:k]
+    rows, edge = {}, {}
+    for a in (0, 1):
+        spec = np.mean(10 ** XA[quiet, a * n:(a + 1) * n], axis=0)
+        db = 10 * np.log10(spec / spec.max())
+        rows[a] = db
+        i0 = int(np.argmax(spec))
+        sides = []
+        for step in (1, -1):
+            i = i0
+            while 0 <= i + step < n and db[i] > -drop_db:
+                i += step
+            sides.append(abs(v[i]))
+        edge[a] = max(sides)
+    theory = None
+    N, res = meta.get("sample_length"), meta.get("delta_v_resolution")
+    if N and res:   # Hann window of N packets: power response vs velocity / N パケットのハン窓の応答
+        f = np.abs(v) / (float(res) * float(N))   # cycles per packet / 1 パケットあたりの周期
+        from scipy.signal.windows import hann   # the same window as CSI_doppler_computation.py / ドップラー計算と同じ窓
+        nn = np.arange(int(N))
+        w = hann(int(N))
+        resp = np.abs(np.array([np.sum(w * np.exp(-2j * np.pi * fi * nn)) for fi in f])) ** 2
+        theory = 10 * np.log10(resp / resp.max() + 1e-30)
+    path = os.path.join(out_dir, f"static_spectrum_{tag}.csv")
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        w_ = csv.writer(fh)
+        w_.writerow(["v(m/s)", "antenna1(dB)", "antenna2(dB)"] + (["hann_main_lobe(dB)"] if theory is not None else []))
+        for i in range(n):
+            w_.writerow([f"{v[i]:+.4f}", f"{rows[0][i]:.2f}", f"{rows[1][i]:.2f}"]
+                        + ([f"{theory[i]:.2f}"] if theory is not None else []))
+    log(f"  静止成分の広がり（ENMO が小さい {k} 区間、平均 {np.mean(y[quiet]):.0f} mG）: 0 m/s の山から {drop_db:g} dB 下がるのは "
+        f"|v| ≥ {edge[0]:.2f} m/s（antenna1）、{edge[1]:.2f} m/s（antenna2）。今の境目 {static_v:g} m/s"
+        + (f"（ハン窓 {int(N)} パケットの主ローブの端 {2 * float(res):.2f} m/s）" if theory is not None else ""), out)
+    if not plots:
+        return
+    plt = _setup_plt()
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    ax.plot(v, rows[0], color="#2A6FDB", lw=1.4, label="antenna1（実データ）")
+    ax.plot(v, rows[1], color="#D9822B", lw=1.4, label="antenna2（実データ）")
+    if theory is not None:
+        ax.plot(v, theory, color="#7F7F7F", lw=1.0, ls="--", label=f"ハン窓 {int(N)} パケットの応答（計算）")
+    ax.axvspan(-static_v, static_v, color="#BBBBBB", alpha=0.3, label=f"静止として除く |v| < {static_v:g} m/s")
+    ax.axhline(-drop_db, color="#333333", lw=0.8, ls=":")
+    ax.set_xlim(-2.5, 2.5)
+    ax.set_ylim(-45, 3)
+    ax.set_xlabel("速度 [m/s]")
+    ax.set_ylabel("ピークからの強さ [dB]")
+    ax.set_title(f"静かな区間（ENMO の小さい {k} 区間）の平均スペクトル: {tag}", fontsize=10)
+    ax.legend(fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, f"static_spectrum_{tag}.png"), dpi=110)
+    plt.close(fig)
+
+
 def _setup_plt():
     import warnings
     import matplotlib
@@ -1238,7 +1394,7 @@ def _plots(out_dir, results):
                      + ("" if r["split"] == "試行ごと" else f"\n{r['split']}"))
         fig.tight_layout()
         fig.savefig(os.path.join(out_dir, f"pred_{_split_tag(r['split'])}{r['variant']}_{r['window']:g}s_{r['model']}_"
-                                          f"{r['features'].split()[0]}.png"), dpi=110)
+                                          f"{r['features'].split()[0].replace('/', '_')}.png"), dpi=110)
         plt.close(fig)
     # comparison / 比較
     groups = list(dict.fromkeys((r["variant"], r["window"], r["split"]) for r in results))
@@ -1304,9 +1460,16 @@ def main(argv=None):
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS),
                     help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）など）")
-    ap.add_argument("--features", default="A,B",
-                    help="CNN 以外のモデルの特徴量（既定 A,B。ほかに C: 速さの時間微分、D: 1 秒の中の時間変化、"
-                         "E: 強さをそろえたスペクトル。組み合わせは A+B、A+D など。B+D@1 で前後 1 区間の特徴量も並べる）")
+    ap.add_argument("--static_v", type=float, default=STATIC_V,
+                    help=f"特徴量 F で静止とみなす速さ [m/s]（|v| がこれ未満のビンを静止として除く。既定 {STATIC_V:g} = "
+                         "ハン窓の主ローブの端、速度分解能の約 2 倍）")
+    ap.add_argument("--deriv_window", default=f"{DERIV_WINDOW:g}",
+                    help=f"特徴量 F の微分の窓 [s]（Savitzky-Golay。既定 {DERIV_WINDOW:g}。0.1,0.2,0.4 のように複数で比べる）")
+    ap.add_argument("--features", default="F1,F2a,F2b",
+                    help="CNN 以外のモデルの特徴量（既定 F1,F2a,F2b = 特徴量 F: 動いているビンで足したドップラーの時間微分の "
+                         "1 秒平均。F1: log10 Σ_動 D、F2a: Σ_動 |v| D ÷ Σ_静止 D、F2b: 平均の速さ。前の特徴量 A: 平均スペクトル、"
+                         "B: 物理特徴量、C: 速さの時間微分、D: 1 秒の中の時間変化、E: 強さをそろえたスペクトルも指定すれば使える。"
+                         "組み合わせは F1+F2a、A+D など。B+D@1 で前後 1 区間の特徴量も並べる）")
     ap.add_argument("--target", choices=list(TARGETS), default="waist",
                     help="正解にする ENMO（既定 waist = 腰の ENMO。body = 全身の ENMO（腰・大腿・下腿・手首の 4 台の合計。"
                          "加速度計算ソフト v2.0 で 4 台そろった試行だけ）")
