@@ -715,12 +715,32 @@ def make_tabular(kind, seed):
     raise ValueError(kind)
 
 
-def _cnn_model(tf, shape, kind):
+def _gain_jitter_layer(tf, scale):
+    """Layer that, only while training, adds a random offset to the moving bins of each window:
+    x + u * scale, u ~ U(-1, 1) drawn per window and per channel. scale (1, 1, bins, channels) is
+    the jitter in the CNN's normalised input units (0 for the static bins and the mark channel).
+    学習のときだけ、区間ごと・チャネルごとに動いている速度ビンへランダムな量を足す層（テストでは何もしない）"""
+    class GainJitter(tf.keras.layers.Layer):
+        def __init__(self, **kw):
+            super().__init__(**kw)
+            self.scale = tf.constant(scale, tf.float32)
+
+        def call(self, x, training=None):
+            if not training:
+                return x
+            u = tf.random.uniform(tf.stack([tf.shape(x)[0], 1, 1, tf.shape(x)[-1]]), -1.0, 1.0)
+            return x + u * self.scale
+    return GainJitter(name="gain_jitter")
+
+
+def _cnn_model(tf, shape, kind, jitter=None):
     """2D CNN on (frames x bins x channels), or 1D CNN along time on (frames x features).
     2 次元 CNN（時間 x 速度 x チャネル）、または時間方向だけの 1 次元 CNN（時間 x 特徴）"""
     L = tf.keras.layers
     inp = L.Input(shape=shape)
     x = inp
+    if jitter is not None and kind != "1d":
+        x = _gain_jitter_layer(tf, jitter)(x)
     if kind == "1d":
         for i, (n, k) in enumerate(((32, 5), (64, 5), (64, 3))):
             x = L.BatchNormalization()(L.Conv1D(n, k, padding="same")(x))
@@ -739,11 +759,25 @@ def _cnn_model(tf, shape, kind):
     return tf.keras.Model(inp, L.Dense(1)(x))
 
 
-def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False):
+def jitter_mask(v, static_v, n_ch, n_ant=2):
+    """Where --gain_jitter acts: the moving bins (|v| >= static_v) of the antenna channels, shape
+    (1, 1, bins, channels); the mark channel of cnn3s / cnn5s is left alone.
+    強さのゆらぎを掛ける場所: アンテナのチャネルの、動いている速度ビン（区間の印のチャネルには掛けない）"""
+    m = np.zeros((1, 1, len(v), n_ch))
+    m[0, 0, np.abs(np.asarray(v)) >= static_v, :min(n_ant, n_ch)] = 1.0
+    return m
+
+
+def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False, jitter_db=0.0, jitter_mask_=None):
     """Train a small CNN and predict. With cam=True, also the Grad-CAM map of each test window
     (where in time x velocity the CNN looked; the same size as the input, max 1).
+    jitter_db > 0: while training, the moving bins (jitter_mask_) of each window and antenna are
+    raised or lowered by a random gain of up to +-jitter_db dB (the input is log10 power, so +g dB
+    = +g/10), so the CNN cannot rely on the absolute strength of the Doppler alone.
     小さな CNN を学習して予測する。cam=True なら、テストの区間ごとの Grad-CAM（CNN が時間 x 速度の
-    どこを見たか。入力と同じ大きさ、最大 1）も返す。戻り値 (予測, Grad-CAM または None)"""
+    どこを見たか。入力と同じ大きさ、最大 1）も返す。戻り値 (予測, Grad-CAM または None)。
+    jitter_db > 0 なら、学習のときだけ区間ごと・アンテナごとに動いている成分の強さを最大 ±jitter_db dB
+    ランダムに変える（入力は log10 なので +g dB は +g/10）。ドップラーの強さそのものに頼れなくする"""
     os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
     import tensorflow as tf
     tf.get_logger().setLevel("ERROR")
@@ -752,7 +786,10 @@ def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False):
     mu = Xtr.mean(axis=ax, keepdims=True)
     sd = Xtr.std(axis=ax, keepdims=True) + 1e-6
     ym, ys = ytr.mean(), ytr.std() + 1e-9
-    model = _cnn_model(tf, Xtr.shape[1:], kind)
+    jitter = None
+    if jitter_db > 0 and jitter_mask_ is not None and kind != "1d":
+        jitter = jitter_mask_ * (jitter_db / 10.0) / sd      # in normalised units / 正規化した入力の単位で
+    model = _cnn_model(tf, Xtr.shape[1:], kind, jitter)
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3), loss="mse")
     cb = [tf.keras.callbacks.EarlyStopping(patience=20, restore_best_weights=True)]
     model.fit(((Xtr - mu) / sd).astype(np.float32), (ytr - ym) / ys, validation_split=0.15, epochs=epochs,
@@ -904,6 +941,11 @@ def run(opts):
             feats = [f if not set(f.partition("@")[0].split("+")) & set(F_PARTS) else
                      f"{f.partition('@')[0]}/{w:g}s" + (f"@{f.partition('@')[2]}" if "@" in f else "")
                      for f in feats for w in (dws if set(f.partition("@")[0].split("+")) & set(F_PARTS) else [None])]
+    jitters = parse_jitter(getattr(opts, "gain_jitter", None) or "0")
+    if any(j > 0 for j in jitters) and any(m in CNN_KINDS for m in models):
+        log(f"CNN の学習で強さをゆらす: 区間ごと・アンテナごとに、動いている速度ビン（|v| ≥ {static_v:g} m/s）の強さを"
+            f"最大 ±{'/'.join(f'{j:g}' for j in jitters if j > 0)} dB ランダムに変える（テストの入力はそのまま。"
+            "1 次元 CNN には掛けない）" + ("。0 dB（ゆらさない）とも比べる" if 0.0 in jitters else ""), out)
     splits = parse_splits(getattr(opts, "split", None))
     for kind, tr_tok, te_tok in splits:  # check the names before the slow part / 時間の掛かる処理の前に名前を確かめる
         if tr_tok:
@@ -990,16 +1032,17 @@ def run(opts):
         if need_f:
             _static_check(out_dir, f"{variant}_{window:g}s", XA, y, trials[0]["v"], static_v, trials[0]["meta"], out,
                           plots=not opts.no_plots)
-        configs = [("baseline", "-")]
+        configs = [("baseline", "-", 0.0)]
         for m in models:
             if m in CNN_KINDS:
-                configs.append((m, CNN_FEAT[m]))
+                configs += [(m, CNN_FEAT[m] + (f" 強さ±{j:g}dB" if j > 0 else ""), j) for j in jitters
+                            if not (j > 0 and m == "cnn1d")]
             else:
-                configs += [(m, f) for f in feats]
+                configs += [(m, f, 0.0) for f in feats]
         for sp_label, folds in evals:
             if len(evals) > 1 or sp_label != "試行ごと":
                 log(f"  -- 学習とテスト: {sp_label}", out)
-            for model, feat in configs:
+            for model, feat, jit in configs:
                 t_start = time.time()
                 seeds = [opts.seed + k for k in range(n_seeds)] if model in CNN_KINDS else [opts.seed]
                 preds, skip = [], False
@@ -1016,8 +1059,9 @@ def run(opts):
                             Xin, ck = cnn_data(model)
                             want_cam = study and model == "cnn" and si == 0 and not opts.no_plots
                             try:
+                                jm = jitter_mask(trials[0]["v"], static_v, Xin.shape[-1]) if jit > 0 else None
                                 p_, cm = fit_predict_cnn(Xin[tr_i], y[tr_i], Xin[te_i], seed, opts.epochs, kind=ck,
-                                                         cam=want_cam)
+                                                         cam=want_cam, jitter_db=jit, jitter_mask_=jm)
                             except ImportError:
                                 log("  CNN: TensorFlow がないので飛ばします (pip install tensorflow)", out)
                                 skip = True
@@ -1058,7 +1102,7 @@ def run(opts):
                 per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
-                                    features=feat, **mt, per_trial=per, seconds=time.time() - t_start,
+                                    features=feat, jitter=jit, **mt, per_trial=per, seconds=time.time() - t_start,
                                     pred=pp, y=yy, tname=tn_, win=ww, target=target, **extra))
                 if imp_n:
                     imp = imp_sum / imp_n
@@ -1241,10 +1285,10 @@ def _save(out_dir, results, pred_rows, opts, out):
     if any(r.get("seed_metrics") for r in results):
         with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["doppler", "window(s)", "split", "model", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r"])
+            w.writerow(["doppler", "window(s)", "split", "model", "features", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r"])
             for r in results:
                 for k, m_ in enumerate(r.get("seed_metrics") or []):
-                    w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], opts.seed + k,
+                    w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], opts.seed + k,
                                 f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -1455,8 +1499,9 @@ def _plots(out_dir, results):
                      f"ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
                      + ("" if r["split"] == "試行ごと" else f"\n{r['split']}"))
         fig.tight_layout()
+        jtag = f"_jitter{r['jitter']:g}dB" if r.get("jitter", 0) > 0 else ""
         fig.savefig(os.path.join(out_dir, f"pred_{_split_tag(r['split'])}{r['variant']}_{r['window']:g}s_{r['model']}_"
-                                          f"{r['features'].split()[0].replace('/', '_')}.png"), dpi=110)
+                                          f"{r['features'].split()[0].replace('/', '_')}{jtag}.png"), dpi=110)
         plt.close(fig)
     # comparison / 比較
     groups = list(dict.fromkeys((r["variant"], r["window"], r["split"]) for r in results))
@@ -1468,7 +1513,8 @@ def _plots(out_dir, results):
                  "mlp": "MLP", "svr": "SVR", "gpr": "ガウス\n過程", "cnn": "CNN", "cnn_shuffle": "CNN\n時間入替",
                  "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒",
                  "cnn5s": "CNN\n前後2秒"}
-        labels = [short[r["model"]] + ("" if r["model"] in ["baseline"] + CNN_KINDS else f"\n特徴量{r['features']}")
+        labels = [short[r["model"]] + ((f"\n±{r['jitter']:g}dB" if r.get("jitter", 0) > 0 else "")
+                                       if r["model"] in ["baseline"] + CNN_KINDS else f"\n特徴量{r['features']}")
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
@@ -1503,6 +1549,19 @@ def parse_windows(text):
     if not ws or any(w <= 0 for w in ws):
         raise RegError(f"--windows の値が正しくありません（{text}）")
     return list(dict.fromkeys(ws))
+
+
+def parse_jitter(text):
+    """--gain_jitter: dB values, 0 = no jitter (e.g. "0,3,6"). / 強さのゆらぎの大きさ [dB]（0 はゆらさない）"""
+    if isinstance(text, (int, float)):
+        text = str(text)
+    try:
+        js = [float(x) for x in str(text).split(",") if x.strip()]
+    except ValueError:
+        raise RegError(f"--gain_jitter は dB の数字をカンマで区切って指定します（{text}）")
+    if not js or any(j < 0 or j > 20 for j in js):
+        raise RegError(f"--gain_jitter の値は 0〜20 dB です（{text}）")
+    return list(dict.fromkeys(js))
 
 
 def main(argv=None):
@@ -1544,6 +1603,10 @@ def main(argv=None):
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--cnn_seeds", type=int, default=1,
                     help="CNN を乱数の種を変えて何回学習するか（既定 1。例 5 で平均とばらつきを出し、予測は 5 回の平均）")
+    ap.add_argument("--gain_jitter", default="0",
+                    help="CNN の学習のとき、区間ごと・アンテナごとに動いている速度ビン（|v| ≥ --static_v）の強さを最大 ±この dB "
+                         "ランダムに変える（既定 0 = 変えない。テストの入力はそのまま）。測定した回ごとにドップラーの強さが違っても"
+                         "当たるようにするため。0,3,6 のように複数で比べる")
     ap.add_argument("--cnn_study", action="store_true",
                     help="CNN が効く理由を確かめる: 時間の順番を入れ替えた CNN・時間で平均した CNN・1 次元 CNN・"
                          "前後 1 秒も入れた CNN を足し、CNN が見た場所の図（Grad-CAM）を作る")

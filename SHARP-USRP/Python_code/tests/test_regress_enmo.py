@@ -16,6 +16,8 @@
       8. 特徴量 D・E: どちらも動き、試行ごとに受信の強さが違うとき E (強さをそろえたスペクトル) が A より良いこと
          (ランダムフォレストで比べる。線形回帰は強さの違いを係数で打ち消せるので差が出にくい)
       9. 特徴量の重要度 (--importance) と前後の区間の特徴量 (B+D@1) が出ること
+     10. CNN の強さのゆらぎ (--gain_jitter): 学習のときだけ、動いている速度ビンに区間ごと・アンテナごとの量を足し
+         (静止ビンと区間の印のチャネルはそのまま)、テストでは何もしないこと。0 dB と 3 dB の両方の結果が出ること
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -167,6 +169,46 @@ def check_cnn_study(tmp):
     good &= any(r["model"] == "cnn5s" for r in res5)
     print(f"  {'OK ' if good else 'NG '} CNN の確認: {', '.join(sorted(got))}、乱数の種 2 回、Grad-CAM の図 "
           f"{[f for f in files if f.startswith('cnn_gradcam_')]}")
+    return good
+
+
+def check_gain_jitter(tmp):
+    """--gain_jitter: the layer only moves the moving bins while training, and a run gives one result per value.
+    強さのゆらぎ: 学習のときだけ動いている速度ビンが動き、値ごとに結果が出ること"""
+    import importlib.util
+    if not importlib.util.find_spec("tensorflow"):
+        print("  (TensorFlow が無いので強さのゆらぎの確認は飛ばします)")
+        return True
+    import tensorflow as tf
+    v = np.linspace(-2, 2, 21)
+    m = ro.jitter_mask(v, 0.65, 3)                 # 2 antennas + the mark channel / アンテナ 2 本 + 区間の印
+    layer = ro._gain_jitter_layer(tf, m * 0.3)
+    x = np.zeros((64, 8, len(v), 3), np.float32)
+    on = layer(x, training=True).numpy()
+    off = layer(x, training=False).numpy()
+    mov = np.abs(v) >= 0.65
+    i = int(np.argmax(mov))                        # first moving bin / 最初の動いているビン
+    good = (np.all(off == 0) and np.all(on[:, :, ~mov] == 0) and np.all(on[..., 2] == 0)
+            and np.all(np.abs(on[:, :, mov, :2]) <= 0.3 + 1e-6) and on[:, :, mov, :2].std() > 0.05
+            and np.allclose(on[:, 0, i, :2], on[:, -1, i, :2])                     # same over time / 時間で一定
+            and abs(np.corrcoef(on[:, 0, i, 0], on[:, 0, i, 1])[0, 1]) < 0.5)       # antennas apart / アンテナ別
+    import argparse
+    inp = os.path.join(tmp, "in_jitter")
+    for k in range(4):
+        make_trial(inp, k)
+    res, out_dir = ro.run(argparse.Namespace(input=inp, out=os.path.join(tmp, "out_jitter"), doppler="nowinnorm",
+                                             models="cnn,cnn3s", features="B", windows=[1.0], blocks=5, epochs=3, seed=0,
+                                             no_plots=False, pairs=None, split=["T1,T2,T3:T4"], gain_jitter="0,3"))
+    got = sorted((r["model"], r["jitter"]) for r in res if r["model"] != "baseline")
+    preds = [f for f in os.listdir(out_dir) if f.startswith("pred_")]
+    good &= (got == [("cnn", 0.0), ("cnn", 3.0), ("cnn3s", 0.0), ("cnn3s", 3.0)]
+             and sum("jitter3dB" in f for f in preds) == 2 and len(preds) == 4)
+    try:
+        ro.parse_jitter("-1")
+        good = False
+    except ro.RegError:
+        pass
+    print(f"  {'OK ' if good else 'NG '} CNN の強さのゆらぎ: 結果 {got}、図 {len(preds)} 枚")
     return good
 
 
@@ -508,6 +550,7 @@ def main():
         ok &= check_similar_names(tmp)
         ok &= check_levels(tmp)
         ok &= check_cnn_study(tmp)
+        ok &= check_gain_jitter(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,svr,gpr,cnn"
