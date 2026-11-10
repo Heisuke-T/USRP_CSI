@@ -56,7 +56,6 @@
 
 import argparse
 import csv
-import difflib
 import glob
 import json
 import os
@@ -301,10 +300,12 @@ def discover(root, out, pairs_csv=None, exclude=EXCLUDE_DEFAULT):
             elif t["ds"] != g["ds"] and t["ds"] in ds_with_doppler:
                 continue  # never pair by name across datasets (A1_XR1 vs A2_XR1) / 名前ではデータセットをまたがない
             else:
+                # by name only when one name is the other plus a "_..." suffix: a similar name such as
+                # A3_XL1 vs A3_XR1 is another trial, never a match / 名前は「片方 + _…」のときだけ。
+                # A3_XL1 と A3_XR1 のような似た名前は別の試行なので組にしない
                 a, b = tn.lower(), pre.lower()
-                r = difflib.SequenceMatcher(None, a, b).ratio()
-                if b and (a == b or a in b or b in a or r >= 0.75):
-                    cand.append((1, 1.0 if a == b else r, tn, gk, "名前"))
+                if b and (a == b or a.startswith(b + "_") or b.startswith(a + "_")):
+                    cand.append((1, 1.0 if a == b else 0.9, tn, gk, "名前"))
     cand.sort(key=lambda c: (c[0], c[1]), reverse=True)
     used_t, used_g, specs = set(), set(), []
     for _, _, tn, gk, how in cand:
