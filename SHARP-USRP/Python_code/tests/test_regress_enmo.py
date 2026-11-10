@@ -308,6 +308,37 @@ def check_feature_f(tmp):
     return good
 
 
+def check_similar_names(tmp):
+    """A truth whose Doppler is missing is not paired with a similarly named one (A3_XL1 vs A3_XR1).
+    ドップラーがない正解データを、似た名前の別の試行（A3_XL1 と A3_XR1）と組にしない"""
+    import argparse
+    src = os.path.join(tmp, "src_sim")
+    for k in range(3):
+        make_trial(src, k)
+    root = os.path.join(tmp, "in_sim")
+    names = {0: ("A3_XL2", "A3_XL2"), 1: ("A3_XL1", "A3_XR1"), 2: ("A3_XL3", "A3_XL3")}   # T2's Doppler is XR1
+    for k, (truth, dop) in names.items():
+        tn = f"T{k + 1}"
+        tdir = os.path.join(root, "A3", "imu", truth)
+        os.makedirs(tdir, exist_ok=True)
+        ts = os.path.join(src, tn, "imu", f"{tn}_power_timeseries.csv")
+        shutil.copy(ts if os.path.exists(ts) else os.path.join(src, tn, f"{tn}_power_timeseries.csv"),
+                    os.path.join(tdir, f"{truth}_power_timeseries.csv"))
+        folder = ro.VARIANT_DIRS["nowinnorm"]
+        os.makedirs(os.path.join(root, "A3", folder), exist_ok=True)
+        for f in os.listdir(os.path.join(src, tn, folder)):
+            shutil.copy(os.path.join(src, tn, folder, f), os.path.join(root, "A3", folder, f.replace(tn, dop)))
+    res, out_dir = ro.run(argparse.Namespace(input=root, out=os.path.join(tmp, "out_sim"), doppler="nowinnorm",
+                                             models="linear", features="F2b", windows=[1.0], blocks=5, epochs=5,
+                                             seed=0, no_plots=True, pairs=None))
+    used = sorted(str(n) for n in set(res[0]["tname"]))
+    with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+        logtxt = f.read()
+    good = used == ["A3_XL2", "A3_XL3"] and "ドップラーが見つからない正解データ: A3_XL1" in logtxt
+    print(f"  {'OK ' if good else 'NG '} 似た名前の別の試行と組にしない: 使った試行 {used}（A3_XL1 は A3_XR1 と組にせず飛ばす）")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -431,6 +462,7 @@ def main():
         ok &= check_importance_context(tmp)
         ok &= check_target_body(tmp)
         ok &= check_feature_f(tmp)
+        ok &= check_similar_names(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
