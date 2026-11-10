@@ -497,6 +497,56 @@ def deriv_traces(d, static_v, deriv_windows):
     return out
 
 
+def trial_levels(d, a, b, static_v):
+    """Signal levels of one antenna over [a, b): medians over the frames of the static power (|v| < static_v),
+    the moving power, and the mean speed of the moving part. / 区間 [a, b) の強さ: 静止成分・動いている成分の強さと
+    動いている成分の平均の速さ（フレームの中央値）"""
+    sel = (d["t"] >= a) & (d["t"] < b)
+    P = np.clip(d["S"][sel], 0, None)
+    av = np.abs(d["v"])
+    st = av < static_v
+    p_st = P[:, st].sum(axis=1)
+    p_mov = P[:, ~st].sum(axis=1)
+    speed = (P[:, ~st] * av[~st]).sum(axis=1) / (p_mov + EPS)
+    return dict(static=float(np.median(p_st)), moving=float(np.median(p_mov)), speed=float(np.median(speed)),
+                rate=float(sel.sum() / max(b - a, 1e-9)))
+
+
+def _log_levels(trials, out, out_dir):
+    """Table of the signal levels of every trial, in dB from the first dataset's average.
+    試行ごとの強さの表（最初のデータセットの平均からの dB）"""
+    ds = lambda n: n.split("_")[0]   # noqa: E731
+    ref_ds = ds(trials[0]["name"])
+    ref = {}
+    for a in (0, 1):
+        for k in ("static", "moving"):
+            ref[(a, k)] = np.mean([10 * np.log10(tr["levels"][a][k] + EPS) for tr in trials if ds(tr["name"]) == ref_ds])
+    log(f"\n[試行ごとの強さ]（静止 = |v| が境目未満のビン、動 = それ以上のビンの、フレームごとの合計の中央値。"
+        f"dB は {ref_ds} の平均から。速さ = 動いている成分の平均の速さの中央値）", out)
+    log("  試行        ENMO平均   ant1 静止  ant1 動  ant1 動-静止  ant1 速さ   ant2 静止  ant2 動  ant2 動-静止  "
+        "ant2 速さ  パケット/秒", out)
+    rows = []
+    for tr in trials:
+        lv = tr["levels"]
+        vals = []
+        for a in (0, 1):
+            st = 10 * np.log10(lv[a]["static"] + EPS) - ref[(a, "static")]
+            mv = 10 * np.log10(lv[a]["moving"] + EPS) - ref[(a, "moving")]
+            ratio = 10 * np.log10((lv[a]["moving"] + EPS) / (lv[a]["static"] + EPS))
+            vals += [st, mv, ratio, lv[a]["speed"]]
+        rate = lv[0]["rate"]
+        rows.append([tr["name"], float(np.mean(tr["y"]))] + vals + [rate])
+        log(f"  {tr['name']:10s} {np.mean(tr['y']):8.0f}   {vals[0]:+7.1f}  {vals[1]:+7.1f}  {vals[2]:+9.1f}    "
+            f"{vals[3]:6.2f}    {vals[4]:+7.1f}  {vals[5]:+7.1f}  {vals[6]:+9.1f}    {vals[7]:6.2f}    {rate:6.0f}", out)
+    with open(os.path.join(out_dir, "trial_levels.csv"), "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["trial", "ENMO_mean(mG)"] + [f"ant{a}_{k}" for a in (1, 2) for k in
+                                                  ("static(dB)", "moving(dB)", "moving_minus_static(dB)", "speed(m/s)")]
+                   + ["frames_per_s"])
+        for r in rows:
+            w.writerow([r[0]] + [f"{x:.4g}" for x in r[1:]])
+
+
 def deriv_features(tr, a, b):
     """Feature F of one window: the mean of |derivative| inside [a, b). / 区間の中の |微分| の平均"""
     m = (tr["tu"] >= a) & (tr["tu"] < b)
@@ -540,7 +590,7 @@ def cnn_input(S, t, a, b):
 
 
 def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET,
-                need_f=None):
+                need_f=None, static_v=STATIC_V):
     """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
@@ -621,6 +671,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
                 XN=np.array(XN),
                 XNctx={c: np.array(v) for c, v in XNctx.items()}, y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"], meta=ants[0]["meta"],
+                levels=[trial_levels(d, kept[0][0], kept[-1][1], static_v) for d in ants],
                 XF={k: np.array(v, float) for k, v in XF.items()})
 
 
@@ -866,13 +917,16 @@ def run(opts):
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
                                   need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column,
-                                  need_f=need_f)
+                                  need_f=need_f, static_v=static_v)
                       for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
                 log(f"  この版は飛ばします: {e}", out)
                 continue
             raise
+        _log_levels(trials, out, out_dir)
+        if getattr(opts, "levels_only", False):
+            continue
         XA = np.concatenate([tr["XA"] for tr in trials])
         XB = np.concatenate([tr["XB"] for tr in trials])
         XC = np.concatenate([tr["XC"] for tr in trials])
@@ -1027,6 +1081,13 @@ def run(opts):
                 for i in range(len(yy)):
                     pred_rows.append([variant, f"{window:g}", sp_label, model, feat, tn_[i], f"{ww[i][0]:.3f}",
                                       f"{ww[i][1]:.3f}", f"{yy[i]:.3f}", f"{pp[i]:.3f}"])
+    if getattr(opts, "levels_only", False):   # only the level table / 強さの表だけ
+        with open(os.path.join(out_dir, "config.json"), "w", encoding="utf-8") as f:
+            json.dump(vars(opts), f, ensure_ascii=False, indent=2)
+        log(f"\n保存しました: {out_dir}（trial_levels.csv）", out)
+        with open(os.path.join(out_dir, "log.txt"), "w", encoding="utf-8") as f:
+            f.write("\n".join(out) + "\n")
+        return [], out_dir
     if not results:
         raise RegError("どの版でも計算できませんでした")
     _save(out_dir, results, pred_rows, opts, out)
@@ -1489,6 +1550,8 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=0, help="乱数の種（既定 0）")
     ap.add_argument("--importance", action="store_true",
                     help="ランダムフォレストと XGBoost の特徴量の重要度を出す（importance.csv・importance_groups.csv・図）")
+    ap.add_argument("--levels_only", action="store_true",
+                    help="試行ごとの強さ（静止成分・動いている成分・平均の速さ）の表だけを出して終わる（学習しない。trial_levels.csv）")
     ap.add_argument("--no_plots", action="store_true", help="図を作らない")
     opts = ap.parse_args(argv)
     try:

@@ -339,6 +339,49 @@ def check_similar_names(tmp):
     return good
 
 
+def check_levels(tmp):
+    """--levels_only: the per-trial level table shows each trial's receive gain (static part) and exits.
+    試行ごとの強さの表: 試行ごとの受信の強さ（静止成分）が出て、学習せずに終わる"""
+    import argparse
+    root = os.path.join(tmp, "in_lv")
+    v = (np.arange(N_FFT) - N_FFT // 2) * DV
+    gains = (1.0, 2.0, 0.5)
+    for k, gain in enumerate(gains):
+        name = f"A{k + 1}_XL1"
+        folder = os.path.join(root, name, ro.VARIANT_DIRS["nowinnorm"])
+        os.makedirs(folder)
+        t_frames = np.arange(0, 80.5, FRAME_DT)
+        s_ = intensity(t_frames, k)
+        for ant in ("antenna1", "antenna2"):
+            S = gain * (np.exp(-0.5 * (v[None, :] / (0.15 + 0.6 * s_[:, None])) ** 2) * s_[:, None]
+                        + 3.0 * (np.abs(v) < 1e-9)[None, :]) + 1e-4
+            base = os.path.join(folder, f"{name}_{ant}_stream_0")
+            with open(base + ".txt", "wb") as fp:
+                pickle.dump(S, fp)
+            np.save(base + "_time.npy", t_frames)
+            with open(base + "_meta.json", "w") as fp:
+                json.dump(dict(delta_v_bin=DV, n_fft=N_FFT, time_origin_s=0.0), fp)
+        t50 = np.arange(0, 80.0, 0.02)
+        with open(os.path.join(root, name, f"{name}_power_timeseries.csv"), "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_csi(s)", "t_imu(s)", "ENMO(mG)"])
+            for a in t50:
+                w.writerow([f"{a:.4f}", f"{a + 40:.4f}", f"{60 * intensity(a, k):.3f}"])
+    out_dir = os.path.join(tmp, "out_lv")
+    res, _ = ro.run(argparse.Namespace(input=root, out=out_dir, doppler="nowinnorm", models="linear,cnn",
+                                       features="F2b", windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True,
+                                       pairs=None, levels_only=True))
+    with open(os.path.join(out_dir, "trial_levels.csv"), encoding="utf-8") as f:
+        rows = {r["trial"]: r for r in csv.DictReader(f)}
+    st = {k: float(r["ant1_static(dB)"]) for k, r in rows.items()}
+    want = {f"A{k + 1}_XL1": 10 * np.log10(g) for k, g in enumerate(gains)}
+    good = (res == [] and all(abs(st[k] - want[k]) < 0.6 for k in want)   # slow motion also falls in the static bins / 遅い動きも静止ビンに入る分
+            and not any(f.startswith("metrics") for f in os.listdir(out_dir)))
+    print(f"  {'OK ' if good else 'NG '} 試行ごとの強さの表（--levels_only）: 静止成分 "
+          + "、".join(f"{k} {st[k]:+.1f} dB（受信の強さ {want[k]:+.1f} dB）" for k in sorted(st)) + "、学習はしない")
+    return good
+
+
 def check_two_datasets(tmp):
     """regression_input/A1 and A2 side by side, and --split. / A1 と A2 を並べて置き、学習とテストを指定する"""
     import argparse
@@ -463,6 +506,7 @@ def main():
         ok &= check_target_body(tmp)
         ok &= check_feature_f(tmp)
         ok &= check_similar_names(tmp)
+        ok &= check_levels(tmp)
         ok &= check_cnn_study(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
