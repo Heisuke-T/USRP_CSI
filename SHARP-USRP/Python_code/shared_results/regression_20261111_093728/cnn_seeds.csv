@@ -1,0 +1,81 @@
+doppler,window(s),split,model,features,seed,MAE(mG),RMSE(mG),R2,r
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±3dB,0,1639.993,1946.921,0.2275,0.7635
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±3dB,1,1442.323,1799.804,0.3399,0.7686
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±3dB,2,1418.833,1774.230,0.3585,0.7593
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±3dB,3,1360.599,1718.680,0.3980,0.7497
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±3dB,4,1347.852,1721.175,0.3963,0.7515
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±6dB,0,1603.216,1920.118,0.2487,0.7777
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±6dB,1,1372.647,1691.958,0.4166,0.8064
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±6dB,2,1569.217,1876.163,0.2827,0.7848
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±6dB,3,1468.737,1792.232,0.3454,0.7586
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN,Doppler 2D 強さ±6dB,4,1671.492,1981.911,0.1995,0.7636
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,0,1997.982,2282.041,-0.0613,0.7513
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,1,1465.677,1758.660,0.3697,0.8080
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,2,1665.051,1918.013,0.2503,0.8172
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,3,2117.757,2341.672,-0.1175,0.8344
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,4,1685.680,1926.648,0.2435,0.8035
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,0,2137.996,2408.255,-0.1819,0.7442
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,1,1448.877,1755.642,0.3719,0.8036
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,2,1647.899,1911.819,0.2551,0.8058
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,3,1967.228,2171.970,0.0386,0.8352
+nowinnorm,1,学習 A2+A3+A4 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,4,1974.483,2186.859,0.0254,0.8221
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±3dB,0,584.430,776.926,0.8850,0.9456
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±3dB,1,664.082,859.888,0.8591,0.9379
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±3dB,2,943.512,1332.515,0.6617,0.9447
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±3dB,3,669.240,899.478,0.8459,0.9326
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±3dB,4,639.247,947.628,0.8289,0.9516
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±6dB,0,577.645,821.799,0.8713,0.9379
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±6dB,1,723.579,994.064,0.8117,0.9371
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±6dB,2,596.720,775.239,0.8855,0.9466
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±6dB,3,598.872,896.790,0.8468,0.9322
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN,Doppler 2D 強さ±6dB,4,550.677,810.491,0.8749,0.9414
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,0,553.782,776.100,0.8852,0.9451
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,1,629.857,882.825,0.8515,0.9492
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,2,551.752,778.620,0.8845,0.9507
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,3,572.299,783.100,0.8832,0.9533
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,4,672.442,949.599,0.8282,0.9411
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,0,713.867,1047.744,0.7909,0.8911
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,1,708.913,998.743,0.8100,0.9530
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,2,539.362,734.222,0.8973,0.9545
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,3,601.445,849.447,0.8625,0.9549
+nowinnorm,1,学習 A1+A3+A4 → テスト A2,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,4,617.611,846.832,0.8634,0.9446
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±3dB,0,590.686,773.510,0.8058,0.9167
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±3dB,1,624.606,833.985,0.7742,0.9198
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±3dB,2,485.591,654.599,0.8609,0.9335
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±3dB,3,580.306,746.737,0.8190,0.9327
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±3dB,4,819.035,1030.317,0.6554,0.9118
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±6dB,0,542.569,732.401,0.8259,0.9127
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±6dB,1,567.632,727.726,0.8281,0.9203
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±6dB,2,762.521,926.177,0.7215,0.8974
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±6dB,3,579.895,756.181,0.8144,0.9418
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN,Doppler 2D 強さ±6dB,4,638.251,815.353,0.7842,0.9316
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,0,526.456,687.027,0.8468,0.9255
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,1,529.293,666.052,0.8560,0.9318
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,2,691.789,855.745,0.7623,0.9226
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,3,521.920,691.797,0.8446,0.9442
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,4,805.891,948.012,0.7083,0.9216
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,0,523.863,685.650,0.8474,0.9209
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,1,541.398,672.944,0.8530,0.9270
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,2,559.450,719.558,0.8319,0.9133
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,3,563.308,728.501,0.8277,0.9365
+nowinnorm,1,学習 A1+A2+A4 → テスト A3,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,4,672.588,820.874,0.7813,0.9071
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±3dB,0,647.268,966.199,0.8059,0.9303
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±3dB,1,856.701,1181.400,0.7097,0.9318
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±3dB,2,799.786,1145.172,0.7273,0.9442
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±3dB,3,817.714,1201.726,0.6997,0.9326
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±3dB,4,678.265,953.518,0.8109,0.9468
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±6dB,0,615.497,936.559,0.8176,0.9339
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±6dB,1,739.202,1078.708,0.7580,0.9371
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±6dB,2,752.657,1074.934,0.7597,0.9466
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±6dB,3,780.870,1164.541,0.7180,0.9333
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN,Doppler 2D 強さ±6dB,4,651.970,946.084,0.8139,0.9388
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,0,543.187,757.303,0.8807,0.9558
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,1,655.985,891.376,0.8348,0.9596
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,2,774.860,1043.985,0.7733,0.9573
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,3,770.147,1136.540,0.7314,0.9207
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,4,746.583,1031.458,0.7787,0.9604
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,0,629.813,871.168,0.8422,0.9510
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,1,730.542,1019.280,0.7839,0.9493
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,2,650.196,875.835,0.8405,0.9469
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,3,645.528,927.102,0.8212,0.9450
+nowinnorm,1,学習 A1+A2+A3 → テスト A4,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±6dB,4,575.779,806.187,0.8648,0.9578
