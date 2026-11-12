@@ -18,6 +18,7 @@
       9. 特徴量の重要度 (--importance) と前後の区間の特徴量 (B+D@1) が出ること
      10. CNN の強さのゆらぎ (--gain_jitter): 学習のときだけ、動いている速度ビンに区間ごと・アンテナごとの量を足し
          (静止ビンと区間の印のチャネルはそのまま)、テストでは何もしないこと。0 dB と 3 dB の両方の結果が出ること
+     11. MAPE: 正解が --mape_min 未満の区間を除いて計算し、表 (metrics.csv) に MAPE(%) の列が出ること
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -209,6 +210,30 @@ def check_gain_jitter(tmp):
     except ro.RegError:
         pass
     print(f"  {'OK ' if good else 'NG '} CNN の強さのゆらぎ: 結果 {got}、図 {len(preds)} 枚")
+    return good
+
+
+def check_mape(tmp):
+    """MAPE leaves out the near-zero truths and is written to metrics.csv. / MAPE: 小さい正解を除き、表に出ること"""
+    m = ro.metrics([0.0, 10.0, 100.0, 200.0], [30.0, 40.0, 110.0, 180.0], mape_min=50)
+    good = abs(m["MAPE"] - 10.0) < 1e-9 and m["MAPE_n"] == 2
+    m0 = ro.metrics([100.0, 200.0], [100.0, 200.0], mape_min=50)
+    good &= m0["MAPE"] == 0.0
+    import argparse
+    inp = os.path.join(tmp, "in_mape")
+    for k in range(4):
+        make_trial(inp, k)
+    out_dir = os.path.join(tmp, "out_mape")
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="linear", features="B",
+                                       windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False, pairs=None,
+                                       split=["T1,T2,T3:T4"], mape_min=20.0))
+    with open(os.path.join(out_dir, "metrics.csv"), encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    lin = [r for r in rows if r["model"].startswith("線形")][0]
+    good &= ("MAPE(%)" in rows[0] and float(lin["MAPE(%)"]) > 0 and lin["MAPE_min(mG)"] == "20"
+             and int(lin["MAPE_windows"]) <= sum(1 for _ in res[0]["y"]))
+    print(f"  {'OK ' if good else 'NG '} MAPE: 例 {m['MAPE']:.1f} %（{m['MAPE_n']} 区間）、線形回帰 {float(lin['MAPE(%)']):.1f} %"
+          f"（{lin['MAPE_windows']} 区間、正解 {lin['MAPE_min(mG)']} mG 以上）")
     return good
 
 
@@ -551,6 +576,7 @@ def main():
         ok &= check_levels(tmp)
         ok &= check_cnn_study(tmp)
         ok &= check_gain_jitter(tmp)
+        ok &= check_mape(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,svr,gpr,cnn"

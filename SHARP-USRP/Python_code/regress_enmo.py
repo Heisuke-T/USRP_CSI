@@ -91,6 +91,9 @@ TARGET_JA = {"waist": "腰の ENMO", "body": "全身の ENMO（腰・大腿・�
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
 ACC_FC = 6.0             # feature C: low-pass before differentiating [Hz] / 特徴量 C: 微分の前の平滑化
 EPS = 1e-12
+# MAPE: windows whose true ENMO is below this are left out (ENMO is ~0 when still, so error / truth blows up)
+# MAPE（平均絶対パーセント誤差）: 正解がこれ未満の区間は除く（静止で ENMO ≈ 0 になり、誤差 ÷ 正解が発散するため）
+MAPE_MIN = 50.0
 
 
 class RegError(Exception):
@@ -812,13 +815,18 @@ def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False, jitter_db
     return pred, np.concatenate(maps).astype(np.float32)
 
 
-def metrics(y, p):
+def metrics(y, p, mape_min=None):
+    """MAE, RMSE, R2, r and MAPE [%] (MAPE only over windows with |truth| >= mape_min; MAPE_n = their count).
+    MAE・RMSE・R²・r と MAPE [%]（MAPE は正解が mape_min 以上の区間だけ。MAPE_n はその区間の数）"""
     y, p = np.asarray(y, float), np.asarray(p, float)
     err = p - y
     ss = np.sum((y - y.mean()) ** 2)
     r = float(np.corrcoef(y, p)[0, 1]) if np.std(p) > 0 and np.std(y) > 0 else float("nan")
+    lo = MAPE_MIN if mape_min is None else mape_min
+    m = np.abs(y) >= max(lo, EPS)
+    mape = float(np.mean(np.abs(err[m]) / np.abs(y[m])) * 100) if m.any() else float("nan")
     return dict(MAE=float(np.mean(np.abs(err))), RMSE=float(np.sqrt(np.mean(err ** 2))),
-                R2=float(1 - np.sum(err ** 2) / ss) if ss > 0 else float("nan"), r=r)
+                R2=float(1 - np.sum(err ** 2) / ss) if ss > 0 else float("nan"), r=r, MAPE=mape, MAPE_n=int(m.sum()))
 
 
 # ============================================================ run
@@ -887,6 +895,7 @@ def make_evaluations(splits, trials, specs, tname, blocks, out):
 
 
 def run(opts):
+    global MAPE_MIN
     out = []
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_dir = opts.out or os.path.join(HERE, "outputs", f"regression_{stamp}")
@@ -900,6 +909,8 @@ def run(opts):
         raise RegError(f"--target は {' / '.join(TARGETS)} です（{target}）")
     column = TARGETS[target]
     log(f"正解: {TARGET_JA[target]}（列 {column}）", out)
+    MAPE_MIN = float(getattr(opts, "mape_min", None) if getattr(opts, "mape_min", None) is not None else 50.0)
+    log(f"MAPE（平均絶対パーセント誤差）: 正解が {MAPE_MIN:g} mG 未満の区間は除いて計算（静止で ENMO ≈ 0 になり割り算が発散するため）", out)
     if target != "waist":
         # trials without the whole-body ENMO (fewer than four sensors) are left out / 全身の ENMO がない試行は使わない
         lack = [sp["name"] for sp in specs if not has_target(sp, opts.windows[0], column)]
@@ -1098,7 +1109,8 @@ def run(opts):
                 seed_m = [metrics(yy, p_[te]) for p_ in preds] if len(preds) > 1 else []
                 extra = dict(n_seeds=len(preds), seed_metrics=seed_m,
                              MAE_sd=float(np.std([m_["MAE"] for m_ in seed_m])) if seed_m else float("nan"),
-                             R2_sd=float(np.std([m_["R2"] for m_ in seed_m])) if seed_m else float("nan"))
+                             R2_sd=float(np.std([m_["R2"] for m_ in seed_m])) if seed_m else float("nan"),
+                             MAPE_sd=float(np.std([m_["MAPE"] for m_ in seed_m])) if seed_m else float("nan"))
                 per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
@@ -1107,13 +1119,14 @@ def run(opts):
                 if imp_n:
                     imp = imp_sum / imp_n
                     results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
-                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mG  RMSE {mt['RMSE']:7.2f}  "
+                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mG  MAPE {mt['MAPE']:6.1f} %  RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
                 if seed_m:
                     each = ", ".join("%.2f" % m_["R2"] for m_ in seed_m)
                     log(f"      乱数の種 {len(seed_m)} 回: R² {np.mean([m_['R2'] for m_ in seed_m]):.3f} ± {extra['R2_sd']:.3f}"
                         f"（{each}）、MAE {np.mean([m_['MAE'] for m_ in seed_m]):.1f}"
-                        f" ± {extra['MAE_sd']:.1f} mG。上の値は {len(seed_m)} 回の予測の平均", out)
+                        f" ± {extra['MAE_sd']:.1f} mG、MAPE {np.mean([m_['MAPE'] for m_ in seed_m]):.1f} ± {extra['MAPE_sd']:.1f} %。"
+                        f"上の値は {len(seed_m)} 回の予測の平均", out)
                 if gp_sd is not None:
                     sdv = gp_sd[te]
                     cover = float(np.mean(np.abs(yy - pp) <= 1.96 * sdv))
@@ -1275,28 +1288,32 @@ def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mG)", "RMSE(mG)", "R2", "r", "seconds",
-                    "n_seeds", "MAE_sd(mG)", "R2_sd", "target"])
+                    "n_seeds", "MAE_sd(mG)", "R2_sd", "target", "MAPE(%)", "MAPE_sd(%)", "MAPE_windows", "MAPE_min(mG)"])
         for r in results:
             sd_ = r.get("seed_metrics")
             w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
                         f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}",
                         r.get("n_seeds", 1), f"{r['MAE_sd']:.3f}" if sd_ else "", f"{r['R2_sd']:.4f}" if sd_ else "",
-                        r.get("target", "waist")])
+                        r.get("target", "waist"), f"{r['MAPE']:.2f}", f"{r['MAPE_sd']:.2f}" if sd_ else "",
+                        r.get("MAPE_n", ""), f"{MAPE_MIN:g}"])
     if any(r.get("seed_metrics") for r in results):
         with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["doppler", "window(s)", "split", "model", "features", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r"])
+            w.writerow(["doppler", "window(s)", "split", "model", "features", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r",
+                        "MAPE(%)"])
             for r in results:
                 for k, m_ in enumerate(r.get("seed_metrics") or []):
                     w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], opts.seed + k,
-                                f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}"])
+                                f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}",
+                                f"{m_['MAPE']:.2f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mG)", "RMSE(mG)", "R2", "r"])
+        w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mG)", "RMSE(mG)", "R2", "r",
+                    "MAPE(%)"])
         for r in results:
             for tn, m in r["per_trial"].items():
                 w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], tn, f"{m['MAE']:.3f}",
-                            f"{m['RMSE']:.3f}", f"{m['R2']:.4f}", f"{m['r']:.4f}"])
+                            f"{m['RMSE']:.3f}", f"{m['R2']:.4f}", f"{m['r']:.4f}", f"{m['MAPE']:.2f}"])
     with open(os.path.join(out_dir, "predictions.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
@@ -1309,7 +1326,7 @@ def _save(out_dir, results, pred_rows, opts, out):
                    key=lambda r: r["MAE"], default=None)
         if best:
             log(f"\n[{sp}] {wl:g} 秒の区間で一番誤差が小さかったのは {best['label']}（特徴量 {best['features']}、"
-                f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mG、R² {best['R2']:.3f}", out)
+                f"ドップラー {best['variant']}）: MAE {best['MAE']:.2f} mG、MAPE {best['MAPE']:.1f} %、R² {best['R2']:.3f}", out)
 
 
 # ============================================================ plots
@@ -1479,7 +1496,7 @@ def _plots(out_dir, results):
             ax.plot(mid, r["y"][m], color="#333333", lw=1.4, label="正解（ENMO）")
             ax.plot(mid, r["pred"][m], color=colors[r["model"]], lw=1.2, label="予測")
             pt = r["per_trial"][tn]
-            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mG / R² {pt['R2']:.2f}", loc="left", fontsize=10)
+            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mG / MAPE {pt['MAPE']:.0f} % / R² {pt['R2']:.2f}", loc="left", fontsize=10)
             ax.set_ylabel("ENMO [mG]")
             if i == 0:
                 ax.legend(loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=2, fontsize=9, frameon=False)
@@ -1493,7 +1510,7 @@ def _plots(out_dir, results):
         ax.plot([lo, hi], [lo, hi], color="#333333", lw=0.8, ls="--")
         ax.set_xlabel("正解 [mG]")
         ax.set_ylabel("予測 [mG]")
-        ax.set_title(f"全体: MAE {r['MAE']:.1f} mG / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
+        ax.set_title(f"全体: MAE {r['MAE']:.1f} mG / MAPE {r['MAPE']:.0f} % / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
         fig.suptitle(f"{r['label']}（正解 {TARGET_JA[r.get('target', 'waist')].split('（')[0]}、特徴量 {r['features']}、"
                      f"ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
@@ -1506,7 +1523,7 @@ def _plots(out_dir, results):
     # comparison / 比較
     groups = list(dict.fromkeys((r["variant"], r["window"], r["split"]) for r in results))
     nmax = max(sum(1 for r in results if (r["variant"], r["window"], r["split"]) == g) for g in groups)
-    fig, ax = plt.subplots(len(groups), 2, figsize=(max(14, 1.25 * nmax), 4.2 * len(groups)), squeeze=False)
+    fig, ax = plt.subplots(len(groups), 3, figsize=(max(20, 1.8 * nmax), 4.2 * len(groups)), squeeze=False)
     for vi, (var, wl, sp) in enumerate(groups):
         rs = [r for r in results if r["variant"] == var and r["window"] == wl and r["split"] == sp]
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
@@ -1518,17 +1535,19 @@ def _plots(out_dir, results):
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
-        for j, (key, unit) in enumerate((("MAE", " [mG]（小さいほど良い）"), ("R2", "（1 に近いほど良い）"))):
+        for j, (key, unit) in enumerate((("MAE", " [mG]（小さいほど良い）"),
+                                         ("MAPE", f" [%]（小さいほど良い。正解 {MAPE_MIN:g} mG 以上の区間）"),
+                                         ("R2", "（1 に近いほど良い）"))):
             vals = [r[key] for r in rs]
             ax[vi, j].bar(x, vals, color=cols)
             for xi, val, r in zip(x, vals, rs):
                 txt = f"{val:.2f}" if key == "R2" else f"{val:.1f}"
                 if r.get("seed_metrics"):  # spread over the seeds / 乱数の種によるばらつき
-                    txt += f"\n±{r['R2_sd']:.2f}" if key == "R2" else f"\n±{r['MAE_sd']:.1f}"
+                    txt += "\n±" + (f"{r['R2_sd']:.2f}" if key == "R2" else f"{r[key + '_sd']:.1f}")
                 ax[vi, j].text(xi, val, txt, ha="center", va="bottom" if val >= 0 else "top", fontsize=8)
             ax[vi, j].set_xticks(x)
             ax[vi, j].set_xticklabels(labels, fontsize=9)
-            ax[vi, j].set_ylabel(("R²" if key == "R2" else key) + unit)
+            ax[vi, j].set_ylabel(("R²" if key == "R2" else key) + unit, fontsize=9)
             ax[vi, j].set_title(f"ドップラー: {var}、区間 {wl:g} 秒" + ("" if sp == "試行ごと" else f"、{sp}"),
                                 loc="left", fontsize=10)
             if key == "R2":
@@ -1603,6 +1622,9 @@ def main(argv=None):
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--cnn_seeds", type=int, default=1,
                     help="CNN を乱数の種を変えて何回学習するか（既定 1。例 5 で平均とばらつきを出し、予測は 5 回の平均）")
+    ap.add_argument("--mape_min", type=float, default=MAPE_MIN,
+                    help=f"MAPE（平均絶対パーセント誤差）を計算するときに除く、正解の ENMO の下限 [mG]（既定 {MAPE_MIN:g}。"
+                         "静止で ENMO ≈ 0 の区間は誤差 ÷ 正解が発散するため除く）")
     ap.add_argument("--gain_jitter", default="0",
                     help="CNN の学習のとき、区間ごと・アンテナごとに動いている速度ビン（|v| ≥ --static_v）の強さを最大 ±この dB "
                          "ランダムに変える（既定 0 = 変えない。テストの入力はそのまま）。測定した回ごとにドップラーの強さが違っても"

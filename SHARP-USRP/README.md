@@ -589,6 +589,9 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - **前後の時間も入れた CNN**: `--models cnn3s` (前後 1 秒、3 秒分の入力)、`--models cnn5s` (前後 2 秒、5 秒分の入力)。
   区間がどこかを示す印のチャネルを足して、真ん中の 1 秒の ENMO を推定する。cnn5s は入力が大きく、メモリと時間が掛かる
   例 `python regress_enmo.py --split A1:A2 --models cnn --cnn_study --cnn_seeds 5`
+- **評価指標**: MAE [mG]・RMSE・R²・r に加えて MAPE（平均絶対パーセント誤差 [%] ＝ |推定 − 正解| ÷ 正解 の平均 × 100）。
+  静止で ENMO ≈ 0 の区間は割り算が発散するので、正解が `--mape_min`（既定 50 mG）未満の区間は MAPE から除く
+  （`metrics.csv` の `MAPE(%)`・`MAPE_windows`（使った区間の数）・`MAPE_min(mG)` の列、`comparison.png` の真ん中の図）
 - **CNN の強さのゆらぎ**: `--gain_jitter 3` で、CNN の学習のときだけ、区間ごと・アンテナごとに動いている速度ビン
   (|v| ≥ `--static_v`) の強さを最大 ±3 dB ランダムに変える (一様分布。入力は log10 なので +g dB は +g/10。静止ビンと
   区間の印のチャネルはそのまま、テストの入力もそのまま。1 次元 CNN には掛けない)。測った回ごとにドップラーの動いている
