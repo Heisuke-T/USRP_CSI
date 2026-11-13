@@ -74,12 +74,17 @@ VARIANT_DIRS = {"normalized": "doppler_traces", "nowinnorm": "doppler_traces_now
 MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレスト", "xgboost": "XGBoost",
                "mlp": "MLP", "svr": "SVR", "gpr": "ガウス過程回帰", "cnn": "CNN",
                "cnn_shuffle": "CNN（時間の順番を入れ替え）", "cnn_timemean": "CNN（時間で平均）",
-               "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）", "cnn5s": "CNN（前後 2 秒も入力）"}
+               "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）", "cnn5s": "CNN（前後 2 秒も入力）",
+               "pls": "PLS 回帰"}
 ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "svr", "gpr", "cnn"]
 # extra CNNs for checking why the CNN works (--cnn_study) / CNN が効く理由を確かめるための CNN
 STUDY_MODELS = ["cnn_shuffle", "cnn_timemean", "cnn1d", "cnn3s"]
 EXTRA_MODELS = ["cnn5s"]   # only when named in --models (heavy) / --models で指定したときだけ（重い）
 CNN_KINDS = ["cnn"] + STUDY_MODELS + EXTRA_MODELS
+TAB_EXTRA = ["pls"]        # PLS regression, only when named in --models / PLS 回帰（--models で指定したときだけ）
+PCA_PARTS = {"A", "M"}     # --pca acts on these feature sets only (the Doppler spectrum / map) / --pca をかける特徴量
+MAP_SIZE = (16, 50)        # feature M: Doppler map shrunk to time x velocity (per antenna) / 特徴量 M の大きさ
+PLS_MAX = 20               # PLS: largest number of components tried / PLS の成分数の上限
 CONTEXT_S = {"cnn3s": 1.0, "cnn5s": 2.0}   # seconds of Doppler before and after the window / 区間の前後に足す秒数
 CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
             "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒"}
@@ -746,6 +751,85 @@ def _gain_jitter_layer(tf, scale):
     return GainJitter(name="gain_jitter")
 
 
+def parse_pca(text):
+    """--pca: None (off), 'auto' (90 % of the variance), a fraction (0-1) or a number of components.
+    --pca: なし、auto（ばらつきの 90 %）、0〜1 の割合、または成分数"""
+    if text is None or str(text).strip().lower() in ("", "none", "off", "0"):
+        return None
+    t = str(text).strip().lower()
+    if t == "auto":
+        return 0.9
+    try:
+        v = float(t)
+    except ValueError:
+        raise RegError(f"--pca は auto、0〜1 の割合（例 0.95）、または成分数（例 20）です（{text}）")
+    if v <= 0:
+        raise RegError(f"--pca の値が正しくありません（{text}）")
+    return v if v < 1 else float(int(v))
+
+
+def parse_map_size(text):
+    """--map_size '16x50' -> (16, 50): time frames x velocity bins of feature M. / 特徴量 M の大きさ"""
+    if not text:
+        return MAP_SIZE
+    try:
+        a, b = (int(x) for x in str(text).lower().replace("×", "x").split("x"))
+    except ValueError:
+        raise RegError(f"--map_size は 時刻数x速度ビン数 で指定します（例 16x50）（{text}）")
+    if not (1 <= a <= CNN_FRAMES and 1 <= b <= 100):
+        raise RegError(f"--map_size は 1〜{CNN_FRAMES} x 1〜100 です（{text}）")
+    return a, b
+
+
+def map_features(XN, v, nt, nv):
+    """Feature M: the CNN input (windows x frames x bins x antennas, log10) averaged in blocks to nt x nv per antenna
+    and flattened (order: antenna, time, velocity). / 特徴量 M: CNN の入力をかたまりごとに平均して縮め、1 列に並べる"""
+    tg = np.array_split(np.arange(XN.shape[1]), nt)
+    vg = np.array_split(np.arange(XN.shape[2]), nv)
+    out = np.stack([np.stack([XN[:, t_][:, :, v_].mean(axis=(1, 2)) for v_ in vg], axis=-1) for t_ in tg], axis=1)
+    X = np.transpose(out, (0, 2, 1, 3)).reshape(len(XN), -1)      # (N, antenna, time, velocity) / アンテナ・時刻・速度の順
+    names = [f"M_ant{a + 1}_t{i + 1}_v{np.mean(np.asarray(v)[v_]):+.2f}" for a in range(XN.shape[3])
+             for i in range(nt) for v_ in vg]
+    return X, names
+
+
+def pca_used(model, feat, pca_opt):
+    """PCA before this model? Only tabular models on the Doppler spectrum / map (A, M). / PCA をかけるか"""
+    if pca_opt is None or model in CNN_KINDS or model in ("baseline", "pls"):
+        return False
+    parts = set(feat.partition("@")[0].partition("/")[0].split("+"))
+    return parts <= PCA_PARTS
+
+
+def with_pca(est, pca_opt, seed):
+    """Standardize -> PCA -> the model (fitted on the training windows only). / 標準化 → PCA → モデル"""
+    from sklearn.decomposition import PCA
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    n = pca_opt if pca_opt < 1 else int(pca_opt)
+    return Pipeline([("scale", StandardScaler()), ("pca", PCA(n_components=n, svd_solver="full", random_state=seed)),
+                     ("model", est)])
+
+
+def fit_pls(X, y, groups):
+    """PLS regression; the number of components (1..PLS_MAX) by cross-validation over the training trials.
+    Returns (fitted pipeline, components). / PLS 回帰。成分数は学習データの試行ごとの交差検証で選ぶ"""
+    from sklearn.cross_decomposition import PLSRegression
+    from sklearn.model_selection import GridSearchCV, GroupKFold
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    nmax = int(max(1, min(PLS_MAX, X.shape[1], len(y) - 2)))
+    pipe = Pipeline([("scale", StandardScaler()), ("plsregression", PLSRegression(scale=False))])
+    ng = len(set(groups))
+    if ng < 2 or nmax == 1:
+        pipe.set_params(plsregression__n_components=min(5, nmax)).fit(X, y)
+        return pipe, min(5, nmax)
+    gs = GridSearchCV(pipe, {"plsregression__n_components": list(range(1, nmax + 1))},
+                      cv=GroupKFold(n_splits=min(5, ng)), scoring="neg_mean_squared_error")
+    gs.fit(X, y, groups=groups)
+    return gs.best_estimator_, int(gs.best_params_["plsregression__n_components"])
+
+
 def _cnn_model(tf, shape, kind, jitter=None):
     """2D CNN on (frames x bins x channels), or 1D CNN along time on (frames x features).
     2 次元 CNN（時間 x 速度 x チャネル）、または時間方向だけの 1 次元 CNN（時間 x 特徴）"""
@@ -933,9 +1017,10 @@ def run(opts):
                            "計算し直してください")
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
-    bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS]
+    bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS + TAB_EXTRA]
     if bad:
-        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは {', '.join(ALL_MODELS + STUDY_MODELS + EXTRA_MODELS)}）")
+        raise RegError(f"不明なモデル: {', '.join(bad)}（使えるのは "
+                       f"{', '.join(ALL_MODELS + STUDY_MODELS + EXTRA_MODELS + TAB_EXTRA)}）")
     study = bool(getattr(opts, "cnn_study", False))
     if study:  # the CNN and its check variants / CNN と、理由を確かめるための CNN
         models += [m for m in ["cnn"] + STUDY_MODELS if m not in models]
@@ -943,7 +1028,7 @@ def run(opts):
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
     def _ok(f):
         base, _, k = f.partition("@")
-        return bool(base) and all(p in ("A", "B", "C", "D", "E", "W", "WS") + F_PARTS for p in base.split("+")) and (
+        return bool(base) and all(p in ("A", "B", "C", "D", "E", "M", "W", "WS") + F_PARTS for p in base.split("+")) and (
             k == "" or (k.isdigit() and 1 <= int(k) <= 5))
     badf = [f for f in feats if not _ok(f)]
     if badf:
@@ -951,6 +1036,17 @@ def run(opts):
                        "前後の区間も入れるときは B+D@1 のように @ と区間の数 1〜5）")
     used = {p for f in feats for p in f.partition("@")[0].split("+")}
     need_w = bool(used & {"W", "WS"})
+    pca_opt = parse_pca(getattr(opts, "pca", None))
+    map_size = parse_map_size(getattr(opts, "map_size", None))
+    if "M" in used:
+        log(f"特徴量 M: ドップラーの図そのもの（log10、1 秒を {map_size[0]} 時刻 × {map_size[1]} 速度ビンに縮めて、アンテナ 2 本で "
+            f"{2 * map_size[0] * map_size[1]} 個を 1 列に並べる）", out)
+    if pca_opt is not None:
+        log(f"PCA: 特徴量 {'・'.join(sorted(PCA_PARTS))} だけのとき、表の形のモデルの前に PCA をかける（学習データだけで作る。"
+            + (f"成分数はばらつきの {pca_opt * 100:g} % を説明する数" if pca_opt < 1 else f"成分数 {int(pca_opt)}")
+            + "）。PLS 回帰と、ほかの特徴量にはかけない", out)
+    if "pls" in models:
+        log(f"PLS 回帰: 成分数は学習データの中の試行ごとの交差検証で 1〜{PLS_MAX} から選ぶ", out)
     if need_w:
         log("特徴量 W・WS: 同じ 1 秒の区間の腰の ENMO（加速度計の値）を入力にする。W: 1 秒平均、WS: 50 Hz の値の平均・"
             "標準偏差・最大・90 % 点。ドップラーの代わりに腰のセンサを使った場合との比較用", out)
@@ -1028,6 +1124,8 @@ def run(opts):
         XE = np.concatenate([tr["XE"] for tr in trials])
         fsets = {"A": XA, "B": XB, "C": XC, "D": XD, "E": XE}
         fnames = feature_names(trials[0]["v"])
+        if "M" in used:   # the Doppler map itself, shrunk / ドップラーの図そのもの（縮めたもの）
+            fsets["M"], fnames["M"] = map_features(XN, trials[0]["v"], *map_size)
         if need_w:
             XW = np.concatenate([tr["XW"] for tr in trials])
             if np.isnan(XW[:, 1:]).any() and "WS" in used:
@@ -1085,6 +1183,7 @@ def run(opts):
                 cams = None
                 want_imp = bool(getattr(opts, "importance", False))
                 imp_sum, imp_n = None, 0
+                n_comps, coef_sum = [], None   # PCA / PLS components per fold, PLS coefficients / 成分数と PLS の係数
                 for si, seed in enumerate(seeds):
                     pred = np.full(len(y), np.nan)
                     for tr_i, te_i in folds:
@@ -1108,15 +1207,26 @@ def run(opts):
                                 cams[te_i] = cm
                         else:
                             X, xnames = tab_data(feat)
-                            est = make_tabular(model, seed)
+                            use_pca = pca_used(model, feat, pca_opt)
                             with warnings.catch_warnings():
                                 warnings.simplefilter("ignore")  # GPR / SVR convergence notes / 収束の注意は出さない
-                                est.fit(X[tr_i], y[tr_i])
+                                if model == "pls":
+                                    est, ncomp = fit_pls(X[tr_i], y[tr_i], tname[tr_i])
+                                    n_comps.append(ncomp)
+                                    cf = est.named_steps["plsregression"].coef_.ravel()
+                                    coef_sum = cf if coef_sum is None else coef_sum + cf
+                                else:
+                                    est = make_tabular(model, seed)
+                                    if use_pca:
+                                        est = with_pca(est, pca_opt, seed)
+                                    est.fit(X[tr_i], y[tr_i])
+                                    if use_pca:
+                                        n_comps.append(int(est.named_steps["pca"].n_components_))
                                 if model == "gpr":
                                     pred[te_i], gp_sd[te_i] = est.predict(X[te_i], return_std=True)
                                 else:
-                                    pred[te_i] = est.predict(X[te_i])
-                            if want_imp and model in ("rf", "xgboost"):
+                                    pred[te_i] = np.ravel(est.predict(X[te_i]))
+                            if want_imp and model in ("rf", "xgboost") and not use_pca:
                                 imp_sum = est.feature_importances_ + (0 if imp_sum is None else imp_sum)
                                 imp_n += 1
                     if skip:
@@ -1137,14 +1247,23 @@ def run(opts):
                              MAPE_sd=float(np.std([m_["MAPE"] for m_ in seed_m])) if seed_m else float("nan"))
                 per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
+                feat_out = feat + (" PCA" if model not in CNN_KINDS and model != "baseline" and pca_used(model, feat, pca_opt)
+                                   else "")
                 results.append(dict(variant=variant, window=window, split=sp_label, model=model, label=label,
-                                    features=feat, jitter=jit, **mt, per_trial=per, seconds=time.time() - t_start,
+                                    features=feat_out, jitter=jit, **mt, per_trial=per, seconds=time.time() - t_start,
                                     pred=pp, y=yy, tname=tn_, win=ww, target=target, **extra))
+                if n_comps:
+                    results[-1]["n_components"] = n_comps
+                if coef_sum is not None:
+                    results[-1]["pls_coef"] = (tab_data(feat)[1], coef_sum / len(n_comps))
                 if imp_n:
                     imp = imp_sum / imp_n
                     results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
-                log(f"  {label:16s} 特徴量 {feat:10s}: MAE {mt['MAE']:7.2f} mG  MAPE {mt['MAPE']:6.1f} %  RMSE {mt['RMSE']:7.2f}  "
+                log(f"  {label:16s} 特徴量 {feat_out:10s}: MAE {mt['MAE']:7.2f} mG  MAPE {mt['MAPE']:6.1f} %  RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
+                if n_comps:
+                    log(f"      {'PLS' if model == 'pls' else 'PCA'} の成分数: "
+                        + (f"{n_comps[0]}" if len(set(n_comps)) == 1 else f"{min(n_comps)}〜{max(n_comps)}（{len(n_comps)} 回の学習）"), out)
                 if seed_m:
                     each = ", ".join("%.2f" % m_["R2"] for m_ in seed_m)
                     log(f"      乱数の種 {len(seed_m)} 回: R² {np.mean([m_['R2'] for m_ in seed_m]):.3f} ± {extra['R2_sd']:.3f}"
@@ -1172,6 +1291,8 @@ def run(opts):
     if not results:
         raise RegError("どの版でも計算できませんでした")
     _save(out_dir, results, pred_rows, opts, out)
+    if any("pls_coef" in r for r in results):
+        _save_pls_coef(out_dir, results, out, plots=not opts.no_plots)
     if any("importance" in r for r in results):
         _save_importance(out_dir, results, out, plots=not opts.no_plots)
     if not opts.no_plots:
@@ -1416,6 +1537,68 @@ def _static_check(out_dir, tag, XA, y, v, static_v, meta, out, plots=True, drop_
     plt.close(fig)
 
 
+def _save_pls_coef(out_dir, results, out, plots=True):
+    """PLS coefficients (on standardized inputs, averaged over the trainings of a split): pls_coef.csv, and a figure
+    per split for the spectrum (A: coefficient vs velocity) and the map (M: time x velocity per antenna).
+    PLS の回帰係数（標準化した入力に対する値、分け方の中の学習で平均）。表と、A は速度ごとの線、M は時刻 x 速度の図"""
+    with open(os.path.join(out_dir, "pls_coef.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["split", "features", "column", "coef"])
+        for r in results:
+            if "pls_coef" in r:
+                for n, c in zip(*r["pls_coef"]):
+                    w.writerow([r["split"], r["features"], n, f"{c:.6g}"])
+    if not plots:
+        return
+    plt = _setup_plt()
+    for r in results:
+        if "pls_coef" not in r:
+            continue
+        names, coef = r["pls_coef"]
+        base = r["features"].split()[0]
+        tag = f"{_split_tag(r['split'])}{base.replace('/', '_').replace('+', '-')}"
+        if base == "A":
+            fig, ax = plt.subplots(figsize=(8, 3.6))
+            for a in (1, 2):
+                sel = [i for i, n in enumerate(names) if n.startswith(f"A_ant{a}_")]
+                vv = [float(names[i].split("_v")[1]) for i in sel]
+                ax.plot(vv, coef[sel], lw=1.4, label=f"アンテナ {a}")
+            ax.axvspan(-STATIC_V, STATIC_V, color="#EEEEEE", lw=0, label="静止ビン")
+            ax.axhline(0, color="#333333", lw=0.7)
+            ax.set_xlabel("速度 [m/s]")
+            ax.set_ylabel("PLS の回帰係数（標準化）")
+            ax.legend(fontsize=8)
+        elif base == "M":
+            parsed = [n.split("_") for n in names]              # M, ant1, t3, v+0.15
+            ants = sorted({int(p[1][3:]) for p in parsed})
+            nt = max(int(p[2][1:]) for p in parsed)
+            vs = sorted({float(p[3][1:]) for p in parsed})
+            grid = np.zeros((len(ants), nt, len(vs)))
+            for (p_, c) in zip(parsed, coef):
+                grid[ants.index(int(p_[1][3:])), int(p_[2][1:]) - 1, vs.index(float(p_[3][1:]))] = c
+            lim = float(np.nanmax(np.abs(grid))) or 1.0
+            fig, axs = plt.subplots(1, len(ants), figsize=(5 * len(ants), 3.8), squeeze=False)
+            for k, a in enumerate(ants):
+                im = axs[0, k].imshow(grid[k].T, origin="lower", aspect="auto", cmap="RdBu_r", vmin=-lim, vmax=lim,
+                                      extent=[0, 1, vs[0], vs[-1]])
+                axs[0, k].axhline(STATIC_V, color="#333333", lw=0.6, ls="--")
+                axs[0, k].axhline(-STATIC_V, color="#333333", lw=0.6, ls="--")
+                axs[0, k].set_title(f"アンテナ {a}", fontsize=10)
+                axs[0, k].set_xlabel("1 秒の中の時刻 [s]")
+                axs[0, k].set_ylabel("速度 [m/s]")
+                fig.colorbar(im, ax=axs[0, k], label="PLS の回帰係数（標準化）")
+        else:
+            continue
+        nc = r.get("n_components") or []
+        fig.suptitle(f"PLS 回帰の係数（特徴量 {r['features']}、{r['split']}、成分数 "
+                     + (f"{nc[0]}" if len(set(nc)) == 1 else f"{min(nc)}〜{max(nc)}") + "。赤: ENMO を上げる、青: 下げる）",
+                     fontsize=10)
+        fig.tight_layout()
+        fig.savefig(os.path.join(out_dir, f"pls_coef_{tag}.png"), dpi=110)
+        plt.close(fig)
+    log("  PLS 回帰の係数: pls_coef.csv、pls_coef_*.png", out)
+
+
 def _setup_plt():
     import warnings
     import matplotlib
@@ -1501,7 +1684,7 @@ def _split_tag(sp):
 
 def _plots(out_dir, results):
     plt = _setup_plt()
-    colors = {"baseline": "#999999", "linear": "#2A6FDB", "rf": "#3A9D5D", "xgboost": "#D9822B",
+    colors = {"baseline": "#999999", "linear": "#2A6FDB", "rf": "#3A9D5D", "xgboost": "#D9822B", "pls": "#B03A2E",
               "mlp": "#B5487A", "svr": "#1F9E9E", "gpr": "#8C6D31", "cnn": "#6A4FB3",
               "cnn_shuffle": "#A895D8", "cnn_timemean": "#C9BEEA", "cnn1d": "#4B3590", "cnn3s": "#8E44AD",
               "cnn5s": "#5B2C83"}
@@ -1550,7 +1733,7 @@ def _plots(out_dir, results):
     fig, ax = plt.subplots(len(groups), 3, figsize=(max(20, 1.8 * nmax), 4.2 * len(groups)), squeeze=False)
     for vi, (var, wl, sp) in enumerate(groups):
         rs = [r for r in results if r["variant"] == var and r["window"] == wl and r["split"] == sp]
-        short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost",
+        short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost", "pls": "PLS",
                  "mlp": "MLP", "svr": "SVR", "gpr": "ガウス\n過程", "cnn": "CNN", "cnn_shuffle": "CNN\n時間入替",
                  "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒",
                  "cnn5s": "CNN\n前後2秒"}
@@ -1623,7 +1806,8 @@ def main(argv=None):
     ap.add_argument("--doppler", choices=list(VARIANT_DIRS) + ["all"], default="nowinnorm",
                     help="使うドップラーの版（既定 nowinnorm。all で 3 つとも）")
     ap.add_argument("--models", default=",".join(ALL_MODELS),
-                    help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）など）")
+                    help=f"使うモデル（既定 {','.join(ALL_MODELS)}。ほかに cnn3s（前後 1 秒も入力）、cnn5s（前後 2 秒も入力）、"
+                         "pls（PLS 回帰）など）")
     ap.add_argument("--static_v", type=float, default=STATIC_V,
                     help=f"特徴量 F で静止とみなす速さ [m/s]（|v| がこれ未満のビンを静止として除く。既定 {STATIC_V:g} = "
                          "ハン窓の主ローブの端、速度分解能の約 2 倍）")
@@ -1648,6 +1832,12 @@ def main(argv=None):
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--cnn_seeds", type=int, default=1,
                     help="CNN を乱数の種を変えて何回学習するか（既定 1。例 5 で平均とばらつきを出し、予測は 5 回の平均）")
+    ap.add_argument("--pca", default=None,
+                    help="特徴量 A（平均スペクトル）・M（ドップラーの図）だけのとき、表の形のモデル（線形回帰・ガウス過程・"
+                         "ランダムフォレストなど）の前に PCA をかける。auto（ばらつきの 90 %%）、0〜1 の割合、または成分数（既定 なし）")
+    ap.add_argument("--map_size", default=f"{MAP_SIZE[0]}x{MAP_SIZE[1]}",
+                    help=f"特徴量 M（ドップラーの図そのもの）の大きさ 時刻数x速度ビン数（既定 {MAP_SIZE[0]}x{MAP_SIZE[1]}。"
+                         "1 秒 64 時刻・100 ビンをかたまりごとに平均して縮める）")
     ap.add_argument("--mape_min", type=float, default=MAPE_MIN,
                     help=f"MAPE（平均絶対パーセント誤差）を計算するときに除く、正解の ENMO の下限 [mG]（既定 {MAPE_MIN:g}。"
                          "静止で ENMO ≈ 0 の区間は誤差 ÷ 正解が発散するため除く）")

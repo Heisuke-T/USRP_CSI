@@ -21,6 +21,8 @@
      11. MAPE: 正解が --mape_min 未満の区間を除いて計算し、表 (metrics.csv) に MAPE(%) の列が出ること
      12. 腰の ENMO を入力にする特徴量 W・WS（--target body）: 全身 ∝ 腰の合成データで、W の線形回帰がよく当たり、
          ドップラーの特徴量と同じ表に並ぶこと
+     13. ドップラーの図そのもの（特徴量 M）と PCA・PLS 回帰: --pca auto で A・M のときだけ PCA がかかり（成分数がログに出る）、
+         PLS 回帰の成分数が学習データの中で選ばれ、係数の表と図ができ、どれも基準よりはっきり良いこと
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -276,6 +278,40 @@ def check_waist_input(tmp):
         good = False
     print(f"  {'OK ' if good else 'NG '} 腰の ENMO → 全身の ENMO: 線形回帰 W の R² {got[('linear', 'W')]['R2']:.3f}、"
           f"ガウス過程 WS {got[('gpr', 'WS')]['R2']:.3f}、ドップラー B の線形回帰 {got[('linear', 'B')]['R2']:.3f}")
+    return good
+
+
+def check_pca_pls(tmp):
+    """Feature M (the Doppler map), --pca and PLS regression. / ドップラーの図そのもの・PCA・PLS 回帰"""
+    import argparse
+    inp = os.path.join(tmp, "in_pls")
+    for k in range(4):
+        make_trial(inp, k)
+    res, out_dir = ro.run(argparse.Namespace(input=inp, out=os.path.join(tmp, "out_pls"), doppler="nowinnorm",
+                                             models="linear,rf,pls", features="A,M,B", windows=[1.0], blocks=5,
+                                             epochs=3, seed=0, no_plots=False, pairs=None, split=["T1,T2,T3:T4"],
+                                             pca="auto", map_size="8x25"))
+    got = {(r["model"], r["features"]): r for r in res}
+    files = os.listdir(out_dir)
+    with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+        logtxt = f.read()
+    keys = [("linear", "A PCA"), ("linear", "M PCA"), ("rf", "M PCA"), ("linear", "B"), ("pls", "A"), ("pls", "M")]
+    good = (all(k in got for k in keys) and all(got[k]["R2"] > 0.8 for k in keys)
+            and all(got[k].get("n_components") for k in keys if "PCA" in k[1] or k[0] == "pls")
+            and "n_components" not in got[("linear", "B")]          # no PCA on the physics features / B にはかけない
+            and "pls_coef.csv" in files and any(f.startswith("pls_coef_") and f.endswith("_M.png") for f in files)
+            and "400 個" in logtxt and "PCA の成分数" in logtxt and "PLS の成分数" in logtxt)
+    with open(os.path.join(out_dir, "pls_coef.csv"), encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    good &= sum(1 for r in rows if r["features"] == "M") == 2 * 8 * 25
+    try:
+        ro.parse_pca("abc")
+        good = False
+    except ro.RegError:
+        pass
+    print(f"  {'OK ' if good else 'NG '} 特徴量 M・PCA・PLS: R² " + "、".join(f"{m} {fe} {got[(m, fe)]['R2']:.3f}"
+                                                                    for m, fe in keys if (m, fe) in got)
+          + f"、PLS の成分数 {got[('pls', 'M')].get('n_components')}")
     return good
 
 
@@ -620,6 +656,7 @@ def main():
         ok &= check_gain_jitter(tmp)
         ok &= check_mape(tmp)
         ok &= check_waist_input(tmp)
+        ok &= check_pca_pls(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,svr,gpr,cnn"

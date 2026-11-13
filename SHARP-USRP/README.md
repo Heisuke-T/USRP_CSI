@@ -593,6 +593,13 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   平均・標準偏差・最大・90 % 点、`*_power_timeseries.csv` が要る）を入力にできる。`--target body` で、ドップラーのモデルと
   同じ区間・同じ分け方で全身の ENMO を推定して比べる（腰のセンサを使った場合とドップラーの比較）。例
   `python regress_enmo.py --target body --features F2b,W,WS --models linear,gpr,cnn,cnn3s --split cv`
+- **ドップラーの図を線形モデルなどに入れる（PCA・PLS）**: `--features M` でドップラーの図そのもの（log10、1 秒を
+  `--map_size`（既定 16x50）の時刻 × 速度ビンに縮めて、アンテナ 2 本分を 1 列に並べる。既定で 1600 個）を入力にする。
+  変数が区間の数より多いので、`--pca auto`（ばらつきの 90 %、0〜1 の割合か成分数も指定可）で線形回帰・ガウス過程・
+  ランダムフォレストなどの前に PCA をかける（特徴量 A・M だけのとき。学習データだけで作り、成分数をログに出す）。
+  `--models pls` で PLS 回帰（成分数は学習データの中の試行ごとの交差検証で 1〜20 から選ぶ）。PLS の回帰係数は
+  `pls_coef.csv` と `pls_coef_*.png`（A は速度ごとの線、M は時刻 × 速度の図）。例
+  `python regress_enmo.py --target body --models linear,gpr,rf,pls,cnn,cnn3s --features W,WS,A,M --pca auto`
 - **評価指標**: MAE [mG]・RMSE・R²・r に加えて MAPE（平均絶対パーセント誤差 [%] ＝ |推定 − 正解| ÷ 正解 の平均 × 100）。
   静止で ENMO ≈ 0 の区間は割り算が発散するので、正解が `--mape_min`（既定 50 mG）未満の区間は MAPE から除く
   （`metrics.csv` の `MAPE(%)`・`MAPE_windows`（使った区間の数）・`MAPE_min(mG)` の列、`comparison.png` の真ん中の図）
