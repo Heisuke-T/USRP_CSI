@@ -1,0 +1,5 @@
+doppler,window(s),split,model,features,MAE(mG),RMSE(mG),R2,r,seconds,n_seeds,MAE_sd(mG),R2_sd,target,MAPE(%),MAPE_sd(%),MAPE_windows,MAPE_min(mG)
+nowinnorm,1,学習 A2+A3 → テスト A1,平均値で予測（基準）,-,172.667,232.739,-0.0010,-0.0000,0.0,1,,,waist,26.83,,435,50
+nowinnorm,1,学習 A2+A3 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,137.037,161.379,0.5187,0.8638,181.8,5,23.164,0.2285,waist,28.82,7.35,435,50
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,平均値で予測（基準）,-,209.760,276.551,-0.4134,nan,0.0,1,,,waist,30.69,,435,50
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,CNN（前後 1 秒も入力）,Doppler 2D 3秒 強さ±3dB,123.061,148.325,0.5934,0.8432,289.8,5,8.817,0.0635,waist,26.49,1.84,435,50

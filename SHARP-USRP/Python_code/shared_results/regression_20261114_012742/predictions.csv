@@ -1,0 +1,1873 @@
+doppler,window(s),split,model,features,trial,start_csi(s),end_csi(s),true_ENMO(mG),pred_ENMO(mG)
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,1.000,2.000,625.937,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,2.000,3.000,585.523,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,3.000,4.000,529.779,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,4.000,5.000,532.506,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,5.000,6.000,594.508,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,6.000,7.000,605.508,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,7.000,8.000,622.282,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,8.000,9.000,738.955,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,9.000,10.000,634.728,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,10.000,11.000,592.251,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,11.000,12.000,583.621,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,12.000,13.000,562.812,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,13.000,14.000,596.626,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,14.000,15.000,501.961,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,15.000,16.000,549.858,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,16.000,17.000,428.607,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,17.000,18.000,347.204,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,18.000,19.000,359.598,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,19.000,20.000,346.652,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,20.000,21.000,335.673,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,21.000,22.000,434.511,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,22.000,23.000,359.635,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,23.000,24.000,374.727,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,24.000,25.000,461.437,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,25.000,26.000,557.892,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,26.000,27.000,398.416,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,27.000,28.000,378.914,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,28.000,29.000,453.328,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,29.000,30.000,364.494,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,30.000,31.000,363.080,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,31.000,32.000,480.001,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,32.000,33.000,333.767,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,33.000,34.000,398.327,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,34.000,35.000,394.100,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,35.000,36.000,327.995,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,36.000,37.000,314.743,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,37.000,38.000,320.535,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,38.000,39.000,347.549,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,39.000,40.000,401.501,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,40.000,41.000,310.284,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,41.000,42.000,278.167,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,42.000,43.000,360.806,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,43.000,44.000,384.708,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,44.000,45.000,403.632,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,45.000,46.000,416.943,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,46.000,47.000,542.745,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,47.000,48.000,670.887,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,48.000,49.000,734.708,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,49.000,50.000,877.365,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,50.000,51.000,840.170,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,51.000,52.000,848.216,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,52.000,53.000,798.685,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,53.000,54.000,843.630,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,54.000,55.000,828.714,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,55.000,56.000,930.497,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,56.000,57.000,877.384,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,57.000,58.000,896.798,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,58.000,59.000,918.659,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,59.000,60.000,877.472,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,60.000,61.000,952.251,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,61.000,62.000,918.342,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,62.000,63.000,673.856,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,63.000,64.000,491.398,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,64.000,65.000,403.039,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,65.000,66.000,408.019,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,66.000,67.000,351.869,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,67.000,68.000,303.332,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,68.000,69.000,382.832,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,69.000,70.000,399.718,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,70.000,71.000,337.594,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,71.000,72.000,352.129,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,72.000,73.000,385.742,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,73.000,74.000,448.927,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,74.000,75.000,515.459,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,75.000,76.000,543.872,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,76.000,77.000,419.192,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,77.000,78.000,525.782,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL1,78.000,79.000,586.882,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,1.000,2.000,704.025,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,2.000,3.000,747.575,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,3.000,4.000,759.987,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,4.000,5.000,781.280,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,5.000,6.000,647.682,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,6.000,7.000,432.925,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,7.000,8.000,425.050,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,8.000,9.000,341.304,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,9.000,10.000,412.477,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,10.000,11.000,482.930,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,11.000,12.000,375.053,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,12.000,13.000,587.637,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,13.000,14.000,626.002,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,14.000,15.000,648.639,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,15.000,16.000,671.399,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,16.000,17.000,562.179,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,17.000,18.000,634.791,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,18.000,19.000,609.066,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,19.000,20.000,499.877,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,20.000,21.000,14.537,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,21.000,22.000,1.652,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,22.000,23.000,0.807,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,23.000,24.000,0.493,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,24.000,25.000,0.956,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,25.000,26.000,202.298,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,26.000,27.000,439.223,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,27.000,28.000,506.450,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,28.000,29.000,505.611,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,29.000,30.000,498.847,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,30.000,31.000,505.830,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,31.000,32.000,686.684,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,32.000,33.000,772.826,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,33.000,34.000,663.976,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,34.000,35.000,708.453,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,35.000,36.000,663.498,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,36.000,37.000,705.807,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,37.000,38.000,913.636,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,38.000,39.000,625.142,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,39.000,40.000,429.056,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,40.000,41.000,375.780,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,41.000,42.000,376.627,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,42.000,43.000,373.690,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,43.000,44.000,395.027,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,44.000,45.000,464.693,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,45.000,46.000,441.227,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,46.000,47.000,463.349,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,47.000,48.000,448.421,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,48.000,49.000,532.059,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,49.000,50.000,437.814,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,50.000,51.000,495.967,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,51.000,52.000,576.726,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,52.000,53.000,1014.610,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,53.000,54.000,1010.172,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,54.000,55.000,1029.295,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,55.000,56.000,776.443,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,56.000,57.000,532.258,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,57.000,58.000,450.135,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,58.000,59.000,396.786,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,59.000,60.000,289.029,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,60.000,61.000,353.413,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,61.000,62.000,343.529,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,62.000,63.000,297.214,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,63.000,64.000,444.974,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,64.000,65.000,467.423,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,65.000,66.000,378.807,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,66.000,67.000,389.005,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,67.000,68.000,337.667,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,68.000,69.000,407.069,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,69.000,70.000,363.966,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,70.000,71.000,254.344,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,71.000,72.000,443.807,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,72.000,73.000,390.604,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,73.000,74.000,463.843,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,74.000,75.000,448.513,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,75.000,76.000,472.960,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,76.000,77.000,481.075,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,77.000,78.000,542.908,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL2,78.000,79.000,494.827,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,1.000,2.000,595.692,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,2.000,3.000,459.830,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,3.000,4.000,560.378,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,4.000,5.000,460.104,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,5.000,6.000,511.804,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,6.000,7.000,555.156,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,7.000,8.000,599.827,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,8.000,9.000,508.480,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,9.000,10.000,589.805,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,10.000,11.000,605.232,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,11.000,12.000,632.020,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,12.000,13.000,600.885,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,13.000,14.000,529.385,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,14.000,15.000,446.394,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,15.000,16.000,488.715,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,16.000,17.000,207.106,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,17.000,18.000,1.300,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,18.000,19.000,1.743,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,19.000,20.000,1.132,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,20.000,21.000,1.301,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,21.000,22.000,0.914,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,22.000,23.000,306.292,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,23.000,24.000,843.535,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,24.000,25.000,945.605,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,25.000,26.000,707.252,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,26.000,27.000,901.525,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,27.000,28.000,864.058,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,28.000,29.000,714.135,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,29.000,30.000,919.419,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,30.000,31.000,890.259,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,31.000,32.000,919.301,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,32.000,33.000,863.288,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,33.000,34.000,842.063,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,34.000,35.000,544.159,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,35.000,36.000,475.843,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,36.000,37.000,403.276,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,37.000,38.000,459.743,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,38.000,39.000,475.204,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,39.000,40.000,467.667,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,40.000,41.000,412.099,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,41.000,42.000,283.299,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,42.000,43.000,319.477,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,43.000,44.000,217.560,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,44.000,45.000,295.366,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,45.000,46.000,198.326,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,46.000,47.000,361.410,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,47.000,48.000,397.909,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,48.000,49.000,404.505,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,49.000,50.000,392.531,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,50.000,51.000,396.592,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,51.000,52.000,380.058,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,52.000,53.000,572.462,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,53.000,54.000,544.255,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,54.000,55.000,531.909,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,55.000,56.000,508.999,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,56.000,57.000,457.537,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,57.000,58.000,597.457,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,58.000,59.000,581.200,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,59.000,60.000,537.751,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,60.000,61.000,813.243,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,61.000,62.000,866.270,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,62.000,63.000,902.584,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,63.000,64.000,928.989,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,64.000,65.000,1007.223,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,65.000,66.000,961.376,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,66.000,67.000,595.189,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,67.000,68.000,415.195,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,68.000,69.000,439.697,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,69.000,70.000,426.212,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,70.000,71.000,471.895,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,71.000,72.000,410.496,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,72.000,73.000,458.543,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,73.000,74.000,376.791,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,74.000,75.000,386.323,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,75.000,76.000,341.890,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,76.000,77.000,357.835,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,77.000,78.000,347.088,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XL3,78.000,79.000,365.836,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,1.000,2.000,580.423,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,2.000,3.000,583.599,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,3.000,4.000,620.882,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,4.000,5.000,653.998,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,5.000,6.000,651.229,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,6.000,7.000,663.376,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,7.000,8.000,677.007,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,8.000,9.000,573.011,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,9.000,10.000,399.786,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,10.000,11.000,423.254,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,11.000,12.000,388.016,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,12.000,13.000,420.966,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,13.000,14.000,398.210,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,14.000,15.000,393.265,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,15.000,16.000,557.026,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,16.000,17.000,597.978,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,17.000,18.000,499.037,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,18.000,19.000,578.869,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,19.000,20.000,438.329,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,20.000,21.000,526.711,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,21.000,22.000,560.728,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,22.000,23.000,504.599,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,23.000,24.000,484.898,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,24.000,25.000,474.798,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,25.000,26.000,466.748,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,26.000,27.000,192.081,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,27.000,28.000,4.240,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,28.000,29.000,1.740,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,29.000,30.000,1.149,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,30.000,31.000,1.523,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,31.000,32.000,0.687,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,32.000,33.000,1.248,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,33.000,34.000,0.417,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,34.000,35.000,0.694,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,35.000,36.000,0.826,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,36.000,37.000,0.787,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,37.000,38.000,0.656,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,38.000,39.000,0.573,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,39.000,40.000,12.219,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,40.000,41.000,525.390,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,41.000,42.000,616.366,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,42.000,43.000,660.966,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,43.000,44.000,846.944,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,44.000,45.000,732.303,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,45.000,46.000,942.109,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,46.000,47.000,697.148,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,47.000,48.000,744.909,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,48.000,49.000,820.906,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,49.000,50.000,712.717,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,50.000,51.000,893.418,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,51.000,52.000,721.094,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,52.000,53.000,758.702,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,53.000,54.000,911.926,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,54.000,55.000,740.915,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,55.000,56.000,725.126,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,56.000,57.000,534.490,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,57.000,58.000,434.374,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,58.000,59.000,408.420,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,59.000,60.000,411.454,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,60.000,61.000,413.732,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,61.000,62.000,428.249,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,62.000,63.000,443.832,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,63.000,64.000,488.604,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,64.000,65.000,934.071,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,65.000,66.000,784.776,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,66.000,67.000,723.132,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,67.000,68.000,849.989,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,68.000,69.000,866.361,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,69.000,70.000,767.061,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,70.000,71.000,491.867,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,71.000,72.000,393.699,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,72.000,73.000,415.124,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,73.000,74.000,398.228,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,74.000,75.000,398.719,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,75.000,76.000,417.694,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,76.000,77.000,379.601,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,77.000,78.000,341.139,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR1,78.000,79.000,295.323,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,1.000,2.000,627.961,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,2.000,3.000,650.856,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,3.000,4.000,493.514,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,4.000,5.000,440.159,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,5.000,6.000,470.295,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,6.000,7.000,336.302,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,7.000,8.000,408.804,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,8.000,9.000,372.596,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,9.000,10.000,347.816,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,10.000,11.000,380.598,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,11.000,12.000,450.972,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,12.000,13.000,422.411,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,13.000,14.000,446.515,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,14.000,15.000,365.391,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,15.000,16.000,516.545,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,16.000,17.000,464.361,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,17.000,18.000,419.723,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,18.000,19.000,537.595,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,19.000,20.000,844.427,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,20.000,21.000,728.550,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,21.000,22.000,715.356,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,22.000,23.000,881.722,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,23.000,24.000,777.298,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,24.000,25.000,906.027,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,25.000,26.000,931.725,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,26.000,27.000,1032.471,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,27.000,28.000,1232.437,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,28.000,29.000,1085.592,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,29.000,30.000,767.162,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,30.000,31.000,566.917,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,31.000,32.000,410.504,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,32.000,33.000,455.547,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,33.000,34.000,459.322,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,34.000,35.000,467.469,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,35.000,36.000,450.375,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,36.000,37.000,413.372,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,37.000,38.000,418.787,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,38.000,39.000,380.603,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,39.000,40.000,370.993,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,40.000,41.000,270.098,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,41.000,42.000,1.064,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,42.000,43.000,2.512,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,43.000,44.000,1.113,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,44.000,45.000,0.761,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,45.000,46.000,0.929,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,46.000,47.000,0.987,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,47.000,48.000,0.873,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,48.000,49.000,0.709,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,49.000,50.000,0.729,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,50.000,51.000,1.942,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,51.000,52.000,346.669,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,52.000,53.000,425.617,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,53.000,54.000,441.740,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,54.000,55.000,477.375,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,55.000,56.000,490.465,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,56.000,57.000,438.050,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,57.000,58.000,445.021,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,58.000,59.000,460.953,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,59.000,60.000,440.191,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,60.000,61.000,469.168,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,61.000,62.000,404.330,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,62.000,63.000,432.682,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,63.000,64.000,546.359,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,64.000,65.000,521.709,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,65.000,66.000,533.239,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,66.000,67.000,454.851,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,67.000,68.000,563.506,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,68.000,69.000,594.925,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,69.000,70.000,624.707,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,70.000,71.000,585.622,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,71.000,72.000,593.789,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,72.000,73.000,567.591,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,73.000,74.000,610.921,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,74.000,75.000,694.157,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,75.000,76.000,532.149,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,76.000,77.000,451.305,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,77.000,78.000,457.266,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR2,78.000,79.000,441.329,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,1.000,2.000,271.572,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,2.000,3.000,331.349,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,3.000,4.000,288.305,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,4.000,5.000,262.651,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,5.000,6.000,356.998,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,6.000,7.000,344.885,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,7.000,8.000,385.524,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,8.000,9.000,479.868,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,9.000,10.000,574.885,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,10.000,11.000,543.176,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,11.000,12.000,558.249,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,12.000,13.000,541.235,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,13.000,14.000,497.091,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,14.000,15.000,718.925,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,15.000,16.000,749.001,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,16.000,17.000,852.716,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,17.000,18.000,1101.088,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,18.000,19.000,1105.150,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,19.000,20.000,1210.729,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,20.000,21.000,1288.210,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,21.000,22.000,1229.225,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,22.000,23.000,663.543,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,23.000,24.000,537.318,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,24.000,25.000,349.982,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,25.000,26.000,387.390,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,26.000,27.000,406.459,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,27.000,28.000,409.230,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,28.000,29.000,475.402,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,29.000,30.000,460.810,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,30.000,31.000,470.282,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,31.000,32.000,605.472,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,32.000,33.000,478.868,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,33.000,34.000,430.142,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,34.000,35.000,554.397,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,35.000,36.000,434.716,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,36.000,37.000,457.728,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,37.000,38.000,457.086,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,38.000,39.000,484.711,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,39.000,40.000,598.636,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,40.000,41.000,516.064,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,41.000,42.000,501.761,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,42.000,43.000,560.264,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,43.000,44.000,582.462,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,44.000,45.000,551.482,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,45.000,46.000,603.777,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,46.000,47.000,753.347,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,47.000,48.000,766.616,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,48.000,49.000,696.402,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,49.000,50.000,703.832,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,50.000,51.000,754.119,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,51.000,52.000,768.536,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,52.000,53.000,661.401,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,53.000,54.000,668.915,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,54.000,55.000,721.871,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,55.000,56.000,666.338,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,56.000,57.000,776.654,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,57.000,58.000,752.489,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,58.000,59.000,680.888,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,59.000,60.000,699.716,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,60.000,61.000,660.193,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,61.000,62.000,653.035,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,62.000,63.000,486.233,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,63.000,64.000,442.847,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,64.000,65.000,381.207,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,65.000,66.000,396.021,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,66.000,67.000,344.206,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,67.000,68.000,405.804,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,68.000,69.000,406.916,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,69.000,70.000,368.748,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,70.000,71.000,401.687,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,71.000,72.000,376.049,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,72.000,73.000,331.677,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,73.000,74.000,347.686,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,74.000,75.000,365.390,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,75.000,76.000,412.398,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,76.000,77.000,396.445,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,77.000,78.000,480.292,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,baseline,-,A1_XR3,78.000,79.000,466.740,500.770
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,1.000,2.000,625.937,639.297
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,2.000,3.000,585.523,622.490
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,3.000,4.000,529.779,636.711
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,4.000,5.000,532.506,666.633
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,5.000,6.000,594.508,662.744
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,6.000,7.000,605.508,734.620
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,7.000,8.000,622.282,750.679
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,8.000,9.000,738.955,905.711
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,9.000,10.000,634.728,856.457
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,10.000,11.000,592.251,860.432
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,11.000,12.000,583.621,835.398
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,12.000,13.000,562.812,811.496
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,13.000,14.000,596.626,806.469
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,14.000,15.000,501.961,816.697
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,15.000,16.000,549.858,715.879
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,16.000,17.000,428.607,573.739
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,17.000,18.000,347.204,377.279
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,18.000,19.000,359.598,383.246
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,19.000,20.000,346.652,449.771
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,20.000,21.000,335.673,453.965
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,21.000,22.000,434.511,515.270
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,22.000,23.000,359.635,548.930
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,23.000,24.000,374.727,478.873
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,24.000,25.000,461.437,527.815
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,25.000,26.000,557.892,441.413
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,26.000,27.000,398.416,404.309
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,27.000,28.000,378.914,265.290
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,28.000,29.000,453.328,230.577
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,29.000,30.000,364.494,213.018
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,30.000,31.000,363.080,217.558
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,31.000,32.000,480.001,280.263
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,32.000,33.000,333.767,241.587
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,33.000,34.000,398.327,220.340
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,34.000,35.000,394.100,167.186
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,35.000,36.000,327.995,172.654
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,36.000,37.000,314.743,157.088
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,37.000,38.000,320.535,177.712
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,38.000,39.000,347.549,319.089
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,39.000,40.000,401.501,300.239
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,40.000,41.000,310.284,411.716
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,41.000,42.000,278.167,479.536
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,42.000,43.000,360.806,605.947
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,43.000,44.000,384.708,529.929
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,44.000,45.000,403.632,573.178
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,45.000,46.000,416.943,641.035
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,46.000,47.000,542.745,784.815
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,47.000,48.000,670.887,858.639
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,48.000,49.000,734.708,975.543
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,49.000,50.000,877.365,946.388
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,50.000,51.000,840.170,937.659
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,51.000,52.000,848.216,894.229
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,52.000,53.000,798.685,947.374
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,53.000,54.000,843.630,941.748
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,54.000,55.000,828.714,965.040
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,55.000,56.000,930.497,958.092
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,56.000,57.000,877.384,949.062
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,57.000,58.000,896.798,971.712
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,58.000,59.000,918.659,1009.967
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,59.000,60.000,877.472,1005.029
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,60.000,61.000,952.251,984.387
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,61.000,62.000,918.342,879.284
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,62.000,63.000,673.856,657.149
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,63.000,64.000,491.398,457.849
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,64.000,65.000,403.039,355.107
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,65.000,66.000,408.019,307.718
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,66.000,67.000,351.869,346.206
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,67.000,68.000,303.332,455.811
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,68.000,69.000,382.832,474.398
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,69.000,70.000,399.718,445.965
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,70.000,71.000,337.594,456.739
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,71.000,72.000,352.129,412.462
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,72.000,73.000,385.742,495.106
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,73.000,74.000,448.927,651.997
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,74.000,75.000,515.459,679.975
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,75.000,76.000,543.872,758.872
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,76.000,77.000,419.192,743.852
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,77.000,78.000,525.782,787.714
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,78.000,79.000,586.882,768.364
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,1.000,2.000,704.025,802.577
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,2.000,3.000,747.575,854.283
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,3.000,4.000,759.987,879.854
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,4.000,5.000,781.280,859.250
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,5.000,6.000,647.682,678.956
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,6.000,7.000,432.925,594.949
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,7.000,8.000,425.050,509.055
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,8.000,9.000,341.304,551.584
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,9.000,10.000,412.477,533.874
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,10.000,11.000,482.930,582.131
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,11.000,12.000,375.053,558.612
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,12.000,13.000,587.637,741.633
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,13.000,14.000,626.002,725.785
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,14.000,15.000,648.639,765.106
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,15.000,16.000,671.399,666.260
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,16.000,17.000,562.179,718.281
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,17.000,18.000,634.791,647.158
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,18.000,19.000,609.066,614.666
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,19.000,20.000,499.877,375.681
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,20.000,21.000,14.537,92.097
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,21.000,22.000,1.652,-129.690
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,22.000,23.000,0.807,-107.256
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,23.000,24.000,0.493,-99.771
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,24.000,25.000,0.956,76.674
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,25.000,26.000,202.298,521.293
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,26.000,27.000,439.223,695.469
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,27.000,28.000,506.450,723.265
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,28.000,29.000,505.611,671.735
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,29.000,30.000,498.847,698.887
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,30.000,31.000,505.830,791.577
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,31.000,32.000,686.684,867.937
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,32.000,33.000,772.826,897.780
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,33.000,34.000,663.976,893.839
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,34.000,35.000,708.453,853.180
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,35.000,36.000,663.498,849.082
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,36.000,37.000,705.807,836.881
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,37.000,38.000,913.636,914.859
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,38.000,39.000,625.142,670.033
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,39.000,40.000,429.056,537.125
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,40.000,41.000,375.780,494.909
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,41.000,42.000,376.627,535.739
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,42.000,43.000,373.690,563.791
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,43.000,44.000,395.027,503.047
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,44.000,45.000,464.693,583.769
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,45.000,46.000,441.227,672.485
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,46.000,47.000,463.349,740.949
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,47.000,48.000,448.421,728.083
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,48.000,49.000,532.059,802.433
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,49.000,50.000,437.814,736.085
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,50.000,51.000,495.967,767.571
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,51.000,52.000,576.726,831.743
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,52.000,53.000,1014.610,932.035
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,53.000,54.000,1010.172,959.761
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,54.000,55.000,1029.295,916.078
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,55.000,56.000,776.443,740.431
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,56.000,57.000,532.258,558.811
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,57.000,58.000,450.135,356.379
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,58.000,59.000,396.786,446.766
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,59.000,60.000,289.029,467.128
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,60.000,61.000,353.413,501.459
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,61.000,62.000,343.529,482.693
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,62.000,63.000,297.214,508.037
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,63.000,64.000,444.974,651.630
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,64.000,65.000,467.423,620.652
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,65.000,66.000,378.807,551.590
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,66.000,67.000,389.005,424.711
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,67.000,68.000,337.667,410.627
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,68.000,69.000,407.069,288.917
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,69.000,70.000,363.966,251.822
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,70.000,71.000,254.344,409.659
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,71.000,72.000,443.807,605.874
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,72.000,73.000,390.604,662.287
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,73.000,74.000,463.843,783.102
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,74.000,75.000,448.513,751.438
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,75.000,76.000,472.960,780.906
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,76.000,77.000,481.075,734.205
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,77.000,78.000,542.908,684.532
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,78.000,79.000,494.827,688.228
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,1.000,2.000,595.692,509.956
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,2.000,3.000,459.830,498.114
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,3.000,4.000,560.378,532.092
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,4.000,5.000,460.104,517.237
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,5.000,6.000,511.804,559.185
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,6.000,7.000,555.156,592.281
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,7.000,8.000,599.827,682.057
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,8.000,9.000,508.480,675.129
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,9.000,10.000,589.805,730.416
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,10.000,11.000,605.232,739.533
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,11.000,12.000,632.020,758.704
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,12.000,13.000,600.885,709.302
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,13.000,14.000,529.385,564.574
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,14.000,15.000,446.394,496.208
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,15.000,16.000,488.715,436.154
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,16.000,17.000,207.106,151.111
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,17.000,18.000,1.300,-53.473
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,18.000,19.000,1.743,-134.965
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,19.000,20.000,1.132,-157.727
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,20.000,21.000,1.301,-158.324
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,21.000,22.000,0.914,31.841
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,22.000,23.000,306.292,497.972
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,23.000,24.000,843.535,721.827
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,24.000,25.000,945.605,771.969
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,25.000,26.000,707.252,709.763
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,26.000,27.000,901.525,800.027
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,27.000,28.000,864.058,893.501
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,28.000,29.000,714.135,939.979
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,29.000,30.000,919.419,933.501
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,30.000,31.000,890.259,879.562
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,31.000,32.000,919.301,905.031
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,32.000,33.000,863.288,852.957
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,33.000,34.000,842.063,732.478
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,34.000,35.000,544.159,608.969
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,35.000,36.000,475.843,403.322
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,36.000,37.000,403.276,366.668
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,37.000,38.000,459.743,361.057
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,38.000,39.000,475.204,436.854
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,39.000,40.000,467.667,444.865
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,40.000,41.000,412.099,427.881
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,41.000,42.000,283.299,293.368
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,42.000,43.000,319.477,210.460
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,43.000,44.000,217.560,227.553
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,44.000,45.000,295.366,223.902
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,45.000,46.000,198.326,205.841
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,46.000,47.000,361.410,273.091
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,47.000,48.000,397.909,282.730
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,48.000,49.000,404.505,347.407
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,49.000,50.000,392.531,383.326
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,50.000,51.000,396.592,471.140
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,51.000,52.000,380.058,577.921
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,52.000,53.000,572.462,711.759
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,53.000,54.000,544.255,794.040
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,54.000,55.000,531.909,793.842
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,55.000,56.000,508.999,790.370
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,56.000,57.000,457.537,795.055
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,57.000,58.000,597.457,851.155
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,58.000,59.000,581.200,802.504
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,59.000,60.000,537.751,849.837
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,60.000,61.000,813.243,928.288
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,61.000,62.000,866.270,936.250
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,62.000,63.000,902.584,911.765
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,63.000,64.000,928.989,819.253
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,64.000,65.000,1007.223,837.272
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,65.000,66.000,961.376,763.108
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,66.000,67.000,595.189,560.290
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,67.000,68.000,415.195,461.170
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,68.000,69.000,439.697,478.712
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,69.000,70.000,426.212,522.963
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,70.000,71.000,471.895,572.215
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,71.000,72.000,410.496,637.792
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,72.000,73.000,458.543,603.160
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,73.000,74.000,376.791,533.662
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,74.000,75.000,386.323,454.318
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,75.000,76.000,341.890,492.404
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,76.000,77.000,357.835,518.836
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,77.000,78.000,347.088,553.953
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,78.000,79.000,365.836,502.337
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,1.000,2.000,580.423,646.588
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,2.000,3.000,583.599,644.939
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,3.000,4.000,620.882,701.260
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,4.000,5.000,653.998,727.831
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,5.000,6.000,651.229,719.584
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,6.000,7.000,663.376,657.669
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,7.000,8.000,677.007,606.741
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,8.000,9.000,573.011,486.130
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,9.000,10.000,399.786,461.218
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,10.000,11.000,423.254,405.369
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,11.000,12.000,388.016,385.484
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,12.000,13.000,420.966,301.812
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,13.000,14.000,398.210,383.696
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,14.000,15.000,393.265,558.347
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,15.000,16.000,557.026,681.209
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,16.000,17.000,597.978,738.517
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,17.000,18.000,499.037,691.392
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,18.000,19.000,578.869,728.430
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,19.000,20.000,438.329,685.007
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,20.000,21.000,526.711,707.420
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,21.000,22.000,560.728,595.233
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,22.000,23.000,504.599,529.728
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,23.000,24.000,484.898,362.578
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,24.000,25.000,474.798,435.646
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,25.000,26.000,466.748,438.898
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,26.000,27.000,192.081,283.082
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,27.000,28.000,4.240,91.271
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,28.000,29.000,1.740,-18.546
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,29.000,30.000,1.149,-85.398
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,30.000,31.000,1.523,-116.723
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,31.000,32.000,0.687,-227.191
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,32.000,33.000,1.248,-143.703
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,33.000,34.000,0.417,-226.737
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,34.000,35.000,0.694,-102.743
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,35.000,36.000,0.826,-122.615
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,36.000,37.000,0.787,-85.192
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,37.000,38.000,0.656,-79.709
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,38.000,39.000,0.573,-41.319
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,39.000,40.000,12.219,182.006
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,40.000,41.000,525.390,609.161
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,41.000,42.000,616.366,759.695
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,42.000,43.000,660.966,867.193
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,43.000,44.000,846.944,946.908
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,44.000,45.000,732.303,956.708
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,45.000,46.000,942.109,1008.044
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,46.000,47.000,697.148,983.465
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,47.000,48.000,744.909,908.759
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,48.000,49.000,820.906,952.295
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,49.000,50.000,712.717,854.279
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,50.000,51.000,893.418,918.369
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,51.000,52.000,721.094,841.567
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,52.000,53.000,758.702,860.539
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,53.000,54.000,911.926,886.766
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,54.000,55.000,740.915,868.038
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,55.000,56.000,725.126,707.057
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,56.000,57.000,534.490,468.018
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,57.000,58.000,434.374,449.740
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,58.000,59.000,408.420,454.248
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,59.000,60.000,411.454,513.374
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,60.000,61.000,413.732,484.315
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,61.000,62.000,428.249,444.756
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,62.000,63.000,443.832,372.124
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,63.000,64.000,488.604,605.311
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,64.000,65.000,934.071,811.797
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,65.000,66.000,784.776,925.305
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,66.000,67.000,723.132,986.254
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,67.000,68.000,849.989,1007.739
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,68.000,69.000,866.361,963.855
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,69.000,70.000,767.061,815.132
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,70.000,71.000,491.867,563.503
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,71.000,72.000,393.699,492.737
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,72.000,73.000,415.124,438.946
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,73.000,74.000,398.228,507.082
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,74.000,75.000,398.719,474.090
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,75.000,76.000,417.694,539.517
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,76.000,77.000,379.601,624.584
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,77.000,78.000,341.139,609.289
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,78.000,79.000,295.323,658.839
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,1.000,2.000,627.961,663.121
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,2.000,3.000,650.856,701.278
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,3.000,4.000,493.514,577.159
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,4.000,5.000,440.159,504.026
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,5.000,6.000,470.295,531.189
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,6.000,7.000,336.302,507.704
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,7.000,8.000,408.804,507.837
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,8.000,9.000,372.596,597.160
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,9.000,10.000,347.816,623.498
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,10.000,11.000,380.598,622.793
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,11.000,12.000,450.972,621.119
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,12.000,13.000,422.411,656.582
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,13.000,14.000,446.515,633.725
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,14.000,15.000,365.391,620.447
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,15.000,16.000,516.545,624.250
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,16.000,17.000,464.361,643.687
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,17.000,18.000,419.723,668.829
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,18.000,19.000,537.595,803.630
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,19.000,20.000,844.427,857.485
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,20.000,21.000,728.550,920.194
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,21.000,22.000,715.356,974.884
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,22.000,23.000,881.722,928.232
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,23.000,24.000,777.298,916.316
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,24.000,25.000,906.027,930.254
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,25.000,26.000,931.725,956.307
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,26.000,27.000,1032.471,993.196
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,27.000,28.000,1232.437,987.559
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,28.000,29.000,1085.592,970.106
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,29.000,30.000,767.162,769.690
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,30.000,31.000,566.917,681.002
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,31.000,32.000,410.504,527.961
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,32.000,33.000,455.547,486.208
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,33.000,34.000,459.322,367.213
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,34.000,35.000,467.469,358.950
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,35.000,36.000,450.375,405.594
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,36.000,37.000,413.372,408.791
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,37.000,38.000,418.787,411.649
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,38.000,39.000,380.603,399.104
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,39.000,40.000,370.993,322.755
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,40.000,41.000,270.098,173.180
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,41.000,42.000,1.064,-24.431
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,42.000,43.000,2.512,-147.760
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,43.000,44.000,1.113,-182.938
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,44.000,45.000,0.761,-198.850
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,45.000,46.000,0.929,-225.595
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,46.000,47.000,0.987,-224.613
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,47.000,48.000,0.873,-227.726
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,48.000,49.000,0.709,-200.539
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,49.000,50.000,0.729,-139.785
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,50.000,51.000,1.942,96.592
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,51.000,52.000,346.669,505.441
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,52.000,53.000,425.617,650.530
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,53.000,54.000,441.740,680.532
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,54.000,55.000,477.375,732.547
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,55.000,56.000,490.465,685.672
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,56.000,57.000,438.050,681.400
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,57.000,58.000,445.021,698.456
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,58.000,59.000,460.953,729.036
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,59.000,60.000,440.191,763.312
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,60.000,61.000,469.168,754.213
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,61.000,62.000,404.330,659.331
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,62.000,63.000,432.682,675.555
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,63.000,64.000,546.359,652.313
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,64.000,65.000,521.709,728.923
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,65.000,66.000,533.239,756.157
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,66.000,67.000,454.851,786.304
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,67.000,68.000,563.506,796.710
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,68.000,69.000,594.925,867.293
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,69.000,70.000,624.707,883.740
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,70.000,71.000,585.622,837.092
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,71.000,72.000,593.789,797.982
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,72.000,73.000,567.591,833.024
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,73.000,74.000,610.921,793.682
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,74.000,75.000,694.157,821.108
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,75.000,76.000,532.149,754.456
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,76.000,77.000,451.305,624.540
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,77.000,78.000,457.266,578.559
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,78.000,79.000,441.329,561.053
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,1.000,2.000,271.572,108.368
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,2.000,3.000,331.349,75.720
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,3.000,4.000,288.305,109.025
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,4.000,5.000,262.651,141.982
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,5.000,6.000,356.998,171.875
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,6.000,7.000,344.885,222.536
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,7.000,8.000,385.524,319.474
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,8.000,9.000,479.868,406.367
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,9.000,10.000,574.885,431.952
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,10.000,11.000,543.176,526.624
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,11.000,12.000,558.249,641.120
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,12.000,13.000,541.235,713.107
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,13.000,14.000,497.091,720.808
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,14.000,15.000,718.925,809.009
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,15.000,16.000,749.001,873.287
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,16.000,17.000,852.716,949.811
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,17.000,18.000,1101.088,992.546
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,18.000,19.000,1105.150,974.590
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,19.000,20.000,1210.729,978.991
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,20.000,21.000,1288.210,946.325
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,21.000,22.000,1229.225,903.093
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,22.000,23.000,663.543,718.750
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,23.000,24.000,537.318,543.728
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,24.000,25.000,349.982,486.175
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,25.000,26.000,387.390,484.976
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,26.000,27.000,406.459,462.062
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,27.000,28.000,409.230,589.563
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,28.000,29.000,475.402,512.689
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,29.000,30.000,460.810,609.388
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,30.000,31.000,470.282,596.441
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,31.000,32.000,605.472,708.001
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,32.000,33.000,478.868,717.293
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,33.000,34.000,430.142,752.935
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,34.000,35.000,554.397,647.635
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,35.000,36.000,434.716,607.156
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,36.000,37.000,457.728,604.407
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,37.000,38.000,457.086,565.521
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,38.000,39.000,484.711,598.747
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,39.000,40.000,598.636,729.472
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,40.000,41.000,516.064,735.071
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,41.000,42.000,501.761,790.576
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,42.000,43.000,560.264,806.747
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,43.000,44.000,582.462,842.483
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,44.000,45.000,551.482,838.918
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,45.000,46.000,603.777,846.014
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,46.000,47.000,753.347,927.945
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,47.000,48.000,766.616,947.197
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,48.000,49.000,696.402,913.487
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,49.000,50.000,703.832,931.119
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,50.000,51.000,754.119,919.373
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,51.000,52.000,768.536,946.705
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,52.000,53.000,661.401,872.121
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,53.000,54.000,668.915,866.436
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,54.000,55.000,721.871,835.466
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,55.000,56.000,666.338,782.817
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,56.000,57.000,776.654,751.421
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,57.000,58.000,752.489,695.608
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,58.000,59.000,680.888,696.681
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,59.000,60.000,699.716,721.028
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,60.000,61.000,660.193,683.072
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,61.000,62.000,653.035,560.012
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,62.000,63.000,486.233,449.084
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,63.000,64.000,442.847,405.406
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,64.000,65.000,381.207,508.947
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,65.000,66.000,396.021,527.070
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,66.000,67.000,344.206,585.925
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,67.000,68.000,405.804,591.026
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,68.000,69.000,406.916,543.526
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,69.000,70.000,368.748,663.274
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,70.000,71.000,401.687,686.494
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,71.000,72.000,376.049,757.381
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,72.000,73.000,331.677,639.183
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,73.000,74.000,347.686,644.161
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,74.000,75.000,365.390,579.404
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,75.000,76.000,412.398,678.189
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,76.000,77.000,396.445,660.543
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,77.000,78.000,480.292,717.070
+nowinnorm,1,学習 A2+A3 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,78.000,79.000,466.740,701.966
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,1.000,2.000,625.937,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,2.000,3.000,585.523,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,3.000,4.000,529.779,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,4.000,5.000,532.506,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,5.000,6.000,594.508,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,6.000,7.000,605.508,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,7.000,8.000,622.282,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,8.000,9.000,738.955,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,9.000,10.000,634.728,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,10.000,11.000,592.251,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,11.000,12.000,583.621,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,12.000,13.000,562.812,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,13.000,14.000,596.626,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,14.000,15.000,501.961,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,15.000,16.000,549.858,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,16.000,17.000,428.607,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,17.000,18.000,347.204,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,18.000,19.000,359.598,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,19.000,20.000,346.652,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,20.000,21.000,335.673,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,21.000,22.000,434.511,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,22.000,23.000,359.635,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,23.000,24.000,374.727,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,24.000,25.000,461.437,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,25.000,26.000,557.892,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,26.000,27.000,398.416,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,27.000,28.000,378.914,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,28.000,29.000,453.328,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,29.000,30.000,364.494,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,30.000,31.000,363.080,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,31.000,32.000,480.001,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,32.000,33.000,333.767,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,33.000,34.000,398.327,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,34.000,35.000,394.100,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,35.000,36.000,327.995,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,36.000,37.000,314.743,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,37.000,38.000,320.535,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,38.000,39.000,347.549,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,39.000,40.000,401.501,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,40.000,41.000,310.284,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,41.000,42.000,278.167,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,42.000,43.000,360.806,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,43.000,44.000,384.708,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,44.000,45.000,403.632,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,45.000,46.000,416.943,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,46.000,47.000,542.745,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,47.000,48.000,670.887,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,48.000,49.000,734.708,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,49.000,50.000,877.365,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,50.000,51.000,840.170,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,51.000,52.000,848.216,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,52.000,53.000,798.685,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,53.000,54.000,843.630,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,54.000,55.000,828.714,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,55.000,56.000,930.497,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,56.000,57.000,877.384,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,57.000,58.000,896.798,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,58.000,59.000,918.659,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,59.000,60.000,877.472,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,60.000,61.000,952.251,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,61.000,62.000,918.342,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,62.000,63.000,673.856,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,63.000,64.000,491.398,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,64.000,65.000,403.039,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,65.000,66.000,408.019,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,66.000,67.000,351.869,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,67.000,68.000,303.332,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,68.000,69.000,382.832,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,69.000,70.000,399.718,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,70.000,71.000,337.594,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,71.000,72.000,352.129,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,72.000,73.000,385.742,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,73.000,74.000,448.927,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,74.000,75.000,515.459,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,75.000,76.000,543.872,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,76.000,77.000,419.192,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,77.000,78.000,525.782,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL1,78.000,79.000,586.882,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,1.000,2.000,704.025,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,2.000,3.000,747.575,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,3.000,4.000,759.987,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,4.000,5.000,781.280,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,5.000,6.000,647.682,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,6.000,7.000,432.925,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,7.000,8.000,425.050,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,8.000,9.000,341.304,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,9.000,10.000,412.477,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,10.000,11.000,482.930,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,11.000,12.000,375.053,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,12.000,13.000,587.637,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,13.000,14.000,626.002,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,14.000,15.000,648.639,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,15.000,16.000,671.399,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,16.000,17.000,562.179,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,17.000,18.000,634.791,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,18.000,19.000,609.066,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,19.000,20.000,499.877,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,20.000,21.000,14.537,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,21.000,22.000,1.652,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,22.000,23.000,0.807,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,23.000,24.000,0.493,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,24.000,25.000,0.956,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,25.000,26.000,202.298,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,26.000,27.000,439.223,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,27.000,28.000,506.450,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,28.000,29.000,505.611,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,29.000,30.000,498.847,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,30.000,31.000,505.830,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,31.000,32.000,686.684,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,32.000,33.000,772.826,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,33.000,34.000,663.976,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,34.000,35.000,708.453,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,35.000,36.000,663.498,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,36.000,37.000,705.807,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,37.000,38.000,913.636,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,38.000,39.000,625.142,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,39.000,40.000,429.056,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,40.000,41.000,375.780,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,41.000,42.000,376.627,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,42.000,43.000,373.690,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,43.000,44.000,395.027,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,44.000,45.000,464.693,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,45.000,46.000,441.227,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,46.000,47.000,463.349,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,47.000,48.000,448.421,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,48.000,49.000,532.059,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,49.000,50.000,437.814,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,50.000,51.000,495.967,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,51.000,52.000,576.726,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,52.000,53.000,1014.610,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,53.000,54.000,1010.172,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,54.000,55.000,1029.295,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,55.000,56.000,776.443,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,56.000,57.000,532.258,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,57.000,58.000,450.135,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,58.000,59.000,396.786,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,59.000,60.000,289.029,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,60.000,61.000,353.413,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,61.000,62.000,343.529,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,62.000,63.000,297.214,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,63.000,64.000,444.974,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,64.000,65.000,467.423,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,65.000,66.000,378.807,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,66.000,67.000,389.005,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,67.000,68.000,337.667,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,68.000,69.000,407.069,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,69.000,70.000,363.966,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,70.000,71.000,254.344,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,71.000,72.000,443.807,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,72.000,73.000,390.604,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,73.000,74.000,463.843,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,74.000,75.000,448.513,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,75.000,76.000,472.960,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,76.000,77.000,481.075,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,77.000,78.000,542.908,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL2,78.000,79.000,494.827,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,1.000,2.000,595.692,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,2.000,3.000,459.830,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,3.000,4.000,560.378,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,4.000,5.000,460.104,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,5.000,6.000,511.804,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,6.000,7.000,555.156,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,7.000,8.000,599.827,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,8.000,9.000,508.480,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,9.000,10.000,589.805,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,10.000,11.000,605.232,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,11.000,12.000,632.020,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,12.000,13.000,600.885,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,13.000,14.000,529.385,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,14.000,15.000,446.394,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,15.000,16.000,488.715,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,16.000,17.000,207.106,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,17.000,18.000,1.300,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,18.000,19.000,1.743,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,19.000,20.000,1.132,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,20.000,21.000,1.301,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,21.000,22.000,0.914,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,22.000,23.000,306.292,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,23.000,24.000,843.535,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,24.000,25.000,945.605,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,25.000,26.000,707.252,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,26.000,27.000,901.525,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,27.000,28.000,864.058,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,28.000,29.000,714.135,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,29.000,30.000,919.419,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,30.000,31.000,890.259,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,31.000,32.000,919.301,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,32.000,33.000,863.288,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,33.000,34.000,842.063,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,34.000,35.000,544.159,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,35.000,36.000,475.843,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,36.000,37.000,403.276,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,37.000,38.000,459.743,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,38.000,39.000,475.204,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,39.000,40.000,467.667,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,40.000,41.000,412.099,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,41.000,42.000,283.299,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,42.000,43.000,319.477,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,43.000,44.000,217.560,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,44.000,45.000,295.366,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,45.000,46.000,198.326,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,46.000,47.000,361.410,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,47.000,48.000,397.909,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,48.000,49.000,404.505,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,49.000,50.000,392.531,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,50.000,51.000,396.592,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,51.000,52.000,380.058,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,52.000,53.000,572.462,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,53.000,54.000,544.255,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,54.000,55.000,531.909,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,55.000,56.000,508.999,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,56.000,57.000,457.537,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,57.000,58.000,597.457,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,58.000,59.000,581.200,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,59.000,60.000,537.751,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,60.000,61.000,813.243,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,61.000,62.000,866.270,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,62.000,63.000,902.584,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,63.000,64.000,928.989,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,64.000,65.000,1007.223,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,65.000,66.000,961.376,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,66.000,67.000,595.189,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,67.000,68.000,415.195,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,68.000,69.000,439.697,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,69.000,70.000,426.212,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,70.000,71.000,471.895,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,71.000,72.000,410.496,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,72.000,73.000,458.543,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,73.000,74.000,376.791,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,74.000,75.000,386.323,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,75.000,76.000,341.890,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,76.000,77.000,357.835,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,77.000,78.000,347.088,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XL3,78.000,79.000,365.836,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,1.000,2.000,580.423,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,2.000,3.000,583.599,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,3.000,4.000,620.882,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,4.000,5.000,653.998,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,5.000,6.000,651.229,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,6.000,7.000,663.376,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,7.000,8.000,677.007,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,8.000,9.000,573.011,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,9.000,10.000,399.786,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,10.000,11.000,423.254,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,11.000,12.000,388.016,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,12.000,13.000,420.966,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,13.000,14.000,398.210,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,14.000,15.000,393.265,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,15.000,16.000,557.026,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,16.000,17.000,597.978,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,17.000,18.000,499.037,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,18.000,19.000,578.869,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,19.000,20.000,438.329,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,20.000,21.000,526.711,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,21.000,22.000,560.728,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,22.000,23.000,504.599,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,23.000,24.000,484.898,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,24.000,25.000,474.798,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,25.000,26.000,466.748,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,26.000,27.000,192.081,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,27.000,28.000,4.240,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,28.000,29.000,1.740,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,29.000,30.000,1.149,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,30.000,31.000,1.523,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,31.000,32.000,0.687,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,32.000,33.000,1.248,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,33.000,34.000,0.417,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,34.000,35.000,0.694,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,35.000,36.000,0.826,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,36.000,37.000,0.787,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,37.000,38.000,0.656,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,38.000,39.000,0.573,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,39.000,40.000,12.219,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,40.000,41.000,525.390,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,41.000,42.000,616.366,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,42.000,43.000,660.966,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,43.000,44.000,846.944,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,44.000,45.000,732.303,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,45.000,46.000,942.109,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,46.000,47.000,697.148,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,47.000,48.000,744.909,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,48.000,49.000,820.906,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,49.000,50.000,712.717,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,50.000,51.000,893.418,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,51.000,52.000,721.094,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,52.000,53.000,758.702,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,53.000,54.000,911.926,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,54.000,55.000,740.915,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,55.000,56.000,725.126,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,56.000,57.000,534.490,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,57.000,58.000,434.374,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,58.000,59.000,408.420,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,59.000,60.000,411.454,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,60.000,61.000,413.732,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,61.000,62.000,428.249,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,62.000,63.000,443.832,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,63.000,64.000,488.604,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,64.000,65.000,934.071,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,65.000,66.000,784.776,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,66.000,67.000,723.132,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,67.000,68.000,849.989,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,68.000,69.000,866.361,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,69.000,70.000,767.061,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,70.000,71.000,491.867,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,71.000,72.000,393.699,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,72.000,73.000,415.124,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,73.000,74.000,398.228,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,74.000,75.000,398.719,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,75.000,76.000,417.694,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,76.000,77.000,379.601,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,77.000,78.000,341.139,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR1,78.000,79.000,295.323,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,1.000,2.000,627.961,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,2.000,3.000,650.856,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,3.000,4.000,493.514,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,4.000,5.000,440.159,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,5.000,6.000,470.295,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,6.000,7.000,336.302,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,7.000,8.000,408.804,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,8.000,9.000,372.596,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,9.000,10.000,347.816,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,10.000,11.000,380.598,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,11.000,12.000,450.972,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,12.000,13.000,422.411,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,13.000,14.000,446.515,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,14.000,15.000,365.391,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,15.000,16.000,516.545,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,16.000,17.000,464.361,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,17.000,18.000,419.723,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,18.000,19.000,537.595,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,19.000,20.000,844.427,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,20.000,21.000,728.550,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,21.000,22.000,715.356,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,22.000,23.000,881.722,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,23.000,24.000,777.298,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,24.000,25.000,906.027,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,25.000,26.000,931.725,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,26.000,27.000,1032.471,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,27.000,28.000,1232.437,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,28.000,29.000,1085.592,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,29.000,30.000,767.162,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,30.000,31.000,566.917,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,31.000,32.000,410.504,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,32.000,33.000,455.547,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,33.000,34.000,459.322,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,34.000,35.000,467.469,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,35.000,36.000,450.375,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,36.000,37.000,413.372,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,37.000,38.000,418.787,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,38.000,39.000,380.603,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,39.000,40.000,370.993,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,40.000,41.000,270.098,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,41.000,42.000,1.064,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,42.000,43.000,2.512,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,43.000,44.000,1.113,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,44.000,45.000,0.761,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,45.000,46.000,0.929,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,46.000,47.000,0.987,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,47.000,48.000,0.873,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,48.000,49.000,0.709,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,49.000,50.000,0.729,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,50.000,51.000,1.942,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,51.000,52.000,346.669,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,52.000,53.000,425.617,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,53.000,54.000,441.740,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,54.000,55.000,477.375,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,55.000,56.000,490.465,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,56.000,57.000,438.050,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,57.000,58.000,445.021,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,58.000,59.000,460.953,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,59.000,60.000,440.191,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,60.000,61.000,469.168,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,61.000,62.000,404.330,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,62.000,63.000,432.682,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,63.000,64.000,546.359,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,64.000,65.000,521.709,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,65.000,66.000,533.239,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,66.000,67.000,454.851,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,67.000,68.000,563.506,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,68.000,69.000,594.925,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,69.000,70.000,624.707,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,70.000,71.000,585.622,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,71.000,72.000,593.789,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,72.000,73.000,567.591,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,73.000,74.000,610.921,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,74.000,75.000,694.157,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,75.000,76.000,532.149,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,76.000,77.000,451.305,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,77.000,78.000,457.266,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR2,78.000,79.000,441.329,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,1.000,2.000,271.572,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,2.000,3.000,331.349,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,3.000,4.000,288.305,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,4.000,5.000,262.651,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,5.000,6.000,356.998,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,6.000,7.000,344.885,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,7.000,8.000,385.524,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,8.000,9.000,479.868,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,9.000,10.000,574.885,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,10.000,11.000,543.176,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,11.000,12.000,558.249,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,12.000,13.000,541.235,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,13.000,14.000,497.091,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,14.000,15.000,718.925,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,15.000,16.000,749.001,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,16.000,17.000,852.716,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,17.000,18.000,1101.088,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,18.000,19.000,1105.150,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,19.000,20.000,1210.729,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,20.000,21.000,1288.210,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,21.000,22.000,1229.225,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,22.000,23.000,663.543,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,23.000,24.000,537.318,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,24.000,25.000,349.982,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,25.000,26.000,387.390,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,26.000,27.000,406.459,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,27.000,28.000,409.230,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,28.000,29.000,475.402,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,29.000,30.000,460.810,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,30.000,31.000,470.282,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,31.000,32.000,605.472,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,32.000,33.000,478.868,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,33.000,34.000,430.142,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,34.000,35.000,554.397,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,35.000,36.000,434.716,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,36.000,37.000,457.728,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,37.000,38.000,457.086,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,38.000,39.000,484.711,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,39.000,40.000,598.636,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,40.000,41.000,516.064,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,41.000,42.000,501.761,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,42.000,43.000,560.264,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,43.000,44.000,582.462,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,44.000,45.000,551.482,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,45.000,46.000,603.777,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,46.000,47.000,753.347,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,47.000,48.000,766.616,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,48.000,49.000,696.402,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,49.000,50.000,703.832,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,50.000,51.000,754.119,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,51.000,52.000,768.536,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,52.000,53.000,661.401,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,53.000,54.000,668.915,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,54.000,55.000,721.871,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,55.000,56.000,666.338,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,56.000,57.000,776.654,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,57.000,58.000,752.489,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,58.000,59.000,680.888,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,59.000,60.000,699.716,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,60.000,61.000,660.193,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,61.000,62.000,653.035,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,62.000,63.000,486.233,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,63.000,64.000,442.847,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,64.000,65.000,381.207,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,65.000,66.000,396.021,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,66.000,67.000,344.206,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,67.000,68.000,405.804,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,68.000,69.000,406.916,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,69.000,70.000,368.748,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,70.000,71.000,401.687,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,71.000,72.000,376.049,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,72.000,73.000,331.677,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,73.000,74.000,347.686,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,74.000,75.000,365.390,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,75.000,76.000,412.398,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,76.000,77.000,396.445,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,77.000,78.000,480.292,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,baseline,-,A1_XR3,78.000,79.000,466.740,358.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,1.000,2.000,625.937,525.556
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,2.000,3.000,585.523,525.879
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,3.000,4.000,529.779,551.649
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,4.000,5.000,532.506,570.693
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,5.000,6.000,594.508,551.621
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,6.000,7.000,605.508,667.317
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,7.000,8.000,622.282,745.577
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,8.000,9.000,738.955,925.259
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,9.000,10.000,634.728,874.386
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,10.000,11.000,592.251,877.486
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,11.000,12.000,583.621,851.561
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,12.000,13.000,562.812,838.278
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,13.000,14.000,596.626,830.552
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,14.000,15.000,501.961,815.462
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,15.000,16.000,549.858,654.739
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,16.000,17.000,428.607,426.032
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,17.000,18.000,347.204,242.549
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,18.000,19.000,359.598,249.405
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,19.000,20.000,346.652,320.545
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,20.000,21.000,335.673,339.756
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,21.000,22.000,434.511,379.945
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,22.000,23.000,359.635,437.343
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,23.000,24.000,374.727,353.497
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,24.000,25.000,461.437,387.164
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,25.000,26.000,557.892,304.277
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,26.000,27.000,398.416,229.302
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,27.000,28.000,378.914,152.146
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,28.000,29.000,453.328,135.638
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,29.000,30.000,364.494,140.313
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,30.000,31.000,363.080,139.439
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,31.000,32.000,480.001,164.299
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,32.000,33.000,333.767,163.342
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,33.000,34.000,398.327,157.411
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,34.000,35.000,394.100,117.440
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,35.000,36.000,327.995,117.703
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,36.000,37.000,314.743,112.685
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,37.000,38.000,320.535,123.154
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,38.000,39.000,347.549,177.328
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,39.000,40.000,401.501,163.360
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,40.000,41.000,310.284,228.942
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,41.000,42.000,278.167,308.844
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,42.000,43.000,360.806,489.617
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,43.000,44.000,384.708,436.496
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,44.000,45.000,403.632,505.392
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,45.000,46.000,416.943,568.039
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,46.000,47.000,542.745,722.979
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,47.000,48.000,670.887,802.530
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,48.000,49.000,734.708,957.174
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,49.000,50.000,877.365,947.716
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,50.000,51.000,840.170,938.646
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,51.000,52.000,848.216,879.913
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,52.000,53.000,798.685,913.801
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,53.000,54.000,843.630,896.201
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,54.000,55.000,828.714,898.107
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,55.000,56.000,930.497,912.785
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,56.000,57.000,877.384,911.487
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,57.000,58.000,896.798,939.453
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,58.000,59.000,918.659,964.783
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,59.000,60.000,877.472,958.439
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,60.000,61.000,952.251,923.807
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,61.000,62.000,918.342,813.303
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,62.000,63.000,673.856,564.690
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,63.000,64.000,491.398,326.475
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,64.000,65.000,403.039,223.147
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,65.000,66.000,408.019,197.679
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,66.000,67.000,351.869,210.396
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,67.000,68.000,303.332,296.388
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,68.000,69.000,382.832,339.690
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,69.000,70.000,399.718,318.007
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,70.000,71.000,337.594,343.410
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,71.000,72.000,352.129,280.773
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,72.000,73.000,385.742,380.206
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,73.000,74.000,448.927,582.399
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,74.000,75.000,515.459,671.982
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,75.000,76.000,543.872,748.410
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,76.000,77.000,419.192,745.173
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,77.000,78.000,525.782,776.443
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL1,78.000,79.000,586.882,782.454
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,1.000,2.000,704.025,819.030
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,2.000,3.000,747.575,870.403
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,3.000,4.000,759.987,901.295
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,4.000,5.000,781.280,845.295
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,5.000,6.000,647.682,630.229
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,6.000,7.000,432.925,494.658
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,7.000,8.000,425.050,372.686
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,8.000,9.000,341.304,441.091
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,9.000,10.000,412.477,383.837
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,10.000,11.000,482.930,454.757
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,11.000,12.000,375.053,439.263
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,12.000,13.000,587.637,607.851
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,13.000,14.000,626.002,632.285
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,14.000,15.000,648.639,655.171
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,15.000,16.000,671.399,590.395
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,16.000,17.000,562.179,614.554
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,17.000,18.000,634.791,547.195
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,18.000,19.000,609.066,491.760
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,19.000,20.000,499.877,211.613
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,20.000,21.000,14.537,73.630
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,21.000,22.000,1.652,-59.704
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,22.000,23.000,0.807,-55.904
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,23.000,24.000,0.493,-49.476
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,24.000,25.000,0.956,58.586
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,25.000,26.000,202.298,323.510
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,26.000,27.000,439.223,603.314
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,27.000,28.000,506.450,689.963
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,28.000,29.000,505.611,658.783
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,29.000,30.000,498.847,663.311
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,30.000,31.000,505.830,719.778
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,31.000,32.000,686.684,758.428
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,32.000,33.000,772.826,790.331
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,33.000,34.000,663.976,789.511
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,34.000,35.000,708.453,751.898
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,35.000,36.000,663.498,729.737
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,36.000,37.000,705.807,732.546
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,37.000,38.000,913.636,812.671
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,38.000,39.000,625.142,573.237
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,39.000,40.000,429.056,400.074
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,40.000,41.000,375.780,319.376
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,41.000,42.000,376.627,382.040
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,42.000,43.000,373.690,411.489
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,43.000,44.000,395.027,401.604
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,44.000,45.000,464.693,514.454
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,45.000,46.000,441.227,641.892
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,46.000,47.000,463.349,725.762
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,47.000,48.000,448.421,719.241
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,48.000,49.000,532.059,775.819
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,49.000,50.000,437.814,727.384
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,50.000,51.000,495.967,749.096
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,51.000,52.000,576.726,798.941
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,52.000,53.000,1014.610,893.518
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,53.000,54.000,1010.172,918.860
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,54.000,55.000,1029.295,845.043
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,55.000,56.000,776.443,647.104
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,56.000,57.000,532.258,383.389
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,57.000,58.000,450.135,239.156
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,58.000,59.000,396.786,282.041
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,59.000,60.000,289.029,355.996
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,60.000,61.000,353.413,411.495
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,61.000,62.000,343.529,369.125
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,62.000,63.000,297.214,416.921
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,63.000,64.000,444.974,531.962
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,64.000,65.000,467.423,531.119
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,65.000,66.000,378.807,416.848
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,66.000,67.000,389.005,240.570
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,67.000,68.000,337.667,230.162
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,68.000,69.000,407.069,162.714
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,69.000,70.000,363.966,163.075
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,70.000,71.000,254.344,270.766
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,71.000,72.000,443.807,541.047
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,72.000,73.000,390.604,693.645
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,73.000,74.000,463.843,776.813
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,74.000,75.000,448.513,761.398
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,75.000,76.000,472.960,769.073
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,76.000,77.000,481.075,708.992
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,77.000,78.000,542.908,622.309
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL2,78.000,79.000,494.827,611.263
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,1.000,2.000,595.692,370.140
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,2.000,3.000,459.830,333.779
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,3.000,4.000,560.378,384.788
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,4.000,5.000,460.104,369.897
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,5.000,6.000,511.804,464.589
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,6.000,7.000,555.156,533.030
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,7.000,8.000,599.827,649.474
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,8.000,9.000,508.480,652.515
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,9.000,10.000,589.805,697.919
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,10.000,11.000,605.232,691.433
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,11.000,12.000,632.020,677.796
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,12.000,13.000,600.885,585.647
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,13.000,14.000,529.385,425.481
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,14.000,15.000,446.394,341.958
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,15.000,16.000,488.715,243.986
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,16.000,17.000,207.106,86.976
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,17.000,18.000,1.300,-12.669
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,18.000,19.000,1.743,-63.933
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,19.000,20.000,1.132,-71.225
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,20.000,21.000,1.301,-73.211
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,21.000,22.000,0.914,46.309
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,22.000,23.000,306.292,314.364
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,23.000,24.000,843.535,631.224
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,24.000,25.000,945.605,683.701
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,25.000,26.000,707.252,664.430
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,26.000,27.000,901.525,740.290
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,27.000,28.000,864.058,825.030
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,28.000,29.000,714.135,854.229
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,29.000,30.000,919.419,856.811
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,30.000,31.000,890.259,823.877
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,31.000,32.000,919.301,831.830
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,32.000,33.000,863.288,778.712
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,33.000,34.000,842.063,667.655
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,34.000,35.000,544.159,509.567
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,35.000,36.000,475.843,265.200
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,36.000,37.000,403.276,229.734
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,37.000,38.000,459.743,229.625
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,38.000,39.000,475.204,288.048
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,39.000,40.000,467.667,306.623
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,40.000,41.000,412.099,266.011
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,41.000,42.000,283.299,172.396
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,42.000,43.000,319.477,138.977
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,43.000,44.000,217.560,142.693
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,44.000,45.000,295.366,144.770
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,45.000,46.000,198.326,137.329
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,46.000,47.000,361.410,170.986
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,47.000,48.000,397.909,174.351
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,48.000,49.000,404.505,207.034
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,49.000,50.000,392.531,225.334
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,50.000,51.000,396.592,325.582
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,51.000,52.000,380.058,483.002
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,52.000,53.000,572.462,656.872
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,53.000,54.000,544.255,792.203
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,54.000,55.000,531.909,780.610
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,55.000,56.000,508.999,767.654
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,56.000,57.000,457.537,767.574
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,57.000,58.000,597.457,805.975
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,58.000,59.000,581.200,784.729
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,59.000,60.000,537.751,817.360
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,60.000,61.000,813.243,895.447
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,61.000,62.000,866.270,910.909
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,62.000,63.000,902.584,870.764
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,63.000,64.000,928.989,792.416
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,64.000,65.000,1007.223,823.161
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,65.000,66.000,961.376,719.126
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,66.000,67.000,595.189,472.651
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,67.000,68.000,415.195,313.430
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,68.000,69.000,439.697,334.653
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,69.000,70.000,426.212,424.067
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,70.000,71.000,471.895,481.424
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,71.000,72.000,410.496,561.449
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,72.000,73.000,458.543,514.253
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,73.000,74.000,376.791,448.371
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,74.000,75.000,386.323,303.241
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,75.000,76.000,341.890,338.535
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,76.000,77.000,357.835,350.974
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,77.000,78.000,347.088,449.077
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XL3,78.000,79.000,365.836,405.938
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,1.000,2.000,580.423,527.969
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,2.000,3.000,583.599,504.988
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,3.000,4.000,620.882,550.547
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,4.000,5.000,653.998,584.684
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,5.000,6.000,651.229,593.493
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,6.000,7.000,663.376,530.835
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,7.000,8.000,677.007,484.632
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,8.000,9.000,573.011,371.694
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,9.000,10.000,399.786,325.049
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,10.000,11.000,423.254,258.946
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,11.000,12.000,388.016,242.181
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,12.000,13.000,420.966,192.725
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,13.000,14.000,398.210,247.629
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,14.000,15.000,393.265,472.252
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,15.000,16.000,557.026,638.606
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,16.000,17.000,597.978,727.168
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,17.000,18.000,499.037,695.679
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,18.000,19.000,578.869,724.822
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,19.000,20.000,438.329,693.976
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,20.000,21.000,526.711,666.270
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,21.000,22.000,560.728,535.973
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,22.000,23.000,504.599,439.843
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,23.000,24.000,484.898,260.099
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,24.000,25.000,474.798,306.301
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,25.000,26.000,466.748,264.737
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,26.000,27.000,192.081,158.787
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,27.000,28.000,4.240,42.113
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,28.000,29.000,1.740,-26.661
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,29.000,30.000,1.149,-52.538
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,30.000,31.000,1.523,-56.735
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,31.000,32.000,0.687,-93.246
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,32.000,33.000,1.248,-53.835
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,33.000,34.000,0.417,-93.313
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,34.000,35.000,0.694,-48.164
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,35.000,36.000,0.826,-61.722
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,36.000,37.000,0.787,-49.028
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,37.000,38.000,0.656,-47.367
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,38.000,39.000,0.573,-26.626
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,39.000,40.000,12.219,119.301
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,40.000,41.000,525.390,439.925
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,41.000,42.000,616.366,684.376
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,42.000,43.000,660.966,776.366
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,43.000,44.000,846.944,832.590
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,44.000,45.000,732.303,886.624
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,45.000,46.000,942.109,915.256
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,46.000,47.000,697.148,886.906
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,47.000,48.000,744.909,796.928
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,48.000,49.000,820.906,851.339
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,49.000,50.000,712.717,788.778
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,50.000,51.000,893.418,834.309
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,51.000,52.000,721.094,788.705
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,52.000,53.000,758.702,794.571
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,53.000,54.000,911.926,801.214
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,54.000,55.000,740.915,751.859
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,55.000,56.000,725.126,570.881
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,56.000,57.000,534.490,302.684
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,57.000,58.000,434.374,273.203
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,58.000,59.000,408.420,301.877
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,59.000,60.000,411.454,373.559
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,60.000,61.000,413.732,326.432
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,61.000,62.000,428.249,260.121
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,62.000,63.000,443.832,240.543
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,63.000,64.000,488.604,514.450
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,64.000,65.000,934.071,746.721
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,65.000,66.000,784.776,854.443
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,66.000,67.000,723.132,877.538
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,67.000,68.000,849.989,886.276
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,68.000,69.000,866.361,878.907
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,69.000,70.000,767.061,719.195
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,70.000,71.000,491.867,451.069
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,71.000,72.000,393.699,333.381
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,72.000,73.000,415.124,296.974
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,73.000,74.000,398.228,397.366
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,74.000,75.000,398.719,388.743
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,75.000,76.000,417.694,480.839
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,76.000,77.000,379.601,598.221
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,77.000,78.000,341.139,605.062
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR1,78.000,79.000,295.323,636.546
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,1.000,2.000,627.961,645.994
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,2.000,3.000,650.856,631.648
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,3.000,4.000,493.514,466.716
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,4.000,5.000,440.159,376.660
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,5.000,6.000,470.295,364.706
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,6.000,7.000,336.302,398.278
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,7.000,8.000,408.804,405.325
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,8.000,9.000,372.596,532.630
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,9.000,10.000,347.816,582.992
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,10.000,11.000,380.598,587.726
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,11.000,12.000,450.972,600.082
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,12.000,13.000,422.411,643.719
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,13.000,14.000,446.515,575.722
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,14.000,15.000,365.391,550.336
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,15.000,16.000,516.545,515.081
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,16.000,17.000,464.361,564.326
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,17.000,18.000,419.723,576.323
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,18.000,19.000,537.595,679.363
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,19.000,20.000,844.427,787.575
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,20.000,21.000,728.550,853.573
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,21.000,22.000,715.356,916.852
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,22.000,23.000,881.722,878.927
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,23.000,24.000,777.298,892.622
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,24.000,25.000,906.027,910.850
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,25.000,26.000,931.725,949.586
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,26.000,27.000,1032.471,1007.742
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,27.000,28.000,1232.437,1001.386
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,28.000,29.000,1085.592,933.026
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,29.000,30.000,767.162,705.866
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,30.000,31.000,566.917,547.489
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,31.000,32.000,410.504,396.029
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,32.000,33.000,455.547,293.535
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,33.000,34.000,459.322,231.886
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,34.000,35.000,467.469,234.455
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,35.000,36.000,450.375,256.725
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,36.000,37.000,413.372,266.685
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,37.000,38.000,418.787,261.909
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,38.000,39.000,380.603,245.815
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,39.000,40.000,370.993,186.563
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,40.000,41.000,270.098,90.836
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,41.000,42.000,1.064,-10.538
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,42.000,43.000,2.512,-65.253
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,43.000,44.000,1.113,-74.841
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,44.000,45.000,0.761,-80.517
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,45.000,46.000,0.929,-90.382
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,46.000,47.000,0.987,-89.931
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,47.000,48.000,0.873,-95.282
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,48.000,49.000,0.709,-85.523
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,49.000,50.000,0.729,-66.038
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,50.000,51.000,1.942,70.446
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,51.000,52.000,346.669,322.549
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,52.000,53.000,425.617,589.280
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,53.000,54.000,441.740,591.101
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,54.000,55.000,477.375,666.994
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,55.000,56.000,490.465,624.532
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,56.000,57.000,438.050,641.160
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,57.000,58.000,445.021,632.723
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,58.000,59.000,460.953,672.537
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,59.000,60.000,440.191,705.457
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,60.000,61.000,469.168,682.927
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,61.000,62.000,404.330,599.673
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,62.000,63.000,432.682,634.607
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,63.000,64.000,546.359,621.546
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,64.000,65.000,521.709,706.340
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,65.000,66.000,533.239,753.454
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,66.000,67.000,454.851,775.582
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,67.000,68.000,563.506,790.197
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,68.000,69.000,594.925,880.721
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,69.000,70.000,624.707,893.000
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,70.000,71.000,585.622,869.745
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,71.000,72.000,593.789,828.446
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,72.000,73.000,567.591,847.980
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,73.000,74.000,610.921,822.564
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,74.000,75.000,694.157,827.335
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,75.000,76.000,532.149,705.656
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,76.000,77.000,451.305,545.529
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,77.000,78.000,457.266,487.729
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR2,78.000,79.000,441.329,468.346
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,1.000,2.000,271.572,78.445
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,2.000,3.000,331.349,63.301
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,3.000,4.000,288.305,77.421
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,4.000,5.000,262.651,93.615
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,5.000,6.000,356.998,114.657
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,6.000,7.000,344.885,142.575
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,7.000,8.000,385.524,196.909
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,8.000,9.000,479.868,258.822
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,9.000,10.000,574.885,307.075
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,10.000,11.000,543.176,405.618
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,11.000,12.000,558.249,520.702
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,12.000,13.000,541.235,610.614
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,13.000,14.000,497.091,645.223
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,14.000,15.000,718.925,737.493
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,15.000,16.000,749.001,823.752
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,16.000,17.000,852.716,936.331
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,17.000,18.000,1101.088,975.558
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,18.000,19.000,1105.150,984.201
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,19.000,20.000,1210.729,981.688
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,20.000,21.000,1288.210,977.844
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,21.000,22.000,1229.225,879.317
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,22.000,23.000,663.543,647.957
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,23.000,24.000,537.318,423.461
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,24.000,25.000,349.982,348.462
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,25.000,26.000,387.390,320.233
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,26.000,27.000,406.459,305.372
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,27.000,28.000,409.230,416.361
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,28.000,29.000,475.402,382.014
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,29.000,30.000,460.810,512.180
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,30.000,31.000,470.282,525.118
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,31.000,32.000,605.472,659.488
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,32.000,33.000,478.868,655.106
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,33.000,34.000,430.142,674.101
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,34.000,35.000,554.397,487.072
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,35.000,36.000,434.716,494.686
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,36.000,37.000,457.728,478.930
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,37.000,38.000,457.086,476.458
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,38.000,39.000,484.711,495.631
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,39.000,40.000,598.636,618.794
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,40.000,41.000,516.064,663.310
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,41.000,42.000,501.761,708.799
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,42.000,43.000,560.264,755.746
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,43.000,44.000,582.462,778.442
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,44.000,45.000,551.482,763.733
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,45.000,46.000,603.777,781.514
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,46.000,47.000,753.347,822.123
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,47.000,48.000,766.616,847.339
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,48.000,49.000,696.402,824.355
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,49.000,50.000,703.832,831.016
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,50.000,51.000,754.119,829.508
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,51.000,52.000,768.536,833.789
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,52.000,53.000,661.401,788.221
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,53.000,54.000,668.915,757.949
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,54.000,55.000,721.871,735.651
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,55.000,56.000,666.338,695.726
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,56.000,57.000,776.654,650.422
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,57.000,58.000,752.489,595.609
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,58.000,59.000,680.888,586.696
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,59.000,60.000,699.716,619.694
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,60.000,61.000,660.193,579.133
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,61.000,62.000,653.035,440.917
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,62.000,63.000,486.233,305.163
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,63.000,64.000,442.847,271.421
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,64.000,65.000,381.207,386.138
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,65.000,66.000,396.021,463.525
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,66.000,67.000,344.206,495.037
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,67.000,68.000,405.804,477.083
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,68.000,69.000,406.916,429.208
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,69.000,70.000,368.748,564.826
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,70.000,71.000,401.687,584.563
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,71.000,72.000,376.049,644.869
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,72.000,73.000,331.677,529.982
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,73.000,74.000,347.686,518.292
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,74.000,75.000,365.390,485.033
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,75.000,76.000,412.398,580.827
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,76.000,77.000,396.445,593.426
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,77.000,78.000,480.292,654.693
+nowinnorm,1,学習 A2+A3+B1 → テスト A1,cnn3s,Doppler 2D 3秒 強さ±3dB,A1_XR3,78.000,79.000,466.740,656.142
