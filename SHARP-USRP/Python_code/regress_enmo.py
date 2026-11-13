@@ -75,19 +75,24 @@ MODEL_NAMES = {"linear": "線形回帰 (Ridge)", "rf": "ランダムフォレス
                "mlp": "MLP", "svr": "SVR", "gpr": "ガウス過程回帰", "cnn": "CNN",
                "cnn_shuffle": "CNN（時間の順番を入れ替え）", "cnn_timemean": "CNN（時間で平均）",
                "cnn1d": "1 次元 CNN（時間方向）", "cnn3s": "CNN（前後 1 秒も入力）", "cnn5s": "CNN（前後 2 秒も入力）",
-               "pls": "PLS 回帰"}
+               "pls": "PLS 回帰", "cnn_imu": "CNN（加速度計の波形）", "cnn_imu3s": "CNN（加速度計の波形、前後 1 秒も入力）"}
 ALL_MODELS = ["linear", "rf", "xgboost", "mlp", "svr", "gpr", "cnn"]
 # extra CNNs for checking why the CNN works (--cnn_study) / CNN が効く理由を確かめるための CNN
 STUDY_MODELS = ["cnn_shuffle", "cnn_timemean", "cnn1d", "cnn3s"]
-EXTRA_MODELS = ["cnn5s"]   # only when named in --models (heavy) / --models で指定したときだけ（重い）
+# CNN on the accelerometer's 50 Hz ENMO waveform (1D), only when named in --models / 加速度計の ENMO の波形の CNN（1 次元）
+IMU_MODELS = ["cnn_imu", "cnn_imu3s"]
+EXTRA_MODELS = ["cnn5s"] + IMU_MODELS   # only when named in --models / --models で指定したときだけ
 CNN_KINDS = ["cnn"] + STUDY_MODELS + EXTRA_MODELS
 TAB_EXTRA = ["pls"]        # PLS regression, only when named in --models / PLS 回帰（--models で指定したときだけ）
 PCA_PARTS = {"A", "M"}     # --pca acts on these feature sets only (the Doppler spectrum / map) / --pca をかける特徴量
 MAP_SIZE = (16, 50)        # feature M: Doppler map shrunk to time x velocity (per antenna) / 特徴量 M の大きさ
 PLS_MAX = 20               # PLS: largest number of components tried / PLS の成分数の上限
 CONTEXT_S = {"cnn3s": 1.0, "cnn5s": 2.0}   # seconds of Doppler before and after the window / 区間の前後に足す秒数
+IMU_CONTEXT_S = {"cnn_imu": 0.0, "cnn_imu3s": 1.0}   # same, for the accelerometer CNN / 加速度計の CNN の前後の秒数
+IMU_RATE = 50.0            # accelerometer waveform samples per second / 加速度計の波形の 1 秒あたりの点数
 CNN_FEAT = {"cnn": "Doppler 2D", "cnn_shuffle": "Doppler 2D 時間入替", "cnn_timemean": "Doppler 2D 時間平均",
-            "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒"}
+            "cnn1d": "Doppler 1D", "cnn3s": "Doppler 2D 3秒", "cnn5s": "Doppler 2D 5秒",
+            "cnn_imu": "ENMO 波形 1秒", "cnn_imu3s": "ENMO 波形 3秒"}
 CNN_FRAMES = 64          # CNN input frames per second of window (at most 320) / CNN に入れる 1 秒あたりの時間フレーム数（最大 320）
 TARGET = "ENMO(mG)"      # target column in the calculator's output (waist) / 正解の列（腰）
 # --target: which ENMO of the acceleration calculator is the ground truth / どの ENMO を正解にするか
@@ -603,7 +608,7 @@ def cnn_input(S, t, a, b):
 
 
 def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET,
-                need_f=None, static_v=STATIC_V, need_w=False, need_r=False):
+                need_f=None, static_v=STATIC_V, need_w=False, need_r=False, need_imu=None):
     """Windows of one trial: features A, B, C, CNN input and the target. With need_w, also the waist ENMO of the
     same windows as an input (W: 1 s mean, WS: mean / std / max / 90th percentile of the 50 Hz values).
     1 試行分の区間。need_w なら同じ区間の腰の ENMO も入力に（W: 1 秒平均、WS: 50 Hz の値の平均・標準偏差・最大・90 % 点）"""
@@ -619,6 +624,13 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
     tgt = load_target(spec, window, column)
     wst = (tgt if column == TARGET else load_target(spec, window, TARGET)) if need_w else None
     rst = load_target(spec, window, WRIST) if need_r else None
+    # need_imu = (column, [context seconds]): the 50 Hz ENMO waveform for the accelerometer CNN / 加速度計の CNN の波形
+    ist = None
+    if need_imu:
+        ist = load_target(spec, window, need_imu[0]) if need_imu[0] != column else tgt
+        if ist["kind"] != "timeseries":
+            raise RegError(f"{name}: 加速度計の波形の CNN には 50 Hz の ENMO（*_power_timeseries.csv）が要ります")
+    XI = {c: [] for c in (need_imu[1] if need_imu else [])}
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
@@ -667,6 +679,10 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         if not ok:
             dropped += 1
             continue
+        for c in XI:   # ENMO waveform of the window (+- c s) at IMU_RATE / 区間（と前後 c 秒）の ENMO の波形
+            n = int(round(IMU_RATE * (b - a + 2 * c)))
+            tg = a - c + (np.arange(n) + 0.5) / IMU_RATE
+            XI[c].append(np.interp(tg, ist["t"], ist["y"])[:, None].astype(np.float32))
         for src, dst in ((wst, XW), (rst, XR)):   # waist / wrist ENMO of the same window / 同じ区間の腰・手首の ENMO
             if src is None:
                 continue
@@ -699,7 +715,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
                 levels=[trial_levels(d, kept[0][0], kept[-1][1], static_v) for d in ants],
                 XF={k: np.array(v, float) for k, v in XF.items()},
                 XW=np.array(XW, float) if XW else np.zeros((len(y), 0)),
-                XR=np.array(XR, float) if XR else np.zeros((len(y), 0)))
+                XR=np.array(XR, float) if XR else np.zeros((len(y), 0)),
+                XI={c: np.array(v) for c, v in XI.items()})
 
 
 # ============================================================ models
@@ -1024,7 +1041,9 @@ def run(opts):
         if not specs:
             raise RegError("全身の ENMO（ENMO_body(mG)）がある試行がありません。4 台そろった試行を加速度計算ソフト v2.0 で"
                            "計算し直してください")
-    if {p for f in str(opts.features).upper().replace(" ", "").split(",") for p in f.partition("@")[0].split("+")} & {"R", "RS"}:
+    if ({p for f in str(opts.features).upper().replace(" ", "").split(",") for p in f.partition("@")[0].split("+")} & {"R", "RS"}
+            or (str(getattr(opts, "imu_part", "") or "").lower() == "wrist"
+                and any(m.strip() in IMU_MODELS for m in str(opts.models).split(",")))):
         lack = [sp["name"] for sp in specs if not has_target(sp, opts.windows[0], WRIST)]
         if lack:
             log(f"  注意: 手首の ENMO（ENMO_wrist(mG)）がない試行は使いません（手首のセンサがない、または加速度計算ソフトが "
@@ -1056,6 +1075,18 @@ def run(opts):
     used = {p for f in feats for p in f.partition("@")[0].split("+")}
     need_w = bool(used & {"W", "WS"})
     need_r = bool(used & {"R", "RS"})
+    imu_models = [m for m in models if m in IMU_MODELS]
+    imu_part = (getattr(opts, "imu_part", None) or "waist").lower()
+    if imu_part not in ("waist", "wrist"):
+        raise RegError(f"--imu_part は waist か wrist です（{imu_part}）")
+    imu_col = TARGET if imu_part == "waist" else WRIST
+    imu_ja = "腰" if imu_part == "waist" else "手首"
+    need_imu = (imu_col, sorted({IMU_CONTEXT_S[m] for m in imu_models})) if imu_models else None
+    if imu_models:
+        log(f"加速度計の波形の CNN: {imu_ja}の ENMO の 50 Hz の波形（1 秒 = {IMU_RATE:g} 点、前後 1 秒なら 3 秒分。"
+            "1 次元 CNN、区間の印のチャネル付き）を入力にする。ドップラーの CNN と同じ区間・同じ分け方・同じ学習の設定", out)
+        if imu_part == "waist" and target == "waist":
+            log("  注意: 正解も腰の ENMO なので、入力が正解そのものになります（比べるなら --target body）", out)
     if need_r:
         log("特徴量 R・RS: 同じ 1 秒の区間の手首の ENMO（加速度計算ソフト v2.2 の ENMO_wrist(mG)）を入力にする。R: 1 秒平均、"
             "RS: 50 Hz の値の平均・標準偏差・最大・90 % 点。腕の加速度計（スマートウォッチ）との比較用", out)
@@ -1106,7 +1137,7 @@ def run(opts):
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
                                   need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column,
-                                  need_f=need_f, static_v=static_v, need_w=need_w, need_r=need_r)
+                                  need_f=need_f, static_v=static_v, need_w=need_w, need_r=need_r, need_imu=need_imu)
                       for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
@@ -1134,6 +1165,15 @@ def run(opts):
                     cnn_cache[kind] = (np.repeat(XN.mean(axis=1, keepdims=True), XN.shape[1], axis=1), "2d")
                 elif kind == "cnn1d":  # time x (velocity bins x antennas) / 時間 x (速度 x アンテナ)
                     cnn_cache[kind] = (XN.reshape(len(XN), XN.shape[1], -1), "1d")
+                elif kind in IMU_CONTEXT_S:   # accelerometer ENMO waveform (+ mark of the window) / 加速度計の波形
+                    c = IMU_CONTEXT_S[kind]
+                    Xi = np.concatenate([tr["XI"][c] for tr in trials])
+                    if c > 0:
+                        nf = Xi.shape[1]
+                        mark = np.zeros((len(Xi), nf, 1), np.float32)
+                        mark[:, int(round(nf * c / (window + 2 * c))):int(round(nf * (c + window) / (window + 2 * c)))] = 1.0
+                        Xi = np.concatenate([Xi, mark], axis=-1)
+                    cnn_cache[kind] = (Xi, "1d")
                 elif kind in CONTEXT_S:  # window +- c s, and a channel marking the window / 区間と前後 c 秒 + 区間の印
                     c = CONTEXT_S[kind]
                     X3 = np.concatenate([tr["XNctx"][c] for tr in trials])
@@ -1200,7 +1240,8 @@ def run(opts):
         for m in models:
             if m in CNN_KINDS:
                 configs += [(m, CNN_FEAT[m] + (f" 強さ±{j:g}dB" if j > 0 else ""), j) for j in jitters
-                            if not (j > 0 and m == "cnn1d")]
+                            if not (j > 0 and m == "cnn1d")] if m not in IMU_MODELS else \
+                           [(m, f"{imu_ja} " + CNN_FEAT[m], 0.0)]   # no gain jitter for the accelerometer / 強さのゆらぎなし
             else:
                 configs += [(m, f, 0.0) for f in feats]
         for sp_label, folds in evals:
@@ -1718,7 +1759,7 @@ def _plots(out_dir, results):
     colors = {"baseline": "#999999", "linear": "#2A6FDB", "rf": "#3A9D5D", "xgboost": "#D9822B", "pls": "#B03A2E",
               "mlp": "#B5487A", "svr": "#1F9E9E", "gpr": "#8C6D31", "cnn": "#6A4FB3",
               "cnn_shuffle": "#A895D8", "cnn_timemean": "#C9BEEA", "cnn1d": "#4B3590", "cnn3s": "#8E44AD",
-              "cnn5s": "#5B2C83"}
+              "cnn5s": "#5B2C83", "cnn_imu": "#7F7F7F", "cnn_imu3s": "#4D4D4D"}
     # one figure per model: each trial's true vs predicted over time + scatter
     # モデルごと: 試行ごとの正解と予測の時間変化 + 散布図
     for r in results:
@@ -1767,7 +1808,7 @@ def _plots(out_dir, results):
         short = {"baseline": "基準\n(平均値)", "linear": "線形", "rf": "RF", "xgboost": "XGBoost", "pls": "PLS",
                  "mlp": "MLP", "svr": "SVR", "gpr": "ガウス\n過程", "cnn": "CNN", "cnn_shuffle": "CNN\n時間入替",
                  "cnn_timemean": "CNN\n時間平均", "cnn1d": "1次元\nCNN", "cnn3s": "CNN\n前後1秒",
-                 "cnn5s": "CNN\n前後2秒"}
+                 "cnn5s": "CNN\n前後2秒", "cnn_imu": "CNN\n加速度計", "cnn_imu3s": "CNN\n加速度計\n前後1秒"}
         labels = [short[r["model"]] + ((f"\n±{r['jitter']:g}dB" if r.get("jitter", 0) > 0 else "")
                                        if r["model"] in ["baseline"] + CNN_KINDS else f"\n特徴量{r['features']}")
                   for r in rs]
@@ -1863,6 +1904,9 @@ def main(argv=None):
     ap.add_argument("--epochs", type=int, default=200, help="CNN の最大エポック数（既定 200。早期終了あり）")
     ap.add_argument("--cnn_seeds", type=int, default=1,
                     help="CNN を乱数の種を変えて何回学習するか（既定 1。例 5 で平均とばらつきを出し、予測は 5 回の平均）")
+    ap.add_argument("--imu_part", default="waist", choices=["waist", "wrist"],
+                    help="加速度計の波形の CNN（--models cnn_imu,cnn_imu3s）に入れる部位（既定 waist = 腰の ENMO の 50 Hz の波形。"
+                         "wrist = 手首、加速度計算ソフト v2.2 が要る）")
     ap.add_argument("--pca", default=None,
                     help="特徴量 A（平均スペクトル）・M（ドップラーの図）だけのとき、表の形のモデル（線形回帰・ガウス過程・"
                          "ランダムフォレストなど）の前に PCA をかける。auto（ばらつきの 90 %%）、0〜1 の割合、または成分数（既定 なし）")

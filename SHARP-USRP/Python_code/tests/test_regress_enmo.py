@@ -23,6 +23,8 @@
          手首だけより W+R がよく当たり、ドップラーの特徴量と同じ表に並ぶこと
      13. ドップラーの図そのもの（特徴量 M）と PCA・PLS 回帰: --pca auto で A・M のときだけ PCA がかかり（成分数がログに出る）、
          PLS 回帰の成分数が学習データの中で選ばれ、係数の表と図ができ、どれも基準よりはっきり良いこと
+     14. 加速度計の ENMO の波形の CNN（--models cnn_imu,cnn_imu3s、--imu_part waist / wrist）が最後まで動き、
+         入力が 1 秒 50 点・前後 1 秒で 150 点（＋区間の印）になり、ドップラーの CNN と同じ表に並ぶこと
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -317,6 +319,39 @@ def check_pca_pls(tmp):
     print(f"  {'OK ' if good else 'NG '} 特徴量 M・PCA・PLS: R² " + "、".join(f"{m} {fe} {got[(m, fe)]['R2']:.3f}"
                                                                     for m, fe in keys if (m, fe) in got)
           + f"、PLS の成分数 {got[('pls', 'M')].get('n_components')}")
+    return good
+
+
+def check_imu_cnn(tmp):
+    """CNN on the accelerometer's 50 Hz ENMO waveform. / 加速度計の ENMO の波形の CNN"""
+    import importlib.util
+    if not importlib.util.find_spec("tensorflow"):
+        print("  (TensorFlow が無いので加速度計の波形の CNN は飛ばします)")
+        return True
+    import argparse
+    src = os.path.join(tmp, "in_waist")          # made by check_waist_input (body and wrist columns) / 全身・手首の列つき
+    if not os.path.isdir(src):
+        check_waist_input(tmp)
+    good = True
+    for part in ("waist", "wrist"):
+        res, out_dir = ro.run(argparse.Namespace(input=src, out=os.path.join(tmp, f"out_imu_{part}"), doppler="nowinnorm",
+                                                 models="cnn,cnn_imu,cnn_imu3s", features="B", windows=[1.0], blocks=5,
+                                                 epochs=3, seed=0, no_plots=True, pairs=None, split=["T1,T2,T3:T4"],
+                                                 target="body", imu_part=part, cnn_seeds=1, gain_jitter="3"))
+        got = {r["model"]: r for r in res}
+        with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+            logtxt = f.read()
+        ja = "腰" if part == "waist" else "手首"
+        good &= (all(m in got for m in ("cnn", "cnn_imu", "cnn_imu3s"))
+                 and got["cnn_imu"]["features"] == f"{ja} ENMO 波形 1秒" and got["cnn_imu3s"]["features"] == f"{ja} ENMO 波形 3秒"
+                 and got["cnn_imu"].get("jitter", 0) == 0 and "強さ±3dB" in got["cnn"]["features"]
+                 and "加速度計の波形の CNN" in logtxt and np.isfinite(got["cnn_imu3s"]["R2"]))
+    trials = [ro.build_trial(sp, "nowinnorm", 1.0, [], need_c=False, column="ENMO_body(mG)",
+                             need_imu=("ENMO(mg)" if False else ro.TARGET, [0.0, 1.0]))
+              for sp in ro.discover(src, [])[:1]]
+    good &= trials[0]["XI"][0.0].shape[1:] == (50, 1) and trials[0]["XI"][1.0].shape[1:] == (150, 1)
+    print(f"  {'OK ' if good else 'NG '} 加速度計の波形の CNN: 腰・手首とも CNN と並ぶ、入力 {trials[0]['XI'][0.0].shape[1:]} / "
+          f"{trials[0]['XI'][1.0].shape[1:]}")
     return good
 
 
@@ -662,6 +697,7 @@ def main():
         ok &= check_mape(tmp)
         ok &= check_waist_input(tmp)
         ok &= check_pca_pls(tmp)
+        ok &= check_imu_cnn(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,svr,gpr,cnn"

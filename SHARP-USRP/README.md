@@ -595,6 +595,11 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   `R`（1 秒平均）・`RS`（50 Hz の値の統計）。加速度計算ソフト v2.2 の `ENMO_wrist(mG)` の列が要る（ない試行は除いてログに出す）。
   `W+R` で腰と手首の 2 台。例
   `python regress_enmo.py --target body --features F2b,W,WS,R,RS,W+R --models linear,gpr,cnn,cnn3s --split cv`
+- **加速度計の波形の CNN**: `--models cnn_imu,cnn_imu3s` で、腰（`--imu_part waist`、既定）か手首（`--imu_part wrist`、
+  加速度計算ソフト v2.2）の ENMO の 50 Hz の波形（1 秒 = 50 点、cnn_imu3s は前後 1 秒を足した 150 点＋区間の印）を
+  1 次元 CNN に入れる。ドップラーの CNN と同じ区間・同じ分け方・同じ学習の設定（強さのゆらぎはかけない）で、
+  「単一の加速度計の波形 → 全身の ENMO」と比べる。例
+  `python regress_enmo.py --target body --models cnn,cnn3s,cnn_imu,cnn_imu3s --features B --gain_jitter 3 --cnn_seeds 5`
 - **ドップラーの図を線形モデルなどに入れる（PCA・PLS）**: `--features M` でドップラーの図そのもの（log10、1 秒を
   `--map_size`（既定 16x50）の時刻 × 速度ビンに縮めて、アンテナ 2 本分を 1 列に並べる。既定で 1600 個）を入力にする。
   変数が区間の数より多いので、`--pca auto`（ばらつきの 90 %、0〜1 の割合か成分数も指定可）で線形回帰・ガウス過程・
