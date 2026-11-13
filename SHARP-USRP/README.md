@@ -589,6 +589,10 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - **前後の時間も入れた CNN**: `--models cnn3s` (前後 1 秒、3 秒分の入力)、`--models cnn5s` (前後 2 秒、5 秒分の入力)。
   区間がどこかを示す印のチャネルを足して、真ん中の 1 秒の ENMO を推定する。cnn5s は入力が大きく、メモリと時間が掛かる
   例 `python regress_enmo.py --split A1:A2 --models cnn --cnn_study --cnn_seeds 5`
+- **腰の ENMO → 全身の ENMO**: `--features W`（同じ 1 秒の区間の腰の ENMO、1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の
+  平均・標準偏差・最大・90 % 点、`*_power_timeseries.csv` が要る）を入力にできる。`--target body` で、ドップラーのモデルと
+  同じ区間・同じ分け方で全身の ENMO を推定して比べる（腰のセンサを使った場合とドップラーの比較）。例
+  `python regress_enmo.py --target body --features F2b,W,WS --models linear,gpr,cnn,cnn3s --split cv`
 - **評価指標**: MAE [mG]・RMSE・R²・r に加えて MAPE（平均絶対パーセント誤差 [%] ＝ |推定 − 正解| ÷ 正解 の平均 × 100）。
   静止で ENMO ≈ 0 の区間は割り算が発散するので、正解が `--mape_min`（既定 50 mG）未満の区間は MAPE から除く
   （`metrics.csv` の `MAPE(%)`・`MAPE_windows`（使った区間の数）・`MAPE_min(mG)` の列、`comparison.png` の真ん中の図）

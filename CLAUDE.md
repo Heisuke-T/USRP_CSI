@@ -56,7 +56,7 @@ E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で�
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。
 `--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
 (時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)。前後 2 秒の CNN は `--models cnn5s`。
-評価は MAE・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
+`--features W`（腰の ENMO の 1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の統計）を `--target body` と使うと「腰の ENMO → 全身の ENMO」をドップラーと比べられる。評価は MAE・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
 (測った回ごとの強さの違いに強くする。A1 だけ動いている成分が強く、A2〜A4 で学習すると A1 を高く出したため)
 
 結果の受け渡し: ユーザーはワークステーションで回したあと `python share_results.py` を実行する。

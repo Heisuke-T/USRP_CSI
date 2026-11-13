@@ -593,8 +593,10 @@ def cnn_input(S, t, a, b):
 
 
 def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET,
-                need_f=None, static_v=STATIC_V):
-    """Windows of one trial: features A, B, C, CNN input and the target. / 1 試行分の区間"""
+                need_f=None, static_v=STATIC_V, need_w=False):
+    """Windows of one trial: features A, B, C, CNN input and the target. With need_w, also the waist ENMO of the
+    same windows as an input (W: 1 s mean, WS: mean / std / max / 90th percentile of the 50 Hz values).
+    1 試行分の区間。need_w なら同じ区間の腰の ENMO も入力に（W: 1 秒平均、WS: 50 Hz の値の平均・標準偏差・最大・90 % 点）"""
     name = spec["name"]
     files = spec["doppler"].get(variant, {})
     missing = [a for a in ("antenna1", "antenna2") if a not in files]
@@ -605,6 +607,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
     der = [deriv_traces(d, *need_f) if need_f else None for d in ants]  # feature F only when used / F は使うときだけ
     XF = {}
     tgt = load_target(spec, window, column)
+    wst = (tgt if column == TARGET else load_target(spec, window, TARGET)) if need_w else None
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
@@ -615,7 +618,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, XD, XE, XN, y, kept = [], [], [], [], [], [], [], []
+    XA, XB, XC, XD, XE, XN, y, kept, XW = [], [], [], [], [], [], [], [], []
     need_ctx = sorted(set(need_ctx or ()))
     XNctx = {c: [] for c in need_ctx}
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
@@ -653,6 +656,12 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         if not ok:
             dropped += 1
             continue
+        if wst is not None:   # waist ENMO of the same window / 同じ区間の腰の ENMO
+            if wst["kind"] == "timeseries":
+                wv = wst["y"][(wst["t"] >= a) & (wst["t"] < b)]
+                XW.append([wv.mean(), wv.std(), wv.max(), np.percentile(wv, 90)] if len(wv) else [np.nan] * 4)
+            else:
+                XW.append([float(wst["y"][i])] + [np.nan] * 3)
         XA.append(np.concatenate(fa))
         XB.append(np.concatenate(fb))
         XC.append(np.concatenate(fc))
@@ -675,7 +684,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
                 XNctx={c: np.array(v) for c, v in XNctx.items()}, y=np.array(y),
                 win=np.array(kept), v=ants[0]["v"], meta=ants[0]["meta"],
                 levels=[trial_levels(d, kept[0][0], kept[-1][1], static_v) for d in ants],
-                XF={k: np.array(v, float) for k, v in XF.items()})
+                XF={k: np.array(v, float) for k, v in XF.items()},
+                XW=np.array(XW, float) if XW else np.zeros((len(y), 0)))
 
 
 # ============================================================ models
@@ -933,13 +943,19 @@ def run(opts):
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
     def _ok(f):
         base, _, k = f.partition("@")
-        return bool(base) and all(p in ("A", "B", "C", "D", "E") + F_PARTS for p in base.split("+")) and (
+        return bool(base) and all(p in ("A", "B", "C", "D", "E", "W", "WS") + F_PARTS for p in base.split("+")) and (
             k == "" or (k.isdigit() and 1 <= int(k) <= 5))
     badf = [f for f in feats if not _ok(f)]
     if badf:
-        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E, F1, F2a, F2b と、その組み合わせ A+D など。"
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E, F1, F2a, F2b、腰の ENMO の W・WS と、その組み合わせ A+D など。"
                        "前後の区間も入れるときは B+D@1 のように @ と区間の数 1〜5）")
     used = {p for f in feats for p in f.partition("@")[0].split("+")}
+    need_w = bool(used & {"W", "WS"})
+    if need_w:
+        log("特徴量 W・WS: 同じ 1 秒の区間の腰の ENMO（加速度計の値）を入力にする。W: 1 秒平均、WS: 50 Hz の値の平均・"
+            "標準偏差・最大・90 % 点。ドップラーの代わりに腰のセンサを使った場合との比較用", out)
+        if target == "waist":
+            log("  注意: 正解も腰の ENMO なので、W は正解そのものです（比べるなら --target body）", out)
     static_v = float(getattr(opts, "static_v", None) or STATIC_V)
     dws = getattr(opts, "deriv_window", None) or [DERIV_WINDOW]
     dws = parse_windows(dws) if isinstance(dws, str) else [float(w) for w in dws]
@@ -970,7 +986,7 @@ def run(opts):
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
                                   need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column,
-                                  need_f=need_f, static_v=static_v)
+                                  need_f=need_f, static_v=static_v, need_w=need_w)
                       for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
@@ -1012,6 +1028,14 @@ def run(opts):
         XE = np.concatenate([tr["XE"] for tr in trials])
         fsets = {"A": XA, "B": XB, "C": XC, "D": XD, "E": XE}
         fnames = feature_names(trials[0]["v"])
+        if need_w:
+            XW = np.concatenate([tr["XW"] for tr in trials])
+            if np.isnan(XW[:, 1:]).any() and "WS" in used:
+                raise RegError("特徴量 WS には 50 Hz の腰の ENMO（*_power_timeseries.csv）が要ります。"
+                               "1 秒ごとのファイルしかない試行があります（W なら使えます）")
+            fsets["W"], fnames["W"] = XW[:, :1], ["W_waist_ENMO_mean"]
+            fsets["WS"], fnames["WS"] = XW, ["W_waist_ENMO_mean", "W_waist_ENMO_std", "W_waist_ENMO_max",
+                                              "W_waist_ENMO_p90"]
         XF = {}
         if need_f:   # feature F, one set per derivative window / 特徴量 F（微分の窓ごと）
             for key in trials[0]["XF"]:
@@ -1609,7 +1633,9 @@ def main(argv=None):
                     help="CNN 以外のモデルの特徴量（既定 F1,F2a,F2b = 特徴量 F: 動いているビンで足したドップラーの時間微分の "
                          "1 秒平均。F1: log10 Σ_動 D、F2a: Σ_動 |v| D ÷ Σ_静止 D、F2b: 平均の速さ。前の特徴量 A: 平均スペクトル、"
                          "B: 物理特徴量、C: 速さの時間微分、D: 1 秒の中の時間変化、E: 強さをそろえたスペクトルも指定すれば使える。"
-                         "組み合わせは F1+F2a、A+D など。B+D@1 で前後 1 区間の特徴量も並べる）")
+                         "組み合わせは F1+F2a、A+D など。B+D@1 で前後 1 区間の特徴量も並べる。"
+                         "W: 同じ区間の腰の ENMO（1 秒平均）、WS: 腰の ENMO の 50 Hz の値の平均・標準偏差・最大・90 % 点。"
+                         "--target body で「腰の ENMO → 全身の ENMO」をドップラーと比べる）")
     ap.add_argument("--target", choices=list(TARGETS), default="waist",
                     help="正解にする ENMO（既定 waist = 腰の ENMO。body = 全身の ENMO（腰・大腿・下腿・手首の 4 台の合計。"
                          "加速度計算ソフト v2.0 で 4 台そろった試行だけ）")

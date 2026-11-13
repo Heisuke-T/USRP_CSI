@@ -19,6 +19,8 @@
      10. CNN の強さのゆらぎ (--gain_jitter): 学習のときだけ、動いている速度ビンに区間ごと・アンテナごとの量を足し
          (静止ビンと区間の印のチャネルはそのまま)、テストでは何もしないこと。0 dB と 3 dB の両方の結果が出ること
      11. MAPE: 正解が --mape_min 未満の区間を除いて計算し、表 (metrics.csv) に MAPE(%) の列が出ること
+     12. 腰の ENMO を入力にする特徴量 W・WS（--target body）: 全身 ∝ 腰の合成データで、W の線形回帰がよく当たり、
+         ドップラーの特徴量と同じ表に並ぶこと
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -234,6 +236,46 @@ def check_mape(tmp):
              and int(lin["MAPE_windows"]) <= sum(1 for _ in res[0]["y"]))
     print(f"  {'OK ' if good else 'NG '} MAPE: 例 {m['MAPE']:.1f} %（{m['MAPE_n']} 区間）、線形回帰 {float(lin['MAPE(%)']):.1f} %"
           f"（{lin['MAPE_windows']} 区間、正解 {lin['MAPE_min(mG)']} mG 以上）")
+    return good
+
+
+def check_waist_input(tmp):
+    """Features W / WS (waist ENMO of the same window) predict the whole-body ENMO. / 腰の ENMO → 全身の ENMO"""
+    import argparse
+    inp = os.path.join(tmp, "in_waist")
+    for k in range(4):
+        make_trial(inp, k)
+    for k in range(4):
+        name = f"T{k + 1}"
+        path = os.path.join(inp, name, "imu" if k == 3 else "", f"{name}_power_timeseries.csv")
+        with open(path, encoding="utf-8") as f:
+            rows = list(csv.reader(f))
+        rng = np.random.default_rng(500 + k)
+        col = [i for i, c in enumerate(rows[0]) if c in ("ENMO(mG)", "ENMO(mg)")][0]   # test files use the old name
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(rows[0] + ["ENMO_body(mG)"])
+            for r in rows[1:]:   # whole body = 5 x waist + noise / 全身 = 腰の 5 倍 + 雑音
+                w.writerow(r + [f"{5 * float(r[col]) + rng.normal(0, 10.0):.3f}"])
+    out_dir = os.path.join(tmp, "out_waist")
+    res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="linear,gpr",
+                                       features="B,W,WS", windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False,
+                                       pairs=None, split=["T1,T2,T3:T4"], target="body"))
+    got = {(r["model"], r["features"]): r for r in res}
+    with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
+        logtxt = f.read()
+    good = (("linear", "W") in got and ("gpr", "WS") in got and ("linear", "B") in got
+            and got[("linear", "W")]["R2"] > 0.95 and got[("gpr", "WS")]["R2"] > 0.9 and "特徴量 W・WS" in logtxt)
+    try:   # WS needs the 50 Hz file; W alone with the waist target is allowed but noted / 腰が正解なら注意だけ
+        ro.run(argparse.Namespace(input=inp, out=out_dir + "_w", doppler="nowinnorm", models="linear", features="W",
+                                  windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True, pairs=None,
+                                  split=["T1,T2,T3:T4"], target="waist"))
+        with open(os.path.join(out_dir + "_w", "log.txt"), encoding="utf-8") as f:
+            good &= "正解そのもの" in f.read()
+    except ro.RegError:
+        good = False
+    print(f"  {'OK ' if good else 'NG '} 腰の ENMO → 全身の ENMO: 線形回帰 W の R² {got[('linear', 'W')]['R2']:.3f}、"
+          f"ガウス過程 WS {got[('gpr', 'WS')]['R2']:.3f}、ドップラー B の線形回帰 {got[('linear', 'B')]['R2']:.3f}")
     return good
 
 
@@ -577,6 +619,7 @@ def main():
         ok &= check_cnn_study(tmp)
         ok &= check_gain_jitter(tmp)
         ok &= check_mape(tmp)
+        ok &= check_waist_input(tmp)
         import importlib.util
         if importlib.util.find_spec("tensorflow"):
             models = "linear,rf,xgboost,mlp,svr,gpr,cnn"
