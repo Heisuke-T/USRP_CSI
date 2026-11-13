@@ -23,8 +23,8 @@
          手首だけより W+R がよく当たり、ドップラーの特徴量と同じ表に並ぶこと
      13. ドップラーの図そのもの（特徴量 M）と PCA・PLS 回帰: --pca auto で A・M のときだけ PCA がかかり（成分数がログに出る）、
          PLS 回帰の成分数が学習データの中で選ばれ、係数の表と図ができ、どれも基準よりはっきり良いこと
-     14. 加速度計の ENMO の波形の CNN（--models cnn_imu,cnn_imu3s、--imu_part waist / wrist）が最後まで動き、
-         入力が 1 秒 50 点・前後 1 秒で 150 点（＋区間の印）になり、ドップラーの CNN と同じ表に並ぶこと
+     14. 加速度計の波形の CNN（--models cnn_imu,cnn_imu3s、--imu_part waist / wrist、--imu_input enmo / 6axis）が最後まで
+         動き、入力が 1 秒 50 点・前後 1 秒で 150 点（＋区間の印）、6 軸なら 6 チャネルになり、ドップラーの CNN と同じ表に並ぶこと
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
          --split で「学習 A1 → テスト A2」「学習 A1+A2_XR1 → テスト A2_XR2」が計算できること
     を確かめる。
@@ -36,6 +36,7 @@
 """
 
 import csv
+import glob
 import json
 import os
 import pickle
@@ -350,8 +351,28 @@ def check_imu_cnn(tmp):
                              need_imu=("ENMO(mg)" if False else ro.TARGET, [0.0, 1.0]))
               for sp in ro.discover(src, [])[:1]]
     good &= trials[0]["XI"][0.0].shape[1:] == (50, 1) and trials[0]["XI"][1.0].shape[1:] == (150, 1)
+    # 6-axis waveforms (calculator v2.3, *_imu_waveform.csv) / 6 軸の波形
+    for path in glob.glob(os.path.join(src, "**", "*_power_timeseries.csv"), recursive=True):
+        with open(path, encoding="utf-8") as f:
+            rows = list(csv.reader(f))
+        rng = np.random.default_rng(7)
+        with open(path.replace("_power_timeseries.csv", "_imu_waveform.csv"), "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["t_csi(s)"] + [f"{p_}_{q}{ax}({u})" for p_ in ("waist", "wrist") for q, u in (("Acc", "g"), ("Gyro", "deg/s"))
+                                      for ax in "XYZ"])
+            for r in rows[1:]:
+                w.writerow([r[0]] + [f"{v:.4f}" for v in rng.normal(0, 0.1, 12)])
+    res6, _ = ro.run(argparse.Namespace(input=src, out=os.path.join(tmp, "out_imu6"), doppler="nowinnorm",
+                                        models="cnn_imu,cnn_imu3s", features="B", windows=[1.0], blocks=5, epochs=2, seed=0,
+                                        no_plots=True, pairs=None, split=["T1,T2,T3:T4"], target="body", imu_part="wrist",
+                                        imu_input="6axis", cnn_seeds=1))
+    g6 = {r["model"]: r for r in res6}
+    t6 = ro.build_trial(ro.discover(src, [])[0], "nowinnorm", 1.0, [], need_c=False, column="ENMO_body(mG)",
+                        need_imu=("6axis:wrist", [0.0, 1.0]))
+    good &= (g6["cnn_imu"]["features"] == "手首 6軸 波形 1秒" and t6["XI"][0.0].shape[1:] == (50, 6)
+             and t6["XI"][1.0].shape[1:] == (150, 6))
     print(f"  {'OK ' if good else 'NG '} 加速度計の波形の CNN: 腰・手首とも CNN と並ぶ、入力 {trials[0]['XI'][0.0].shape[1:]} / "
-          f"{trials[0]['XI'][1.0].shape[1:]}")
+          f"{trials[0]['XI'][1.0].shape[1:]}、6 軸 {t6['XI'][1.0].shape[1:]}")
     return good
 
 
