@@ -19,8 +19,8 @@
      10. CNN の強さのゆらぎ (--gain_jitter): 学習のときだけ、動いている速度ビンに区間ごと・アンテナごとの量を足し
          (静止ビンと区間の印のチャネルはそのまま)、テストでは何もしないこと。0 dB と 3 dB の両方の結果が出ること
      11. MAPE: 正解が --mape_min 未満の区間を除いて計算し、表 (metrics.csv) に MAPE(%) の列が出ること
-     12. 腰の ENMO を入力にする特徴量 W・WS（--target body）: 全身 ∝ 腰の合成データで、W の線形回帰がよく当たり、
-         ドップラーの特徴量と同じ表に並ぶこと
+     12. 加速度計を入力にする特徴量（腰 W・WS、手首 R・RS、--target body）: 全身 ＝ 腰と手首の和の合成データで、腰だけ・
+         手首だけより W+R がよく当たり、ドップラーの特徴量と同じ表に並ぶこと
      13. ドップラーの図そのもの（特徴量 M）と PCA・PLS 回帰: --pca auto で A・M のときだけ PCA がかかり（成分数がログに出る）、
          PLS 回帰の成分数が学習データの中で選ばれ、係数の表と図ができ、どれも基準よりはっきり良いこと
       5. regression_input/A1 と A2 を並べて置いたとき（「その他」フォルダの中は読まない）: データセットをまたいで名前で組にしないこと、
@@ -256,18 +256,22 @@ def check_waist_input(tmp):
         col = [i for i, c in enumerate(rows[0]) if c in ("ENMO(mG)", "ENMO(mg)")][0]   # test files use the old name
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(rows[0] + ["ENMO_body(mG)"])
-            for r in rows[1:]:   # whole body = 5 x waist + noise / 全身 = 腰の 5 倍 + 雑音
-                w.writerow(r + [f"{5 * float(r[col]) + rng.normal(0, 10.0):.3f}"])
+            w.writerow(rows[0] + ["ENMO_body(mG)", "ENMO_wrist(mG)"])
+            for r in rows[1:]:   # wrist moves on its own; whole body = 3 x waist + 2 x wrist / 手首は別に動く。全身 = 腰と手首の和
+                tt = float(r[0])
+                wr = 80 * (1 + np.sin(2 * np.pi * tt / (17 + 3 * k))) + rng.normal(0, 5.0)
+                w.writerow(r + [f"{3 * float(r[col]) + 2 * wr + rng.normal(0, 10.0):.3f}", f"{wr:.3f}"])
     out_dir = os.path.join(tmp, "out_waist")
     res, _ = ro.run(argparse.Namespace(input=inp, out=out_dir, doppler="nowinnorm", models="linear,gpr",
-                                       features="B,W,WS", windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False,
+                                       features="B,W,WS,R,RS,W+R", windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=False,
                                        pairs=None, split=["T1,T2,T3:T4"], target="body"))
     got = {(r["model"], r["features"]): r for r in res}
     with open(os.path.join(out_dir, "log.txt"), encoding="utf-8") as f:
         logtxt = f.read()
-    good = (("linear", "W") in got and ("gpr", "WS") in got and ("linear", "B") in got
-            and got[("linear", "W")]["R2"] > 0.95 and got[("gpr", "WS")]["R2"] > 0.9 and "特徴量 W・WS" in logtxt)
+    good = (all(k in got for k in [("linear", "W"), ("gpr", "WS"), ("linear", "R"), ("gpr", "RS"), ("linear", "W+R")])
+            and got[("linear", "W+R")]["R2"] > 0.95
+            and got[("linear", "W+R")]["R2"] > max(got[("linear", "W")]["R2"], got[("linear", "R")]["R2"]) + 0.05
+            and "特徴量 W・WS" in logtxt and "特徴量 R・RS" in logtxt)
     try:   # WS needs the 50 Hz file; W alone with the waist target is allowed but noted / 腰が正解なら注意だけ
         ro.run(argparse.Namespace(input=inp, out=out_dir + "_w", doppler="nowinnorm", models="linear", features="W",
                                   windows=[1.0], blocks=5, epochs=5, seed=0, no_plots=True, pairs=None,
@@ -276,8 +280,9 @@ def check_waist_input(tmp):
             good &= "正解そのもの" in f.read()
     except ro.RegError:
         good = False
-    print(f"  {'OK ' if good else 'NG '} 腰の ENMO → 全身の ENMO: 線形回帰 W の R² {got[('linear', 'W')]['R2']:.3f}、"
-          f"ガウス過程 WS {got[('gpr', 'WS')]['R2']:.3f}、ドップラー B の線形回帰 {got[('linear', 'B')]['R2']:.3f}")
+    print(f"  {'OK ' if good else 'NG '} 加速度計 → 全身の ENMO（線形回帰の R²）: 腰 W {got[('linear', 'W')]['R2']:.3f}、"
+          f"手首 R {got[('linear', 'R')]['R2']:.3f}、腰＋手首 W+R {got[('linear', 'W+R')]['R2']:.3f}、"
+          f"ガウス過程 RS {got[('gpr', 'RS')]['R2']:.3f}")
     return good
 
 

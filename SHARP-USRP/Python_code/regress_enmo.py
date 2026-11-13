@@ -93,6 +93,8 @@ TARGET = "ENMO(mG)"      # target column in the calculator's output (waist) / �
 # --target: which ENMO of the acceleration calculator is the ground truth / どの ENMO を正解にするか
 TARGETS = {"waist": "ENMO(mG)", "body": "ENMO_body(mG)"}
 TARGET_JA = {"waist": "腰の ENMO", "body": "全身の ENMO（腰・大腿・下腿・手首の合計）"}
+WRIST = "ENMO_wrist(mG)"  # wrist ENMO of its own (calculator v2.2), for features R / RS / 手首の ENMO（特徴量 R・RS）
+SENSOR_PARTS = {"W": "waist", "WS": "waist", "R": "wrist", "RS": "wrist"}   # accelerometer inputs / 加速度計の入力
 ACC_RATE = 50.0          # feature C: Doppler traces are averaged onto this grid [Hz] / 特徴量 C の時間格子
 ACC_FC = 6.0             # feature C: low-pass before differentiating [Hz] / 特徴量 C: 微分の前の平滑化
 EPS = 1e-12
@@ -186,6 +188,9 @@ def load_target(spec, window, column=TARGET):
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     found = _column(list(rows[0]), column) if rows else None
+    if rows and column == WRIST and found is None:
+        raise RegError(f"{os.path.basename(path)} に手首の ENMO の列 ({column}) がありません。手首のセンサがない試行か、"
+                       "加速度計算ソフトが古いです（v2.2 で計算し直してください）")
     if rows and column != TARGET and found is None:
         raise RegError(f"{os.path.basename(path)} に全身の ENMO の列 ({column}) がありません。センサが 4 台そろっていない"
                        "試行か、加速度計算ソフトが古いです（v2.0 で計算し直してください）")
@@ -598,7 +603,7 @@ def cnn_input(S, t, a, b):
 
 
 def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=False, need_e=False, column=TARGET,
-                need_f=None, static_v=STATIC_V, need_w=False):
+                need_f=None, static_v=STATIC_V, need_w=False, need_r=False):
     """Windows of one trial: features A, B, C, CNN input and the target. With need_w, also the waist ENMO of the
     same windows as an input (W: 1 s mean, WS: mean / std / max / 90th percentile of the 50 Hz values).
     1 試行分の区間。need_w なら同じ区間の腰の ENMO も入力に（W: 1 秒平均、WS: 50 Hz の値の平均・標準偏差・最大・90 % 点）"""
@@ -613,6 +618,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
     XF = {}
     tgt = load_target(spec, window, column)
     wst = (tgt if column == TARGET else load_target(spec, window, TARGET)) if need_w else None
+    rst = load_target(spec, window, WRIST) if need_r else None
     if tgt["kind"] == "timeseries":
         t0 = max(0.0, max(d["t"][0] for d in ants), tgt["t"][0])
         t1 = min(min(d["t"][-1] for d in ants), tgt["t"][-1])
@@ -623,7 +629,7 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         wins = [(e, e + window) for e in edges]
     else:
         wins = [(a, b) for a, b in zip(tgt["a"], tgt["b"])]
-    XA, XB, XC, XD, XE, XN, y, kept, XW = [], [], [], [], [], [], [], [], []
+    XA, XB, XC, XD, XE, XN, y, kept, XW, XR = [], [], [], [], [], [], [], [], [], []
     need_ctx = sorted(set(need_ctx or ()))
     XNctx = {c: [] for c in need_ctx}
     rate = np.median([1 / np.median(np.diff(d["t"])) for d in ants])
@@ -661,12 +667,14 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         if not ok:
             dropped += 1
             continue
-        if wst is not None:   # waist ENMO of the same window / 同じ区間の腰の ENMO
-            if wst["kind"] == "timeseries":
-                wv = wst["y"][(wst["t"] >= a) & (wst["t"] < b)]
-                XW.append([wv.mean(), wv.std(), wv.max(), np.percentile(wv, 90)] if len(wv) else [np.nan] * 4)
+        for src, dst in ((wst, XW), (rst, XR)):   # waist / wrist ENMO of the same window / 同じ区間の腰・手首の ENMO
+            if src is None:
+                continue
+            if src["kind"] == "timeseries":
+                wv = src["y"][(src["t"] >= a) & (src["t"] < b)]
+                dst.append([wv.mean(), wv.std(), wv.max(), np.percentile(wv, 90)] if len(wv) else [np.nan] * 4)
             else:
-                XW.append([float(wst["y"][i])] + [np.nan] * 3)
+                dst.append([float(src["y"][i])] + [np.nan] * 3)
         XA.append(np.concatenate(fa))
         XB.append(np.concatenate(fb))
         XC.append(np.concatenate(fc))
@@ -690,7 +698,8 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
                 win=np.array(kept), v=ants[0]["v"], meta=ants[0]["meta"],
                 levels=[trial_levels(d, kept[0][0], kept[-1][1], static_v) for d in ants],
                 XF={k: np.array(v, float) for k, v in XF.items()},
-                XW=np.array(XW, float) if XW else np.zeros((len(y), 0)))
+                XW=np.array(XW, float) if XW else np.zeros((len(y), 0)),
+                XR=np.array(XR, float) if XR else np.zeros((len(y), 0)))
 
 
 # ============================================================ models
@@ -1015,6 +1024,14 @@ def run(opts):
         if not specs:
             raise RegError("全身の ENMO（ENMO_body(mG)）がある試行がありません。4 台そろった試行を加速度計算ソフト v2.0 で"
                            "計算し直してください")
+    if {p for f in str(opts.features).upper().replace(" ", "").split(",") for p in f.partition("@")[0].split("+")} & {"R", "RS"}:
+        lack = [sp["name"] for sp in specs if not has_target(sp, opts.windows[0], WRIST)]
+        if lack:
+            log(f"  注意: 手首の ENMO（ENMO_wrist(mG)）がない試行は使いません（手首のセンサがない、または加速度計算ソフトが "
+                f"v2.2 より古い）: {', '.join(lack)}", out)
+            specs = [sp for sp in specs if sp["name"] not in lack]
+        if not specs:
+            raise RegError("手首の ENMO（ENMO_wrist(mG)）がある試行がありません。加速度計算ソフト v2.2 で計算し直してください")
     variants = list(VARIANT_DIRS) if opts.doppler == "all" else [opts.doppler]
     models = [m.strip() for m in opts.models.split(",") if m.strip()]
     bad = [m for m in models if m not in ALL_MODELS + STUDY_MODELS + EXTRA_MODELS + TAB_EXTRA]
@@ -1028,14 +1045,21 @@ def run(opts):
     feats = [f.strip().upper().replace(" ", "") for f in opts.features.split(",") if f.strip()]
     def _ok(f):
         base, _, k = f.partition("@")
-        return bool(base) and all(p in ("A", "B", "C", "D", "E", "M", "W", "WS") + F_PARTS for p in base.split("+")) and (
+        return bool(base) and all(p in ("A", "B", "C", "D", "E", "M") + tuple(SENSOR_PARTS) + F_PARTS
+                                  for p in base.split("+")) and (
             k == "" or (k.isdigit() and 1 <= int(k) <= 5))
     badf = [f for f in feats if not _ok(f)]
     if badf:
-        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E, F1, F2a, F2b、腰の ENMO の W・WS と、その組み合わせ A+D など。"
+        raise RegError(f"不明な特徴量: {', '.join(badf)}（A, B, C, D, E, M, F1, F2a, F2b、腰の ENMO の W・WS、手首の ENMO の R・RS と、"
+                       "その組み合わせ A+D・W+R など。"
                        "前後の区間も入れるときは B+D@1 のように @ と区間の数 1〜5）")
     used = {p for f in feats for p in f.partition("@")[0].split("+")}
     need_w = bool(used & {"W", "WS"})
+    need_r = bool(used & {"R", "RS"})
+    if need_r:
+        log("特徴量 R・RS: 同じ 1 秒の区間の手首の ENMO（加速度計算ソフト v2.2 の ENMO_wrist(mG)）を入力にする。R: 1 秒平均、"
+            "RS: 50 Hz の値の平均・標準偏差・最大・90 % 点。腕の加速度計（スマートウォッチ）との比較用", out)
+
     pca_opt = parse_pca(getattr(opts, "pca", None))
     map_size = parse_map_size(getattr(opts, "map_size", None))
     if "M" in used:
@@ -1082,7 +1106,7 @@ def run(opts):
         try:
             trials = [build_trial(sp, variant, window, out, need_c="C" in used, need_d="D" in used, need_e="E" in used,
                                   need_ctx=[CONTEXT_S[m] for m in models if m in CONTEXT_S], column=column,
-                                  need_f=need_f, static_v=static_v, need_w=need_w)
+                                  need_f=need_f, static_v=static_v, need_w=need_w, need_r=need_r)
                       for sp in specs]
         except RegError as e:
             if opts.doppler == "all":
@@ -1134,6 +1158,13 @@ def run(opts):
             fsets["W"], fnames["W"] = XW[:, :1], ["W_waist_ENMO_mean"]
             fsets["WS"], fnames["WS"] = XW, ["W_waist_ENMO_mean", "W_waist_ENMO_std", "W_waist_ENMO_max",
                                               "W_waist_ENMO_p90"]
+        if need_r:
+            XR = np.concatenate([tr["XR"] for tr in trials])
+            if np.isnan(XR[:, 1:]).any() and "RS" in used:
+                raise RegError("特徴量 RS には 50 Hz の手首の ENMO（*_power_timeseries.csv）が要ります（R なら使えます）")
+            fsets["R"], fnames["R"] = XR[:, :1], ["R_wrist_ENMO_mean"]
+            fsets["RS"], fnames["RS"] = XR, ["R_wrist_ENMO_mean", "R_wrist_ENMO_std", "R_wrist_ENMO_max",
+                                              "R_wrist_ENMO_p90"]
         XF = {}
         if need_f:   # feature F, one set per derivative window / 特徴量 F（微分の窓ごと）
             for key in trials[0]["XF"]:

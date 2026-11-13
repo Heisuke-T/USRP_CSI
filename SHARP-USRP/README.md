@@ -591,8 +591,10 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   例 `python regress_enmo.py --split A1:A2 --models cnn --cnn_study --cnn_seeds 5`
 - **腰の ENMO → 全身の ENMO**: `--features W`（同じ 1 秒の区間の腰の ENMO、1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の
   平均・標準偏差・最大・90 % 点、`*_power_timeseries.csv` が要る）を入力にできる。`--target body` で、ドップラーのモデルと
-  同じ区間・同じ分け方で全身の ENMO を推定して比べる（腰のセンサを使った場合とドップラーの比較）。例
-  `python regress_enmo.py --target body --features F2b,W,WS --models linear,gpr,cnn,cnn3s --split cv`
+  同じ区間・同じ分け方で全身の ENMO を推定して比べる（腰のセンサを使った場合とドップラーの比較）。手首の ENMO も同じ形で
+  `R`（1 秒平均）・`RS`（50 Hz の値の統計）。加速度計算ソフト v2.2 の `ENMO_wrist(mG)` の列が要る（ない試行は除いてログに出す）。
+  `W+R` で腰と手首の 2 台。例
+  `python regress_enmo.py --target body --features F2b,W,WS,R,RS,W+R --models linear,gpr,cnn,cnn3s --split cv`
 - **ドップラーの図を線形モデルなどに入れる（PCA・PLS）**: `--features M` でドップラーの図そのもの（log10、1 秒を
   `--map_size`（既定 16x50）の時刻 × 速度ビンに縮めて、アンテナ 2 本分を 1 列に並べる。既定で 1600 個）を入力にする。
   変数が区間の数より多いので、`--pca auto`（ばらつきの 90 %、0〜1 の割合か成分数も指定可）で線形回帰・ガウス過程・
