@@ -59,6 +59,8 @@ E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で�
 `--features W`（腰の ENMO の 1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の統計）・`R`・`RS`（手首、加速度計算ソフト v2.2 の ENMO_wrist(mG)）を `--target body` と使うと「腰の ENMO → 全身の ENMO」をドップラーと比べられる。`--models cnn_imu,cnn_imu3s`（`--imu_part waist|wrist`）で加速度計の ENMO の 50 Hz の波形の 1 次元 CNN（`--imu_input 6axis` で 3 軸加速度＋角速度、加速度計算ソフト v2.3 の `*_imu_waveform.csv`）。`--features M`（ドップラーの図そのもの）・`--pca auto`（A・M の前に PCA）・`--models pls`（PLS 回帰）でドップラーを線形モデルなどに入れる。評価は MAE・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
 (測った回ごとの強さの違いに強くする。A1 だけ動いている成分が強く、A2〜A4 で学習すると A1 を高く出したため)
 
+`wave_video.py --trial A5_XR1 --pred <predictions.csv> [--wave <試行>_imu_waveform.csv] [--offset S] [--window 10]`: 1 試行の ENMO（実測・Wi-Fi・腰の加速度計の推定、50 Hz の各センサの ENMO）を時間に合わせて描く mp4（測定中のカメラの動画と並べて確かめる）
+
 結果の受け渡し: ユーザーはワークステーションで回したあと `python share_results.py` を実行する。
 結果の軽いファイル (log.txt・metrics*.csv・predictions.csv・comparison.png・cnn_gradcam_*.png など) が
 `SHARP-USRP/Python_code/shared_results/<結果のフォルダ名>/` に入ってこのブランチにプッシュされるので、
