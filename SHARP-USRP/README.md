@@ -598,7 +598,8 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
 - **加速度計の波形の CNN**: `--models cnn_imu,cnn_imu3s` で、腰（`--imu_part waist`、既定）か手首（`--imu_part wrist`、
   加速度計算ソフト v2.2）の ENMO の 50 Hz の波形（1 秒 = 50 点、cnn_imu3s は前後 1 秒を足した 150 点＋区間の印）を
   1 次元 CNN に入れる。ドップラーの CNN と同じ区間・同じ分け方・同じ学習の設定（強さのゆらぎはかけない）で、
-  「単一の加速度計の波形 → 全身の ENMO」と比べる。例
+  「単一の加速度計の波形 → 全身の ENMO」と比べる。`--imu_input 6axis` にすると、ENMO ではなく 3 軸加速度と角速度の波形
+  （6 チャネル。加速度計算ソフト v2.3 が正解データと一緒に出す `*_imu_waveform.csv`）を入れる。例
   `python regress_enmo.py --target body --models cnn,cnn3s,cnn_imu,cnn_imu3s --features B --gain_jitter 3 --cnn_seeds 5`
 - **ドップラーの図を線形モデルなどに入れる（PCA・PLS）**: `--features M` でドップラーの図そのもの（log10、1 秒を
   `--map_size`（既定 16x50）の時刻 × 速度ビンに縮めて、アンテナ 2 本分を 1 列に並べる。既定で 1600 個）を入力にする。

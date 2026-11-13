@@ -214,6 +214,7 @@ def load_target(spec, window, column=TARGET):
 
 # ============================================================ finding the trials
 TS_SUFFIX = "_power_timeseries.csv"
+WAVE_SUFFIX = "_imu_waveform.csv"   # accelerometer waveforms (calculator v2.3) / 加速度計の波形（加速度計算ソフト v2.3）
 
 
 def _antenna(name):
@@ -261,6 +262,9 @@ def discover(root, out, pairs_csv=None, exclude=EXCLUDE_DEFAULT):
         if name in truths and truths[name].get("ts"):
             raise RegError(f"正解データ {name}{TS_SUFFIX} が 2 か所にあります: {truths[name]['ts']} と {p}")
         truths.setdefault(name, dict(name=name, win={}))["ts"] = p
+        wave = p[:-len(TS_SUFFIX)] + WAVE_SUFFIX
+        if os.path.exists(wave):
+            truths[name]["wave"] = wave
     for p in sorted(glob.glob(os.path.join(root, "**", "*_windows_*s.csv"), recursive=True)):
         if excluded(p):
             continue
@@ -626,7 +630,19 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
     rst = load_target(spec, window, WRIST) if need_r else None
     # need_imu = (column, [context seconds]): the 50 Hz ENMO waveform for the accelerometer CNN / 加速度計の CNN の波形
     ist = None
-    if need_imu:
+    if need_imu and need_imu[0].startswith("6axis:"):   # 3-axis acceleration + angular rate of one part / 6 軸の波形
+        part = need_imu[0].split(":", 1)[1]
+        if not spec.get("wave"):
+            raise RegError(f"{name}: {name}{WAVE_SUFFIX}（加速度計の波形）がありません。加速度計算ソフト v2.3 で計算し直して"
+                           "ください（--imu_input enmo なら今のまま使えます）")
+        with open(spec["wave"], encoding="utf-8") as f:
+            wrows = list(csv.reader(f))
+        hdr, arr = wrows[0], np.array(wrows[1:], float)
+        cols = [i for i, h in enumerate(hdr) if h.startswith(part + "_")]
+        if not cols:
+            raise RegError(f"{os.path.basename(spec['wave'])} に {part} の波形がありません（列: {', '.join(hdr[1:])}）")
+        ist = dict(kind="timeseries", t=arr[:, 0], Y=arr[:, cols], cols=[hdr[i] for i in cols])
+    elif need_imu:
         ist = load_target(spec, window, need_imu[0]) if need_imu[0] != column else tgt
         if ist["kind"] != "timeseries":
             raise RegError(f"{name}: 加速度計の波形の CNN には 50 Hz の ENMO（*_power_timeseries.csv）が要ります")
@@ -682,7 +698,11 @@ def build_trial(spec, variant, window, out, need_c=True, need_ctx=(), need_d=Fal
         for c in XI:   # ENMO waveform of the window (+- c s) at IMU_RATE / 区間（と前後 c 秒）の ENMO の波形
             n = int(round(IMU_RATE * (b - a + 2 * c)))
             tg = a - c + (np.arange(n) + 0.5) / IMU_RATE
-            XI[c].append(np.interp(tg, ist["t"], ist["y"])[:, None].astype(np.float32))
+            if "Y" in ist:
+                XI[c].append(np.stack([np.interp(tg, ist["t"], ist["Y"][:, j]) for j in range(ist["Y"].shape[1])],
+                                      axis=-1).astype(np.float32))
+            else:
+                XI[c].append(np.interp(tg, ist["t"], ist["y"])[:, None].astype(np.float32))
         for src, dst in ((wst, XW), (rst, XR)):   # waist / wrist ENMO of the same window / 同じ区間の腰・手首の ENMO
             if src is None:
                 continue
@@ -1079,13 +1099,18 @@ def run(opts):
     imu_part = (getattr(opts, "imu_part", None) or "waist").lower()
     if imu_part not in ("waist", "wrist"):
         raise RegError(f"--imu_part は waist か wrist です（{imu_part}）")
-    imu_col = TARGET if imu_part == "waist" else WRIST
-    imu_ja = "腰" if imu_part == "waist" else "手首"
+    imu_input = (getattr(opts, "imu_input", None) or "enmo").lower()
+    if imu_input not in ("enmo", "6axis"):
+        raise RegError(f"--imu_input は enmo か 6axis です（{imu_input}）")
+    imu_col = (TARGET if imu_part == "waist" else WRIST) if imu_input == "enmo" else f"6axis:{imu_part}"
+    imu_ja = ("腰" if imu_part == "waist" else "手首") + ("" if imu_input == "enmo" else " 6軸")
     need_imu = (imu_col, sorted({IMU_CONTEXT_S[m] for m in imu_models})) if imu_models else None
     if imu_models:
-        log(f"加速度計の波形の CNN: {imu_ja}の ENMO の 50 Hz の波形（1 秒 = {IMU_RATE:g} 点、前後 1 秒なら 3 秒分。"
+        what = (f"{imu_ja}の ENMO の 50 Hz の波形" if imu_input == "enmo"
+                else f"{imu_ja.split()[0]}の 3 軸加速度と角速度の 50 Hz の波形（{WAVE_SUFFIX}、6 チャネル）")
+        log(f"加速度計の波形の CNN: {what}（1 秒 = {IMU_RATE:g} 点、前後 1 秒なら 3 秒分。"
             "1 次元 CNN、区間の印のチャネル付き）を入力にする。ドップラーの CNN と同じ区間・同じ分け方・同じ学習の設定", out)
-        if imu_part == "waist" and target == "waist":
+        if imu_part == "waist" and target == "waist" and imu_input == "enmo":
             log("  注意: 正解も腰の ENMO なので、入力が正解そのものになります（比べるなら --target body）", out)
     if need_r:
         log("特徴量 R・RS: 同じ 1 秒の区間の手首の ENMO（加速度計算ソフト v2.2 の ENMO_wrist(mG)）を入力にする。R: 1 秒平均、"
@@ -1241,7 +1266,8 @@ def run(opts):
             if m in CNN_KINDS:
                 configs += [(m, CNN_FEAT[m] + (f" 強さ±{j:g}dB" if j > 0 else ""), j) for j in jitters
                             if not (j > 0 and m == "cnn1d")] if m not in IMU_MODELS else \
-                           [(m, f"{imu_ja} " + CNN_FEAT[m], 0.0)]   # no gain jitter for the accelerometer / 強さのゆらぎなし
+                           [(m, f"{imu_ja} " + (CNN_FEAT[m] if imu_input == "enmo" else CNN_FEAT[m].replace("ENMO 波形", "波形")),
+                             0.0)]   # no gain jitter for the accelerometer / 強さのゆらぎなし
             else:
                 configs += [(m, f, 0.0) for f in feats]
         for sp_label, folds in evals:
@@ -1907,6 +1933,9 @@ def main(argv=None):
     ap.add_argument("--imu_part", default="waist", choices=["waist", "wrist"],
                     help="加速度計の波形の CNN（--models cnn_imu,cnn_imu3s）に入れる部位（既定 waist = 腰の ENMO の 50 Hz の波形。"
                          "wrist = 手首、加速度計算ソフト v2.2 が要る）")
+    ap.add_argument("--imu_input", default="enmo", choices=["enmo", "6axis"],
+                    help="加速度計の波形の CNN の入力（既定 enmo = ENMO の波形 1 チャネル。6axis = 3 軸加速度と角速度の波形 "
+                         "6 チャネル、加速度計算ソフト v2.3 の *_imu_waveform.csv が要る）")
     ap.add_argument("--pca", default=None,
                     help="特徴量 A（平均スペクトル）・M（ドップラーの図）だけのとき、表の形のモデル（線形回帰・ガウス過程・"
                          "ランダムフォレストなど）の前に PCA をかける。auto（ばらつきの 90 %%）、0〜1 の割合、または成分数（既定 なし）")
