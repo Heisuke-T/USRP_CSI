@@ -56,7 +56,7 @@ E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で�
 結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。
 `--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
 (時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)。前後 2 秒の CNN は `--models cnn5s`。
-`--features W`（腰の ENMO の 1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の統計）・`R`・`RS`（手首、加速度計算ソフト v2.2 の ENMO_wrist(mG)）を `--target body` と使うと「腰の ENMO → 全身の ENMO」をドップラーと比べられる。`--models cnn_imu,cnn_imu3s`（`--imu_part waist|wrist`）で加速度計の ENMO の 50 Hz の波形の 1 次元 CNN（`--imu_input 6axis` で 3 軸加速度＋角速度、加速度計算ソフト v2.3 の `*_imu_waveform.csv`）。`--features M`（ドップラーの図そのもの）・`--pca auto`（A・M の前に PCA）・`--models pls`（PLS 回帰）でドップラーを線形モデルなどに入れる。評価は MAE・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
+`--features W`（腰の ENMO の 1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の統計）・`R`・`RS`（手首、加速度計算ソフト v2.2 の ENMO_wrist(mG)）を `--target body` と使うと「腰の ENMO → 全身の ENMO」をドップラーと比べられる。`--models cnn_imu,cnn_imu3s`（`--imu_part waist|wrist`）で加速度計の ENMO の 50 Hz の波形の 1 次元 CNN（`--imu_input 6axis` で 3 軸加速度＋角速度、加速度計算ソフト v2.3 の `*_imu_waveform.csv`）。`--features M`（ドップラーの図そのもの）・`--pca auto`（A・M の前に PCA）・`--models pls`（PLS 回帰）でドップラーを線形モデルなどに入れる。評価は MAE・nRMSE（RMSE ÷ 正解の平均 [%]）・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
 (測った回ごとの強さの違いに強くする。A1 だけ動いている成分が強く、A2〜A4 で学習すると A1 を高く出したため)
 
 `wave_video.py --trial A5_XR1 --pred <predictions.csv> [--wave <試行>_imu_waveform.csv] [--offset S] [--window 10]`: 1 試行の ENMO（実測・Wi-Fi・腰の加速度計の推定、50 Hz の各センサの ENMO）を時間に合わせて描く mp4（測定中のカメラの動画と並べて確かめる）

@@ -956,8 +956,9 @@ def fit_predict_cnn(Xtr, ytr, Xte, seed, epochs, kind="2d", cam=False, jitter_db
 
 
 def metrics(y, p, mape_min=None):
-    """MAE, RMSE, R2, r and MAPE [%] (MAPE only over windows with |truth| >= mape_min; MAPE_n = their count).
-    MAE・RMSE・R²・r と MAPE [%]（MAPE は正解が mape_min 以上の区間だけ。MAPE_n はその区間の数）"""
+    """MAE, RMSE, nRMSE [%] (RMSE / mean of the truth), R2, r and MAPE [%] (MAPE only over windows with
+    |truth| >= mape_min; MAPE_n = their count).
+    MAE・RMSE・nRMSE [%]（RMSE ÷ 正解の平均）・R²・r と MAPE [%]（MAPE は正解が mape_min 以上の区間だけ。MAPE_n はその区間の数）"""
     y, p = np.asarray(y, float), np.asarray(p, float)
     err = p - y
     ss = np.sum((y - y.mean()) ** 2)
@@ -965,7 +966,9 @@ def metrics(y, p, mape_min=None):
     lo = MAPE_MIN if mape_min is None else mape_min
     m = np.abs(y) >= max(lo, EPS)
     mape = float(np.mean(np.abs(err[m]) / np.abs(y[m])) * 100) if m.any() else float("nan")
-    return dict(MAE=float(np.mean(np.abs(err))), RMSE=float(np.sqrt(np.mean(err ** 2))),
+    rmse = float(np.sqrt(np.mean(err ** 2)))
+    ym = float(np.mean(y))
+    return dict(MAE=float(np.mean(np.abs(err))), RMSE=rmse, nRMSE=rmse / ym * 100 if ym > 0 else float("nan"),
                 R2=float(1 - np.sum(err ** 2) / ss) if ss > 0 else float("nan"), r=r, MAPE=mape, MAPE_n=int(m.sum()))
 
 
@@ -1342,7 +1345,8 @@ def run(opts):
                 extra = dict(n_seeds=len(preds), seed_metrics=seed_m,
                              MAE_sd=float(np.std([m_["MAE"] for m_ in seed_m])) if seed_m else float("nan"),
                              R2_sd=float(np.std([m_["R2"] for m_ in seed_m])) if seed_m else float("nan"),
-                             MAPE_sd=float(np.std([m_["MAPE"] for m_ in seed_m])) if seed_m else float("nan"))
+                             MAPE_sd=float(np.std([m_["MAPE"] for m_ in seed_m])) if seed_m else float("nan"),
+                             nRMSE_sd=float(np.std([m_["nRMSE"] for m_ in seed_m])) if seed_m else float("nan"))
                 per = {tn: metrics(yy[tn_ == tn], pp[tn_ == tn]) for tn in dict.fromkeys(tn_)}
                 label = "平均値で予測（基準）" if model == "baseline" else MODEL_NAMES[model]
                 feat_out = feat + (" PCA" if model not in CNN_KINDS and model != "baseline" and pca_used(model, feat, pca_opt)
@@ -1357,7 +1361,8 @@ def run(opts):
                 if imp_n:
                     imp = imp_sum / imp_n
                     results[-1]["importance"] = (tab_data(feat)[1], imp / max(imp.sum(), 1e-12))
-                log(f"  {label:16s} 特徴量 {feat_out:10s}: MAE {mt['MAE']:7.2f} mG  MAPE {mt['MAPE']:6.1f} %  RMSE {mt['RMSE']:7.2f}  "
+                log(f"  {label:16s} 特徴量 {feat_out:10s}: nRMSE {mt['nRMSE']:5.1f} %  MAPE {mt['MAPE']:6.1f} %  MAE {mt['MAE']:7.2f} mG  "
+                    f"RMSE {mt['RMSE']:7.2f}  "
                     f"R² {mt['R2']:6.3f}  r {mt['r']:6.3f}  ({time.time() - t_start:.0f} s)", out)
                 if n_comps:
                     log(f"      {'PLS' if model == 'pls' else 'PCA'} の成分数: "
@@ -1366,7 +1371,8 @@ def run(opts):
                     each = ", ".join("%.2f" % m_["R2"] for m_ in seed_m)
                     log(f"      乱数の種 {len(seed_m)} 回: R² {np.mean([m_['R2'] for m_ in seed_m]):.3f} ± {extra['R2_sd']:.3f}"
                         f"（{each}）、MAE {np.mean([m_['MAE'] for m_ in seed_m]):.1f}"
-                        f" ± {extra['MAE_sd']:.1f} mG、MAPE {np.mean([m_['MAPE'] for m_ in seed_m]):.1f} ± {extra['MAPE_sd']:.1f} %。"
+                        f" ± {extra['MAE_sd']:.1f} mG、MAPE {np.mean([m_['MAPE'] for m_ in seed_m]):.1f} ± {extra['MAPE_sd']:.1f} %、"
+                        f"nRMSE {np.mean([m_['nRMSE'] for m_ in seed_m]):.1f} ± {extra['nRMSE_sd']:.1f} %。"
                         f"上の値は {len(seed_m)} 回の予測の平均", out)
                 if gp_sd is not None:
                     sdv = gp_sd[te]
@@ -1531,32 +1537,34 @@ def _save(out_dir, results, pred_rows, opts, out):
     with open(os.path.join(out_dir, "metrics.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "MAE(mG)", "RMSE(mG)", "R2", "r", "seconds",
-                    "n_seeds", "MAE_sd(mG)", "R2_sd", "target", "MAPE(%)", "MAPE_sd(%)", "MAPE_windows", "MAPE_min(mG)"])
+                    "n_seeds", "MAE_sd(mG)", "R2_sd", "target", "MAPE(%)", "MAPE_sd(%)", "MAPE_windows", "MAPE_min(mG)",
+                    "nRMSE(%)", "nRMSE_sd(%)"])
         for r in results:
             sd_ = r.get("seed_metrics")
             w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], f"{r['MAE']:.3f}",
                         f"{r['RMSE']:.3f}", f"{r['R2']:.4f}", f"{r['r']:.4f}", f"{r['seconds']:.1f}",
                         r.get("n_seeds", 1), f"{r['MAE_sd']:.3f}" if sd_ else "", f"{r['R2_sd']:.4f}" if sd_ else "",
                         r.get("target", "waist"), f"{r['MAPE']:.2f}", f"{r['MAPE_sd']:.2f}" if sd_ else "",
-                        r.get("MAPE_n", ""), f"{MAPE_MIN:g}"])
+                        r.get("MAPE_n", ""), f"{MAPE_MIN:g}", f"{r['nRMSE']:.2f}",
+                        f"{r['nRMSE_sd']:.2f}" if sd_ else ""])
     if any(r.get("seed_metrics") for r in results):
         with open(os.path.join(out_dir, "cnn_seeds.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
             w.writerow(["doppler", "window(s)", "split", "model", "features", "seed", "MAE(mG)", "RMSE(mG)", "R2", "r",
-                        "MAPE(%)"])
+                        "MAPE(%)", "nRMSE(%)"])
             for r in results:
                 for k, m_ in enumerate(r.get("seed_metrics") or []):
                     w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], opts.seed + k,
                                 f"{m_['MAE']:.3f}", f"{m_['RMSE']:.3f}", f"{m_['R2']:.4f}", f"{m_['r']:.4f}",
-                                f"{m_['MAPE']:.2f}"])
+                                f"{m_['MAPE']:.2f}", f"{m_['nRMSE']:.2f}"])
     with open(os.path.join(out_dir, "metrics_by_trial.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "MAE(mG)", "RMSE(mG)", "R2", "r",
-                    "MAPE(%)"])
+                    "MAPE(%)", "nRMSE(%)"])
         for r in results:
             for tn, m in r["per_trial"].items():
                 w.writerow([r["variant"], f"{r['window']:g}", r["split"], r["label"], r["features"], tn, f"{m['MAE']:.3f}",
-                            f"{m['RMSE']:.3f}", f"{m['R2']:.4f}", f"{m['r']:.4f}", f"{m['MAPE']:.2f}"])
+                            f"{m['RMSE']:.3f}", f"{m['R2']:.4f}", f"{m['r']:.4f}", f"{m['MAPE']:.2f}", f"{m['nRMSE']:.2f}"])
     with open(os.path.join(out_dir, "predictions.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["doppler", "window(s)", "split", "model", "features", "trial", "start_csi(s)", "end_csi(s)",
@@ -1801,7 +1809,7 @@ def _plots(out_dir, results):
             ax.plot(mid, r["y"][m], color="#333333", lw=1.4, label="正解（ENMO）")
             ax.plot(mid, r["pred"][m], color=colors[r["model"]], lw=1.2, label="予測")
             pt = r["per_trial"][tn]
-            ax.set_title(f"{tn}  MAE {pt['MAE']:.1f} mG / MAPE {pt['MAPE']:.0f} % / R² {pt['R2']:.2f}", loc="left", fontsize=10)
+            ax.set_title(f"{tn}  nRMSE {pt['nRMSE']:.0f} % / MAPE {pt['MAPE']:.0f} % / R² {pt['R2']:.2f}", loc="left", fontsize=10)
             ax.set_ylabel("ENMO [mG]")
             if i == 0:
                 ax.legend(loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=2, fontsize=9, frameon=False)
@@ -1815,7 +1823,7 @@ def _plots(out_dir, results):
         ax.plot([lo, hi], [lo, hi], color="#333333", lw=0.8, ls="--")
         ax.set_xlabel("正解 [mG]")
         ax.set_ylabel("予測 [mG]")
-        ax.set_title(f"全体: MAE {r['MAE']:.1f} mG / MAPE {r['MAPE']:.0f} % / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
+        ax.set_title(f"全体: nRMSE {r['nRMSE']:.0f} % / MAPE {r['MAPE']:.0f} % / R² {r['R2']:.2f} / r {r['r']:.2f}", fontsize=10)
         ax.legend(fontsize=8)
         fig.suptitle(f"{r['label']}（正解 {TARGET_JA[r.get('target', 'waist')].split('（')[0]}、特徴量 {r['features']}、"
                      f"ドップラー {r['variant']}、区間 {r['window']:g} 秒）"
@@ -1840,7 +1848,7 @@ def _plots(out_dir, results):
                   for r in rs]
         x = np.arange(len(rs))
         cols = [colors[r["model"]] for r in rs]
-        for j, (key, unit) in enumerate((("MAE", " [mG]（小さいほど良い）"),
+        for j, (key, unit) in enumerate((("nRMSE", " [%]（RMSE ÷ 正解の平均。小さいほど良い）"),
                                          ("MAPE", f" [%]（小さいほど良い。正解 {MAPE_MIN:g} mG 以上の区間）"),
                                          ("R2", "（1 に近いほど良い）"))):
             vals = [r[key] for r in rs]
