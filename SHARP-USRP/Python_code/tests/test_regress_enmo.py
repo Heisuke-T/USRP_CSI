@@ -226,6 +226,7 @@ def check_mape(tmp):
     good = abs(m["MAPE"] - 10.0) < 1e-9 and m["MAPE_n"] == 2
     m0 = ro.metrics([100.0, 200.0], [100.0, 200.0], mape_min=50)
     good &= m0["MAPE"] == 0.0
+    good &= abs(m["nRMSE"] - 100 * (575 ** 0.5) / 77.5) < 1e-9   # RMSE ÷ mean of the truth / RMSE ÷ 正解の平均
     import argparse
     inp = os.path.join(tmp, "in_mape")
     for k in range(4):
@@ -237,10 +238,11 @@ def check_mape(tmp):
     with open(os.path.join(out_dir, "metrics.csv"), encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     lin = [r for r in rows if r["model"].startswith("線形")][0]
+    good &= "nRMSE(%)" in rows[0] and float(lin["nRMSE(%)"]) > 0
     good &= ("MAPE(%)" in rows[0] and float(lin["MAPE(%)"]) > 0 and lin["MAPE_min(mG)"] == "20"
              and int(lin["MAPE_windows"]) <= sum(1 for _ in res[0]["y"]))
     print(f"  {'OK ' if good else 'NG '} MAPE: 例 {m['MAPE']:.1f} %（{m['MAPE_n']} 区間）、線形回帰 {float(lin['MAPE(%)']):.1f} %"
-          f"（{lin['MAPE_windows']} 区間、正解 {lin['MAPE_min(mG)']} mG 以上）")
+          f"（{lin['MAPE_windows']} 区間、正解 {lin['MAPE_min(mG)']} mG 以上）、nRMSE 例 {m['nRMSE']:.1f} %")
     return good
 
 
