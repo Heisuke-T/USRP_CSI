@@ -26,7 +26,7 @@
 %      振幅は |H(k)| を dB にしたもの、位相は SHARP-USRP で補正した位相
 %      (サブキャリア方向のアンラップと傾き除去が済んだもの) をそのまま表示する。
 %      サブキャリアは使用帯域の端から端まで (HE20: k=-122..122 の 245 本、
-%      VHT20: k=-28..28 の 57 本)。DC 付近のヌルは振幅 0 のまま残っている。
+%      VHT20: k=-28..28 の 57 本)。DC 付近のヌルは NaN (図では空白) にする。
 %      時間軸は time_sec (alignCSI.m の出力から作った場合は 2 台で共通の時刻)。
 %
 %  出力ファイル名:
@@ -331,7 +331,14 @@ function ds = processedPhaseDataset(S, fileName)
         fprintf('time_sec が無いため、時間軸はパケット番号にします: %s\n', fileName);
     end
 
-    fprintf('位相補正済みファイル (SHARP-USRP) として読み込みました。\n');
+    % DC 付近のヌル (全パケットで振幅 0) は NaN にする。0 のままだと振幅が
+    % -300 dB 程度になり、カラーバーの範囲がそれに引っ張られて図が見えなくなる。
+    isNull = all(amp == 0, 1);
+    amp(:, isNull) = NaN;
+    ph(:, isNull)  = NaN;
+
+    fprintf('位相補正済みファイル (SHARP-USRP) として読み込みました。');
+    fprintf('ヌルのサブキャリア %d 本は NaN (空白) にします。\n', nnz(isNull));
     ds = struct('format', [fmtName ' (sanitized)'], 'csi', amp .* exp(1j * ph), ...
         'subcarrierIndices', subc, 'timeSec', tSec, 'phaseUnwrap', ph);
 end
