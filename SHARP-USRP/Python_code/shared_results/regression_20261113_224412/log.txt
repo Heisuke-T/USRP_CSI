@@ -1,0 +1,84 @@
+=== ドップラー → ENMO の回帰 (20261113_224412) ===
+  読まないフォルダ: その他（--exclude で変更）
+  試行: 12 本（正解データとドップラーの組）
+    A1_XL1  ↔  A1_XL1_antenna#_13  （名前で対応、データセット A1）
+    A1_XL2  ↔  A1_XL2_antenna#_13  （名前で対応、データセット A1）
+    A1_XL3  ↔  A1_XL3_antenna#_13  （名前で対応、データセット A1）
+    A1_XR1  ↔  A1_XR1_antenna#_13  （名前で対応、データセット A1）
+    A1_XR2  ↔  A1_XR2_antenna#_13  （名前で対応、データセット A1）
+    A1_XR3  ↔  A1_XR3_antenna#_13  （名前で対応、データセット A1）
+    A2_XL1  ↔  A2_XL1_antenna#_13  （名前で対応、データセット A2）
+    A2_XL2  ↔  A2_XL2_antenna#_13  （名前で対応、データセット A2）
+    A3_XR1  ↔  A3_XR1_antenna#_13  （名前で対応、データセット A3）
+    A3_XR2  ↔  A3_XR2_antenna#_13  （名前で対応、データセット A3）
+    B1_XR1  ↔  B1_XR1_antenna#_13  （名前で対応、データセット B1）
+    B1_XR2  ↔  B1_XR2_antenna#_13  （名前で対応、データセット B1）
+正解: 腰の ENMO（列 ENMO(mG)）
+MAPE（平均絶対パーセント誤差）: 正解が 50 mG 未満の区間は除いて計算（静止で ENMO ≈ 0 になり割り算が発散するため）
+CNN の学習で強さをゆらす: 区間ごと・アンテナごとに、動いている速度ビン（|v| ≥ 0.65 m/s）の強さを最大 ±3 dB ランダムに変える（テストの入力はそのまま。1 次元 CNN には掛けない）
+
+[ドップラー: nowinnorm（doppler_traces_nowinnorm/）、区間 1 秒]
+  A1_XL1: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XL1_antenna1_13.txt, A1_XL1_antenna2_13.txt, A1_XL1_power_timeseries.csv]
+  A1_XL2: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XL2_antenna1_13.txt, A1_XL2_antenna2_13.txt, A1_XL2_power_timeseries.csv]
+  A1_XL3: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XL3_antenna1_13.txt, A1_XL3_antenna2_13.txt, A1_XL3_power_timeseries.csv]
+  A1_XR1: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XR1_antenna1_13.txt, A1_XR1_antenna2_13.txt, A1_XR1_power_timeseries.csv]
+  A1_XR2: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XR2_antenna1_13.txt, A1_XR2_antenna2_13.txt, A1_XR2_power_timeseries.csv]
+  A1_XR3: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A1_XR3_antenna1_13.txt, A1_XR3_antenna2_13.txt, A1_XR3_power_timeseries.csv]
+  A2_XL1: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A2_XL1_antenna1_13.txt, A2_XL1_antenna2_13.txt, A2_XL1_power_timeseries.csv]
+  A2_XL2: 77 区間（1 秒ごと、CSI の 1.0〜79.0 s）、1 区間はデータ不足で除外  [A2_XL2_antenna1_13.txt, A2_XL2_antenna2_13.txt, A2_XL2_power_timeseries.csv]
+  A3_XR1: 79 区間（1 秒ごと、CSI の 0.0〜79.0 s）  [A3_XR1_antenna1_13.txt, A3_XR1_antenna2_13.txt, A3_XR1_power_timeseries.csv]
+  A3_XR2: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [A3_XR2_antenna1_13.txt, A3_XR2_antenna2_13.txt, A3_XR2_power_timeseries.csv]
+  B1_XR1: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [B1_XR1_antenna1_13.txt, B1_XR1_antenna2_13.txt, B1_XR1_power_timeseries.csv]
+  B1_XR2: 78 区間（1 秒ごと、CSI の 1.0〜79.0 s）  [B1_XR2_antenna1_13.txt, B1_XR2_antenna2_13.txt, B1_XR2_power_timeseries.csv]
+
+[試行ごとの強さ]（静止 = |v| が境目未満のビン、動 = それ以上のビンの、フレームごとの合計の中央値。dB は A1 の平均から。速さ = 動いている成分の平均の速さの中央値）
+  試行        ENMO平均   ant1 静止  ant1 動  ant1 動-静止  ant1 速さ   ant2 静止  ant2 動  ant2 動-静止  ant2 速さ  パケット/秒
+  A1_XL1          528      +0.0     -0.0      -23.5      1.23       +0.0     -0.0      -30.4      1.00       212
+  A1_XL2          493      -0.0     +1.2      -22.2      1.34       +0.0     +0.2      -30.1      1.01       215
+  A1_XL3          515      -0.1     -1.3      -24.6      1.24       -0.0     -0.2      -30.5      1.00       213
+  A1_XR1          480      +0.1     -0.6      -24.1      1.34       +0.0     -0.5      -30.9      1.00       216
+  A1_XR2          471      +0.0     +1.4      -22.0      1.40       +0.0     +0.3      -30.0      1.01       213
+  A1_XR3          562      +0.0     -0.6      -24.1      1.25       -0.0     +0.2      -30.2      1.00       214
+  A2_XL1          580      +0.0     -6.4      -29.8      1.18       -0.2     -1.3      -31.4      0.98       215
+  A2_XL2          447      -0.0     -7.6      -31.0      1.15       -0.3     -1.8      -31.9      0.96       213
+  A3_XR1          482      -0.2     -2.6      -25.8      1.26       +0.1     -1.0      -31.4      1.00       216
+  A3_XR2          494      -0.5     -3.9      -26.8      1.22       +0.1     -1.0      -31.5      0.99       217
+  B1_XR1           82      -0.3     -4.5      -27.7      1.38       +0.1     -2.0      -32.4      0.98       216
+  B1_XR2           67      -0.5     -6.2      -29.2      1.36       +0.1     -1.9      -32.4      0.99       216
+  評価: 学習 A1+A3 → テスト A2（学習 8 試行・625 区間: A1_XL1, A1_XL2, A1_XL3, A1_XR1, A1_XR2, A1_XR3, A3_XR1, A3_XR2 ／ テスト 2 試行・155 区間: A2_XL1, A2_XL2）
+  評価: 学習 A1+A2 → テスト A3（学習 8 試行・623 区間: A1_XL1, A1_XL2, A1_XL3, A1_XR1, A1_XR2, A1_XR3, A2_XL1, A2_XL2 ／ テスト 2 試行・157 区間: A3_XR1, A3_XR2）
+  評価: 学習 A1+A3+B1 → テスト A2（学習 10 試行・781 区間: A1_XL1, A1_XL2, A1_XL3, A1_XR1, A1_XR2, A1_XR3, A3_XR1, A3_XR2, B1_XR1, B1_XR2 ／ テスト 2 試行・155 区間: A2_XL1, A2_XL2）
+  評価: 学習 A1+A2+B1 → テスト A3（学習 10 試行・779 区間: A1_XL1, A1_XL2, A1_XL3, A1_XR1, A1_XR2, A1_XR3, A2_XL1, A2_XL2, B1_XR1, B1_XR2 ／ テスト 2 試行・157 区間: A3_XR1, A3_XR2）
+  評価: 学習 A1+A2+A3 → テスト B1（学習 10 試行・780 区間: A1_XL1, A1_XL2, A1_XL3, A1_XR1, A1_XR2, A1_XR3, A2_XL1, A2_XL2, A3_XR1, A3_XR2 ／ テスト 2 試行・156 区間: B1_XR1, B1_XR2）
+  -- 学習とテスト: 学習 A1+A3 → テスト A2
+  平均値で予測（基準）       特徴量 -         : MAE  258.16 mG  MAPE   65.5 %  RMSE  325.10  R² -0.001  r    nan  (0 s)
+  CNN（前後 1 秒も入力）   特徴量 Doppler 2D 3秒 強さ±3dB: MAE  136.66 mG  MAPE   36.2 %  RMSE  167.12  R²  0.735  r  0.909  (255 s)
+      乱数の種 5 回: R² 0.716 ± 0.081（0.68, 0.79, 0.78, 0.76, 0.58）、MAE 140.7 ± 18.5 mG、MAPE 36.8 ± 2.8 %。上の値は 5 回の予測の平均
+  -- 学習とテスト: 学習 A1+A2 → テスト A3
+  平均値で予測（基準）       特徴量 -         : MAE  230.14 mG  MAPE   52.1 %  RMSE  290.19  R² -0.006  r -0.000  (0 s)
+  CNN（前後 1 秒も入力）   特徴量 Doppler 2D 3秒 強さ±3dB: MAE  120.25 mG  MAPE   31.1 %  RMSE  152.84  R²  0.721  r  0.875  (246 s)
+      乱数の種 5 回: R² 0.700 ± 0.035（0.67, 0.76, 0.66, 0.71, 0.69）、MAE 125.0 ± 5.1 mG、MAPE 32.2 ± 2.3 %。上の値は 5 回の予測の平均
+  -- 学習とテスト: 学習 A1+A3+B1 → テスト A2
+  平均値で予測（基準）       特徴量 -         : MAE  267.96 mG  MAPE   59.6 %  RMSE  338.92  R² -0.088  r    nan  (0 s)
+  CNN（前後 1 秒も入力）   特徴量 Doppler 2D 3秒 強さ±3dB: MAE  203.31 mG  MAPE   42.1 %  RMSE  241.01  R²  0.450  r  0.899  (205 s)
+      乱数の種 5 回: R² 0.427 ± 0.135（0.58, 0.36, 0.58, 0.39, 0.23）、MAE 205.3 ± 22.2 mG、MAPE 42.5 ± 3.5 %。上の値は 5 回の予測の平均
+  -- 学習とテスト: 学習 A1+A2+B1 → テスト A3
+  平均値で予測（基準）       特徴量 -         : MAE  243.97 mG  MAPE   50.0 %  RMSE  296.66  R² -0.051  r    nan  (0 s)
+  CNN（前後 1 秒も入力）   特徴量 Doppler 2D 3秒 強さ±3dB: MAE  172.22 mG  MAPE   33.8 %  RMSE  206.97  R²  0.488  r  0.903  (294 s)
+      乱数の種 5 回: R² 0.449 ± 0.192（0.67, 0.70, 0.32, 0.27, 0.29）、MAE 176.0 ± 34.6 mG、MAPE 34.7 ± 6.2 %。上の値は 5 回の予測の平均
+  -- 学習とテスト: 学習 A1+A2+A3 → テスト B1
+  平均値で予測（基準）       特徴量 -         : MAE  430.83 mG  MAPE  379.2 %  RMSE  438.53  R² -27.713  r -0.000  (0 s)
+  CNN（前後 1 秒も入力）   特徴量 Doppler 2D 3秒 強さ±3dB: MAE  104.95 mG  MAPE  128.6 %  RMSE  141.92  R² -2.007  r  0.431  (340 s)
+      乱数の種 5 回: R² -2.204 ± 0.776（-1.34, -3.33, -1.87, -2.91, -1.57）、MAE 106.6 ± 24.8 mG、MAPE 129.6 ± 31.6 %。上の値は 5 回の予測の平均
+
+[学習 A1+A3 → テスト A2] 1 秒の区間で一番誤差が小さかったのは CNN（前後 1 秒も入力）（特徴量 Doppler 2D 3秒 強さ±3dB、ドップラー nowinnorm）: MAE 136.66 mG、MAPE 36.2 %、R² 0.735
+
+[学習 A1+A2 → テスト A3] 1 秒の区間で一番誤差が小さかったのは CNN（前後 1 秒も入力）（特徴量 Doppler 2D 3秒 強さ±3dB、ドップラー nowinnorm）: MAE 120.25 mG、MAPE 31.1 %、R² 0.721
+
+[学習 A1+A3+B1 → テスト A2] 1 秒の区間で一番誤差が小さかったのは CNN（前後 1 秒も入力）（特徴量 Doppler 2D 3秒 強さ±3dB、ドップラー nowinnorm）: MAE 203.31 mG、MAPE 42.1 %、R² 0.450
+
+[学習 A1+A2+B1 → テスト A3] 1 秒の区間で一番誤差が小さかったのは CNN（前後 1 秒も入力）（特徴量 Doppler 2D 3秒 強さ±3dB、ドップラー nowinnorm）: MAE 172.22 mG、MAPE 33.8 %、R² 0.488
+
+[学習 A1+A2+A3 → テスト B1] 1 秒の区間で一番誤差が小さかったのは CNN（前後 1 秒も入力）（特徴量 Doppler 2D 3秒 強さ±3dB、ドップラー nowinnorm）: MAE 104.95 mG、MAPE 128.6 %、R² -2.007
+
+保存しました: C:\research\USRP-B205-mini-i-Wi-Fi-\SHARP-USRP\Python_code\outputs\regression_20261113_224412

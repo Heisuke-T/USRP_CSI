@@ -1,0 +1,24 @@
+{
+  "input": "C:\\research\\USRP-B205-mini-i-Wi-Fi-\\SHARP-USRP\\Python_code\\regression_input",
+  "out": null,
+  "pairs": null,
+  "exclude": "その他",
+  "doppler": "nowinnorm",
+  "models": "linear,rf,xgboost,mlp,svr,gpr,cnn",
+  "static_v": 0.65,
+  "deriv_window": "0.2",
+  "features": "F1,F2a,F2b",
+  "target": "waist",
+  "windows": [
+    1.0
+  ],
+  "split": null,
+  "blocks": 5,
+  "epochs": 200,
+  "cnn_seeds": 1,
+  "cnn_study": false,
+  "seed": 0,
+  "importance": false,
+  "levels_only": true,
+  "no_plots": false
+}

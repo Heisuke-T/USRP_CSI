@@ -54,6 +54,8 @@ def main():
     parser.add_argument('name_file', help='outputs/ 内の結果ファイル名 (.txt を除く)')
     parser.add_argument('activities', help='活動ラベル (カンマ区切り)')
     parser.add_argument('--plot_dir', default='./plots/', help='画像の保存先')
+    parser.add_argument('--suffix', default='',
+                        help='画像のファイル名の末尾に付ける文字列 (条件ごとに図を分けたいとき)')
     args = parser.parse_args()
 
     with open(os.path.join('./outputs', args.name_file + '.txt'), 'rb') as fp:
@@ -62,9 +64,9 @@ def main():
 
     for key, suffix, acc_key in (('conf_matrix', '', 'accuracy_single'),
                                  ('conf_matrix_max_merge', '_max_merge', 'accuracy_max_merge')):
-        out_png = os.path.join(args.plot_dir, args.name_file + suffix + '.png')
+        out_png = os.path.join(args.plot_dir, args.name_file + args.suffix + suffix + '.png')
         plot_confusion_matrix(metrics[key], activities, out_png,
-                              f'{args.name_file}{suffix}\naccuracy {metrics[acc_key]:.3f}')
+                              f'{args.name_file}{args.suffix}{suffix}\naccuracy {metrics[acc_key]:.3f}')
         print(f'-> {out_png}')
 
 

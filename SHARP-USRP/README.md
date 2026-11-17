@@ -320,6 +320,38 @@ SHARP の `--bandwidth 20` は「80MHz で取得したデータから 20MHz 幅�
 ではない。間隔のばらつきが今回より大きい測定では `nudft` を使うか、測定側で
 レートを安定させるほうがよい。
 
+#### 正規化を省いた版も保存する (`--save_unnormalized`)
+
+SHARP (オリジナルも本移植も) は、ドップラーを作るまでに 2 回、値を割って規格をそろえる。
+
+| | 処理 | 目的 |
+|---|---|---|
+| (1) | パケットごとに、振幅を全サブキャリアの平均で割る | 受信機のゲインの変化 (AGC) を消す |
+| (2) | 時間の窓ごとに、スペクトルを最大値で割り、10^noise_level 未満を切り捨てる | 距離・向き・部屋が違っても同じ動きを同じ形にする |
+
+活動の分類には形だけで足りるのでこれでよいが、動きの **大きさ** (仕事率など) を回帰で
+推定するには強さの情報が要る。`--save_unnormalized` を付けると、通常の版に加えて次の 2 つも保存する。
+
+| 保存先 | 中身 |
+|---|---|
+| `doppler_traces/` | 通常の版 ((1) + (2))。今までと同じ (このオプションを付けても値は変わらない) |
+| `doppler_traces_nowinnorm/` | (1) だけ。(2) の窓ごとの割り算と雑音床の切り捨てをしない |
+| `doppler_traces_raw/` | (1) も (2) もしない。受信した振幅のまま (USRP はゲイン固定なので意味を持つ) |
+
+- どの版も同じパケット・同じ窓から作る (外れ値の補間・欠落の模擬・間引きも同じパケットにかかる)。
+  ファイル名・形・`_time.npy` (窓の時刻) は 3 つで同じ。`_meta.json` の `variant` で区別する
+- 値は |H|² をサブキャリア方向に足したパワー (任意単位)。表示するときは dB (10 log10) にするとよい
+- `--remove_static` と組み合わせられる (静止成分を引いてから計算する)
+- `run_batch.py` では、処理済みのファイル (PNG がある) にこのオプションを付けて実行すると、
+  時間の掛かる位相サニタイゼーションはやり直さず、ドップラー計算だけをやり直して 2 つの版を足す
+
+```powershell
+python run_batch.py "E:/Dataset_CSI/test1101/*.mat" --noise_level -4.0 --despike --save_unnormalized
+```
+
+検証は `tests/test_doppler_variants.py` (通常の版が機能追加前と一致すること、振幅を 3 倍にすると
+raw 版だけが 9 倍になること、など)。
+
 ### 活動認識の学習とテスト (手順6〜8)
 
 SHARP の学習側 (データセット作成・ネットワーク・評価) を USRP の測定に合わせて
@@ -505,6 +537,205 @@ python CSI_network_test.py ./doppler_traces/ S2,S3 100 340 1 32 antenna1 usrp E,
   TensorFlow のキャッシュの既知の警告。キャッシュは正しく作られる
 - `shuffle=True was passed, but will be ignored` — データセット側でシャッフル
   しているので問題ない
+
+### ドップラーから腰の ENMO を推定する回帰 (regress_enmo.py)
+
+ドップラーから、加速度計算ソフト (witmotion_wt011 の `compute_power.py`) が出す腰の **ENMO**
+(max(合成加速度 − 1 g, 0) [mG]。6 面キャリブレーションで補正したもの) を推定するモデルを 5 種類作って比べる。
+推定は 1 秒ごと (`--windows` で変更できる)。
+
+| モデル | 入力 |
+|---|---|
+| 線形回帰 (Ridge)・ランダムフォレスト・XGBoost・MLP | 特徴量 A (区間の平均スペクトル、log10、アンテナ 2 本で 200 個)、特徴量 B (物理に基づく特徴量: 動きの強さ・平均の速さ・速さの 2 乗の平均・速度の広がり・95 % の速さ・足踏みの周期など、アンテナごと)のそれぞれ (特徴量 C は指定したときだけ、下の説明) |
+| SVR (RBF カーネル)・ガウス過程回帰 | 特徴量 A・B (ガウス過程回帰は推定の幅も出し、その幅に正解が入った割合をログに出す) |
+| CNN | 区間のドップラーの 2 次元配列 (1 秒あたり 64 時間フレーム x 速度ビン x アンテナ 2 本、log10) |
+
+- **特徴量 C**: ENMO は加速度なので、速さの時間微分を入れる。ドップラーのフレームごとに「向きつきの平均速度」と
+  「95 % の速さ」を求め、50 Hz の格子に平均 → 6 Hz で平滑化 (微分は雑音を大きくするため) → 微分し、区間ごとに
+  |dv/dt| の平均・2 乗平均の平方根・95 % 値を出す。ほかにスペクトルのフレーム間の変化の速さ。アンテナごとに 7 個。
+  足踏みのテンポが変わると、速さが同じでも加速度は変わる (加速度 ≈ 2π x テンポ x 速さ) ので、その分を拾う
+- **特徴量 D (1 秒の中の時間変化)**: アンテナごとに、速度ビンごとの強さ (log10) の時間方向の標準偏差 100 個と、
+  1 秒のドップラーを時間 4 x 速度 10 のマスに縮めた値 40 個 (計 140 個、2 本で 280 個)。CNN が使っている時間変化を、
+  表の形のモデルにも渡す
+- **特徴量 E (強さをそろえたスペクトル)**: 特徴量 A の平均スペクトルを全体の強さで割ったもの (分布の形だけ、2 本で 200 個)。
+  日によって受信の強さが違っても値がずれない
+- 使う特徴量は `--features` で選ぶ (既定 `A,B`)。D・E・組み合わせは例えば `--features A,B,D,E,A+D,B+D,E+D`。
+- **前後の区間の特徴量**: `B+D@1` のように `@` と数を付けると、その区間の特徴量に前後 1 区間 (1 秒ずつ) の同じ特徴量も
+  並べる (`@2` で前後 2 区間。同じ試行の中だけ、端は一番近い区間)。前後 1 秒の CNN と同じ考え方
+- **特徴量の重要度**: `--importance` で、ランダムフォレストと XGBoost が各特徴量をどれだけ使ったか (学習した回の平均、
+  合計 1) を `importance.csv` に、グループ (B の各特徴量・D のばらつき・D のマス・前後の区間など) ごとの合計を
+  `importance_groups.csv` に出す。分け方ごとに一番良かったモデルの上位 20 個を図 (`importance_*.png`) とログに出す特徴量 C は実データ (A1・A2) で効果がなかったので既定から外した
+  (`--features A,B,C,A+C` のように指定すれば使える)
+- **CNN の確かめ**: `--cnn_seeds 5` で乱数の種を変えて 5 回学習し、平均とばらつき (表の `R2_sd` など、
+  `cnn_seeds.csv`) を出す (予測は 5 回の平均)。`--cnn_study` で、CNN が効く理由を確かめる CNN を足す:
+  時間の順番を入れ替えた CNN・時間で平均した CNN (どちらも下がれば、1 秒の中の時間変化を使っている)、
+  時間方向だけの 1 次元 CNN、前後 1 秒も入れた CNN (時間の文脈が効くか)。あわせて CNN が時間 x 速度のどこを
+  見たかの図 (Grad-CAM、`cnn_gradcam_*.png`、ENMO の低・中・高ごとの平均と、平均しない 1 区間ずつの例
+  `cnn_gradcam_examples_*.png`) を作る。Grad-CAM は、学習した CNN に実データの区間を入れたとき、入力の図の
+  どこが予測の ENMO を上げる方向に効いたかを色で示す (最後の畳み込み層の勾配から計算)。
+- **特徴量 F (既定)**: ドップラー D(n, k) を動いている速度ビン (|v| ≥ 0.65 m/s、`--static_v`) で足して時系列にし、
+  50 Hz にそろえて Savitzky-Golay (2 次式、微分の窓 0.2 秒、`--deriv_window 0.1,0.2,0.4` で比べられる) で時間微分し、
+  1 秒ごとに |微分| を平均する (アンテナ 2 本で 2 個ずつ)。微分は試行全体で計算してから 1 秒に区切る
+  - `F1`: log10 Σ_動 D (動いている成分の強さ。log なので受信の強さ (ゲイン) が微分で消える)
+  - `F2a`: Σ_動 |v| D ÷ Σ_静止 D (運動量に近い量。静止成分で割ってゲインを消す。微分は力に近い)
+  - `F2b`: Σ_動 |v| D ÷ Σ_動 D (平均の速さ [m/s]。微分は加速度相当 [m/s²])
+  - 静止ビンの境目 0.65 m/s は、ドップラーの窓 (31 パケットのハン窓、速度分解能 約 0.32 m/s) の主ローブの端。
+    実データで確かめるため、ENMO の小さい 5 % の区間の平均スペクトルと、0 m/s の山から 20 dB 下がる |v| を
+    `static_spectrum_*.csv/png` とログに出す (ハン窓の計算の応答と並べる)
+  - 既定の特徴量は `F1,F2a,F2b`。前の特徴量 A〜E も `--features A,B` のように指定すれば使える
+- **正解の ENMO**: `--target waist` (既定、腰の ENMO) / `--target body` (全身の ENMO = 腰・大腿・下腿・手首の 4 台の
+  ENMO の合計、加速度計算ソフト v2.0 の `ENMO_body(mG)` の列)。全身の ENMO がない試行 (センサが 4 台そろっていない) は
+  使わずにログに出す。腰と全身は大きさが違うので、別々に学習して比べる (`metrics.csv` の `target` の列に残る)
+- **前後の時間も入れた CNN**: `--models cnn3s` (前後 1 秒、3 秒分の入力)、`--models cnn5s` (前後 2 秒、5 秒分の入力)。
+  区間がどこかを示す印のチャネルを足して、真ん中の 1 秒の ENMO を推定する。cnn5s は入力が大きく、メモリと時間が掛かる
+  例 `python regress_enmo.py --split A1:A2 --models cnn --cnn_study --cnn_seeds 5`
+- **腰の ENMO → 全身の ENMO**: `--features W`（同じ 1 秒の区間の腰の ENMO、1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の
+  平均・標準偏差・最大・90 % 点、`*_power_timeseries.csv` が要る）を入力にできる。`--target body` で、ドップラーのモデルと
+  同じ区間・同じ分け方で全身の ENMO を推定して比べる（腰のセンサを使った場合とドップラーの比較）。手首の ENMO も同じ形で
+  `R`（1 秒平均）・`RS`（50 Hz の値の統計）。加速度計算ソフト v2.2 の `ENMO_wrist(mG)` の列が要る（ない試行は除いてログに出す）。
+  `W+R` で腰と手首の 2 台。例
+  `python regress_enmo.py --target body --features F2b,W,WS,R,RS,W+R --models linear,gpr,cnn,cnn3s --split cv`
+- **加速度計の波形の CNN**: `--models cnn_imu,cnn_imu3s` で、腰（`--imu_part waist`、既定）か手首（`--imu_part wrist`、
+  加速度計算ソフト v2.2）の ENMO の 50 Hz の波形（1 秒 = 50 点、cnn_imu3s は前後 1 秒を足した 150 点＋区間の印）を
+  1 次元 CNN に入れる。ドップラーの CNN と同じ区間・同じ分け方・同じ学習の設定（強さのゆらぎはかけない）で、
+  「単一の加速度計の波形 → 全身の ENMO」と比べる。`--imu_input 6axis` にすると、ENMO ではなく 3 軸加速度と角速度の波形
+  （6 チャネル。加速度計算ソフト v2.3 が正解データと一緒に出す `*_imu_waveform.csv`）を入れる。例
+  `python regress_enmo.py --target body --models cnn,cnn3s,cnn_imu,cnn_imu3s --features B --gain_jitter 3 --cnn_seeds 5`
+- **ドップラーの図を線形モデルなどに入れる（PCA・PLS）**: `--features M` でドップラーの図そのもの（log10、1 秒を
+  `--map_size`（既定 16x50）の時刻 × 速度ビンに縮めて、アンテナ 2 本分を 1 列に並べる。既定で 1600 個）を入力にする。
+  変数が区間の数より多いので、`--pca auto`（ばらつきの 90 %、0〜1 の割合か成分数も指定可）で線形回帰・ガウス過程・
+  ランダムフォレストなどの前に PCA をかける（特徴量 A・M だけのとき。学習データだけで作り、成分数をログに出す）。
+  `--models pls` で PLS 回帰（成分数は学習データの中の試行ごとの交差検証で 1〜20 から選ぶ）。PLS の回帰係数は
+  `pls_coef.csv` と `pls_coef_*.png`（A は速度ごとの線、M は時刻 × 速度の図）。例
+  `python regress_enmo.py --target body --models linear,gpr,rf,pls,cnn,cnn3s --features W,WS,A,M --pca auto`
+- **評価指標**: MAE [mG]・RMSE・R²・r に加えて MAPE（平均絶対パーセント誤差 [%] ＝ |推定 − 正解| ÷ 正解 の平均 × 100）。
+  静止で ENMO ≈ 0 の区間は割り算が発散するので、正解が `--mape_min`（既定 50 mG）未満の区間は MAPE から除く
+  （`metrics.csv` の `MAPE(%)`・`MAPE_windows`（使った区間の数）・`MAPE_min(mG)` の列、`comparison.png` の真ん中の図）
+- **CNN の強さのゆらぎ**: `--gain_jitter 3` で、CNN の学習のときだけ、区間ごと・アンテナごとに動いている速度ビン
+  (|v| ≥ `--static_v`) の強さを最大 ±3 dB ランダムに変える (一様分布。入力は log10 なので +g dB は +g/10。静止ビンと
+  区間の印のチャネルはそのまま、テストの入力もそのまま。1 次元 CNN には掛けない)。測った回ごとにドップラーの動いている
+  成分の強さが違う (`trial_levels.csv`) とき、CNN が強さそのものではなく速度の分布や時間変化の形を見るようにする。
+  静止成分はパケットごとの正規化でどの試行も同じなので、静止ビンは変えない。`--gain_jitter 0,3,6` で、ゆらさない場合と
+  並べて比べる (表の特徴量の列が `Doppler 2D 強さ±3dB` などになる)
+- 学習とテストは `--split "学習:テスト"` で選べる (例 `--split A1:A2`、`--split A1,A2_XR1:A2_XR2`。データセット名・試行名・
+  `A2_*`。何回でも指定できる)。指定しなければ「1 試行をテスト、残りで学習」(`cv`)。`regression_input/A1/`・`A2/` のように
+  データセットを並べて置いてよい
+- 出力はどれも区間ごとの ENMO の値。比べやすいように「平均値で予測する基準」も一緒に出す
+- 評価は **試行ごとに分ける** (1 試行をテスト、残りで学習、を全試行で繰り返す)。
+  隣り合う区間はよく似ているので、ランダムに分けると精度が高く出すぎるため。試行が 1 本ならその中を時間で 5 分割 (参考値)
+- ドップラーは `doppler_traces_nowinnorm/` (窓ごとの割り算なし) が既定。`--doppler all` で 3 つの版を比べる
+- 区間は加速度計算ソフトと同じ区切り (0, 1, 2 … 秒 / 0, 5, 10 … 秒)。ドップラーの時刻は `_meta.json` の
+  `time_origin_s` で CSI の時間軸に直す (この値がない古いドップラーは先頭のパケット数から見積もる)
+
+入力は `regression_input/` に置く。データセットごとにまとめる置き方 (`A1/imu/<試行名>/`・`A1/doppler_traces_nowinnorm/`、名前か一括処理の `batch_pairs_*.csv` で対応づける) と、試行ごとのフォルダの置き方のどちらでもよい (詳しくは `regression_input/README.md`)。最初に、見つけた試行と組み合わせの一覧をログに出す。
+
+```powershell
+python regress_enmo.py                        # nowinnorm 版で 5 モデル、1 秒ごと
+python regress_enmo.py --doppler all          # 3 つの版それぞれで
+python regress_enmo.py --windows 1,5          # 1 秒と 5 秒の区間で比べる (ふつうは不要)
+python regress_enmo.py --models linear,rf     # 一部のモデルだけ
+```
+
+結果は `outputs/regression_<日時>/`: `metrics.csv` (MAE・RMSE・R²・r)、`metrics_by_trial.csv`、
+`predictions.csv`、`comparison.png` (比較の棒グラフ、版と区間ごと)、`pred_<版>_<区間>_<モデル>_<特徴量>.png`
+(試行ごとの正解と予測の時間変化と散布図)、`features_<版>_<区間>.csv` (作った特徴量)。
+必要なパッケージ: `pip install scikit-learn xgboost tensorflow`。検証は `tests/test_regress_enmo.py`。
+
+結果を Claude に見せるときは、回したあとに `python share_results.py` を実行する。いちばん新しい
+`outputs/regression_*` の軽いファイル (log.txt・metrics.csv・metrics_by_trial.csv・cnn_seeds.csv・predictions.csv・
+comparison.png・cnn_gradcam_*.png) を `shared_results/<フォルダ名>/` にコピーし、`shared_results/` だけをコミットして
+今のブランチにプッシュする (ほかの作業中の変更は巻き込まない)。`--features` で特徴量の表、`--pred_png` で予測の図も入れる。
+フォルダを指定するときは `python share_results.py outputs/regression_20261105_203539`。
+
+### 受信レートの低下を模擬する (packet_loss.py)
+
+実環境では他の通信・干渉・混雑などで CSI を受信できないパケットが出る。
+位相サニタイゼーション済みの CSI (`processed_phase/`) のパケットを「受信 / 欠落」
+に振り分けるマスクを掛けて、受信レートが下がった状況を疑似的に作る。
+受信が止まる時間の長さと規則性で 4 つのパターンを用意しており、どれも
+**欠落率 `--loss_rate` (0〜1) で強さを変えられる**。
+
+| `--loss` | 受信の様子 | 想定する原因 | 強さを決めるオプション |
+|---|---|---|---|
+| `random` | 1 パケットずつ散発的に欠ける | 低 SNR (距離・壁)、他の端末との衝突 | `--loss_rate` |
+| `burst` | 一定時間まとめて途切れ、その後回復する | 他の通信によるチャネル占有、干渉、人体による遮蔽 | `--loss_rate`, `--burst_ms` (途切れの平均長) |
+| `periodic` | 一定の周期でまとめて途切れる | 端末・AP の定期スキャン | `--period_s` (周期) と `--loss_rate` (または `--burst_ms`) |
+| `sustained` | 途切れはしないが受信レートが下がり続ける | 混雑で送信機が CSMA/CA で待機し続ける | `--loss_rate` (レートが 1 - 欠落率 倍になる) |
+
+- `burst` は途切れる時間・受信する時間の長さが指数分布 (Gilbert-Elliott モデルを
+  時間で表したもの)。平均の途切れが `--burst_ms`、長い目で見た欠落の割合が
+  `--loss_rate` になる。`--burst_dist fixed` で途切れの長さを固定できる
+- `periodic` の 1 回の途切れは `欠落率 x 周期` (例: `--period_s 30 --loss_rate 0.01`
+  なら 30 秒ごとに 300 ms)。`--burst_ms 300` と直接書いてもよい
+- `--loss_start_s 20 --loss_duration_s 30` のように、測定の一部の区間だけを
+  低下させることもできる (先頭のパケットからの秒数)
+- 欠け方は乱数で決まるが、ファイル名と `--loss_seed` から作るので再実行で同じになる
+- 2 台の受信機 (`antenna1`, `antenna2`): `random` は受信側の要因なので受信機ごとに
+  独立に欠け、それ以外は送信側の要因 (送られなかったパケット) なので 2 台で同じ
+  パケットが欠ける。`--loss_antennas shared / independent` で固定できる
+
+欠落したパケットは既定では取り除く (`--loss_fill drop`)。実際に受信が欠けたときに
+パイプラインが受け取るデータと同じで、`time_sec` も欠落後のものになる。
+`hold` (直前の受信で埋める) と `interp` (前後から線形補間) も選べる。
+
+**欠落率ごとの正解率を比べる (run_har.py --loss)**
+
+```powershell
+cd SHARP-USRP\Python_code
+
+# S1 (欠落なし) で学習し、S2,S3 に burst の欠落を入れて欠落率ごとにテストする
+python run_har.py --train S1 --test S2,S3 --noise_level -3.0 --despike `
+    --loss burst --loss_rate 0.1,0.2,0.4 --burst_ms 100
+
+# 学習側にも同じ欠落を入れる (欠落率ごとに学習し直す)
+python run_har.py --train S1 --test S2,S3 --noise_level -3.0 --despike `
+    --loss sustained --loss_rate 0.3,0.6 --loss_on both
+```
+
+1. `processed_phase/` から、欠落なしで全セッションのドップラーデータを計算する
+   (`doppler_traces_loss/none/`)。これが基準
+2. 欠落率ごとに、テストのセッションへ欠落を入れて計算する
+   (`doppler_traces_loss/burst_r0.2_b100ms/` など)
+3. 欠落なしのデータで 1 回学習し、条件ごとにテストする
+
+`outputs/har_summary_<日時>.md` の先頭に、条件ごとの 実際の欠落率・受信レート・
+最長の途切れ・正解率 を並べた表が出る。混同行列の図は条件ごとに
+`plots/complete_different_..._S2,S3_burst_r0.2_b100ms_max_merge.png` のように分かれる。
+
+- 位相サニタイゼーション済みの CSI (`processed_phase/S1_*.mat` など) が必要。
+  `--csi` と一緒に使えば、先にそれを作ってから欠落の模擬に進む
+- ドップラー計算の設定 (`--noise_level`, `--despike`, `--remove_static` など) は
+  基準と欠落ありの両方に同じものを使う。以前の `doppler_traces/` と設定が違えば
+  警告を出す
+
+**単体で使う**
+
+```powershell
+# processed_phase の .mat に欠落を入れて別のフォルダに書き出す (受信の様子の図も出す)
+python packet_loss.py ./processed_phase/S2_*.mat --out_dir ./processed_phase_loss/ `
+    --loss burst --loss_rate 0.2 --burst_ms 100 --preview
+
+# ドップラー計算で直接入れる (--only で対象のファイルを絞れる)
+python CSI_doppler_computation.py ./processed_phase/ . ./doppler_traces_loss/test/ 10 10 31 1 -3.0 `
+    --despike --only S2_,S3_ --loss periodic --period_s 30 --burst_ms 300
+```
+
+書き出した `.mat` には元のパケットごとの受信 (1) / 欠落 (0) が `loss_mask` として、
+欠落の実績 (欠落率、連続した欠落の長さ、受信レート) が `<名前>_loss.json` に入る。
+ドップラー計算で入れた場合は `_meta.json` の `packet_loss` に残る。
+
+**注意**
+
+- `drop` では受信したパケットだけを並べて STFT に掛けるので (既定の `--resample none`)、
+  途切れた時間は詰められる。また `sustained` で受信レートが下がると Tc が延び、
+  ドップラーの速度軸の範囲 (`v_max`) が狭くなる。これらは実際にレートが落ちたときに
+  このパイプラインで起きることそのもの。途切れの時間を正しく扱いたい場合は
+  `--resample nudft` を試す
+- 欠落はパケット数を減らすので、ドップラーの時間窓の数も減る。測定が短いと
+  学習・テスト用の窓が作れなくなることがある (`--window` を小さくする)
+- 位相サニタイゼーションの後で欠落させている。サニタイゼーションはパケットごとの
+  処理なので、欠落してから処理した場合とほぼ同じになる (前処理のサブキャリアごとの
+  振幅の正規化だけは全パケットの平均を使うが、パケットが減っても平均はほぼ変わらない)
 
 ### MATLAB から変換する場合
 
@@ -746,6 +977,7 @@ SHARP-USRP/
     ├── run_phase_sanitization.py   手順0〜3の一括実行 (1ファイル)
     ├── run_batch.py                手順0〜5の一括実行 (複数ファイル)
     ├── run_har.py                  手順6〜8 (--csi で 0〜8) の一括実行と結果のまとめ
+    ├── packet_loss.py              受信レートの低下 (パケット欠落) の模擬
     ├── CSI_doppler_create_dataset_train.py  手順6: 学習用データセット
     ├── CSI_doppler_create_dataset_test.py   手順6: テスト用データセット
     ├── CSI_network.py              手順7: 学習
@@ -762,6 +994,9 @@ SHARP-USRP/
         ├── test_pipeline.py            パイプライン全体のテスト
         ├── test_doppler.py             ドップラー計算の検証
         ├── test_har.py                 データセット作成〜学習〜テストの検証
+        ├── test_packet_loss.py         パケット欠落の模擬の検証
+        ├── test_doppler_variants.py    正規化を省いたドップラーの検証
+        ├── test_regress_enmo.py        回帰モデル (regress_enmo.py) の検証
         └── test_matlab_parity.py       MATLAB/Python 一致テスト
 ```
 

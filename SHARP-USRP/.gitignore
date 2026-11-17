@@ -5,9 +5,9 @@ Python_code/phase_processing/*.json
 Python_code/phase_processing/*.npy
 Python_code/processed_phase*/**/*.mat
 Python_code/processed_phase*/*.mat
-Python_code/doppler_traces/**/*.txt
-Python_code/doppler_traces/**/*.json
-Python_code/doppler_traces/**/*.npy
+Python_code/doppler_traces*/**/*.txt
+Python_code/doppler_traces*/**/*.json
+Python_code/doppler_traces*/**/*.npy
 
 # 活動認識の学習 (データセットの窓は doppler_traces 内の *.txt として上で無視される)
 Python_code/*_cache_*
@@ -17,8 +17,14 @@ Python_code/outputs/
 # 図とログ
 Python_code/**/*.png
 Python_code/*.log
+# share_results.py で共有する結果 (軽いファイルだけ) はコミットする
+!Python_code/shared_results/**
 
 __pycache__/
 *.pyc
 
 # 共有したい解析結果は明示的に add する (例: doppler_rs/) ので無視しない
+
+# 回帰モデルの入力データ (README.md だけコミットする)
+Python_code/regression_input/*
+!Python_code/regression_input/README.md

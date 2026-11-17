@@ -98,6 +98,14 @@ def find_recordings(trace_dir, session, activities, antennas):
             print(f'  警告: {key} は {",".join(missing)} が無いため使いません')
             continue
         recordings.append((label, [by_ant[a] for a in antennas]))
+
+    # 出力名の末尾は掛けた処理を表す数字 (output_name.py)。2 通り以上あると、
+    # 前処理の違う測定を 1 つの学習データに混ぜてしまう
+    codes = {k.rsplit('_', 1)[-1] for k in groups if k.rsplit('_', 1)[-1].isdigit()}
+    if len(codes) > 1:
+        print(f'  警告: 前処理の違うデータが混ざっています (末尾の数字 '
+              f'{", ".join(sorted(codes))})。片方だけを使うなら、'
+              f'別のフォルダに分けてください')
     return recordings
 
 

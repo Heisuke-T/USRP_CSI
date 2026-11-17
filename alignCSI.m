@@ -67,6 +67,10 @@
 %        - CSI が全部 0 / NaN のパケットは除く (後段で片方だけ消えないように)
 %        - timeSecLocal* に元の (各受信機の) 時刻を残す
 %        - csiMeta.alignment に、揃えたときの情報と検証の結果を残す
+%        - frameLog (decodeIQ_HE.m が保存する全フレームの記録) があれば引き継ぎ、
+%          frameLog.timeSecAligned にこのファイルの時間軸 (切り出し区間の先頭 = 0) での
+%          時刻を足す。IMU 計測アプリの Wi-Fi の合図を探して時刻を合わせるのに使う
+%          (切り出し区間の外のフレームも残す。時刻は区間の外でも同じ規則で変換)
 %    ログ: align_<日時>.log と align_<日時>_summary.csv
 %
 %  注意:
@@ -431,10 +435,29 @@ function res = alignPair(pr, cfg)
     Aout.csiMeta.alignment = infoA;
     Bout.csiMeta.alignment = infoB;
 
+    % --- 全フレームの記録 (IMU との時刻合わせ用) を、揃えた時間軸に直して引き継ぐ ---
+    Aout = carryFrameLog(Aout, A, mapA, winStart);
+    Bout = carryFrameLog(Bout, B, mapB, winStart);
+
     save(pr.refOut,   '-struct', 'Aout', '-v7.3');
     save(pr.otherOut, '-struct', 'Bout', '-v7.3');
     fprintf('  保存しました:\n    %s\n    %s\n', pr.refOut, pr.otherOut);
     res.status = 'OK';
+end
+
+function S = carryFrameLog(S, src, mapFn, winStart)
+    % decodeIQ_HE.m の frameLog (全フレームの記録) を出力に引き継ぎ、
+    % このファイルの時間軸での時刻 timeSecAligned を足す。
+    % 変換は CSI と同じ mapA / mapB (サンプルの抜けも考慮) を使う。
+    if ~isfield(src, 'frameLog') || isempty(src.frameLog) || ~isfield(src.frameLog, 'timeSec')
+        return;
+    end
+    F = src.frameLog;
+    F.timeSecAligned = reshape(mapFn(double(F.timeSec(:))) - winStart, [], 1);
+    F.timeAxisNote = ['timeSec = this receiver''s original time (seconds from its capture start); ', ...
+                      'timeSecAligned = time on the aligned axis of this file (0 = window start). ', ...
+                      'Frames outside the window are kept.'];
+    S.frameLog = F;
 end
 
 function res = failResult(res, msg)

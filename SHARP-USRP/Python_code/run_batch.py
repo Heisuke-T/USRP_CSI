@@ -32,7 +32,9 @@ import traceback
 from collections import Counter
 from datetime import datetime
 
+import output_name
 import usrp_to_sharp
+from CSI_doppler_computation import VARIANTS, variant_dir
 from CSI_doppler_computation import process_one as doppler_one
 from CSI_doppler_plot import load_doppler, plot_doppler
 from CSI_phase_sanitization_H_estimation import estimate_file
@@ -79,6 +81,50 @@ class _DopplerArgs:
         self.sub_sampling = a.sub_sampling
         self.despike = a.despike
         self.despike_sigmas = a.despike_sigmas
+        self.name_style = a.name_style
+        self.save_unnormalized = a.save_unnormalized
+
+
+def _out_stem(args, stem, variant='normalized', keep_stream=False):
+    """ドップラー/図の出力名。--name_style code なら共通語を落として数字を付ける。"""
+    if getattr(args, 'name_style', 'code') != 'code':
+        return stem
+    return output_name.build(stem, output_name.flags_for(args, variant),
+                             keep_stream=keep_stream)
+
+
+def _variant_files(args, stem, keep_stream=False):
+    """--save_unnormalized の版の保存先 (doppler_traces_nowinnorm/ など)。
+
+    版ごとに掛かる処理が違うので、名前の数字も版ごとに変わる。
+    """
+    if not args.save_unnormalized:
+        return None
+    return {v: os.path.join(variant_dir(args.doppler_dir, v, args.label),
+                            _out_stem(args, stem, v, keep_stream) + '.txt')
+            for v in VARIANTS}
+
+
+def doppler_only(name, args):
+    """手順4 だけをやり直す (手順0〜3 の結果 processed_phase/ を使う)。
+    すでに処理済みのファイルに、正規化を省いた版を足すときに使う。"""
+    out_dir = (args.out_dir if args.label is None
+               else os.path.join(args.out_dir, args.label))
+    dop_dir = (args.doppler_dir if args.label is None
+               else os.path.join(args.doppler_dir, args.label))
+    meta = None
+    n_tot = args.nss * args.ncore
+    for stream in range(n_tot):
+        mat_stem = f'{name}_stream_{stream}'
+        out_stem = _out_stem(args, mat_stem, keep_stream=n_tot > 1)
+        mat_file = os.path.join(out_dir, mat_stem + '.mat')
+        if not os.path.exists(mat_file):
+            raise FileNotFoundError(f'{mat_file} がありません (--redo で最初からやり直してください)')
+        print('  手順4: ドップラー計算 (正規化を省いた版を追加)')
+        meta = doppler_one(mat_file, os.path.join(dop_dir, out_stem + '.txt'),
+                           _DopplerArgs(args, args.fc),
+                           variant_files=_variant_files(args, mat_stem, n_tot > 1))
+    return meta
 
 
 def expand_inputs(patterns):
@@ -174,16 +220,21 @@ def run_one(in_path, args, name=None):
 
     pngs = []
     for stream in range(n_tot):
-        stem = f'{name}_stream_{stream}'
-        mat_file = os.path.join(out_dir, stem + '.mat')
-        txt_file = os.path.join(dop_dir, stem + '.txt')
+        # 手順0〜3 の中間ファイルは入力の名前のまま。短くするのは
+        # 人が見るドップラーデータと図だけにする
+        mat_stem = f'{name}_stream_{stream}'
+        out_stem = _out_stem(args, mat_stem, keep_stream=n_tot > 1)
+        mat_file = os.path.join(out_dir, mat_stem + '.mat')
+        txt_file = os.path.join(dop_dir, out_stem + '.txt')
         print('  手順4: ドップラー計算')
-        meta = doppler_one(mat_file, txt_file, _DopplerArgs(args, args.fc))
+        meta = doppler_one(mat_file, txt_file, _DopplerArgs(args, args.fc),
+                           variant_files=_variant_files(args, mat_stem,
+                                                        n_tot > 1))
 
         print('  手順5: 描画')
         arr, m = load_doppler(txt_file)
-        png = os.path.join(plot_dir, stem + '.png')
-        plot_doppler(arr, m, png, title=stem, ylim=args.ylim)
+        png = os.path.join(plot_dir, out_stem + '.png')
+        plot_doppler(arr, m, png, title=out_stem, ylim=args.ylim)
         pngs.append(png)
         print(f'    -> {png}')
 
@@ -241,6 +292,11 @@ def main():
     parser.add_argument('--sub_sampling', type=int, default=1,
                         help='N 個に 1 個へ間引く。取得レートが高い測定の'
                              '速度軸を他に揃えるために使う')
+    parser.add_argument('--save_unnormalized', action='store_true',
+                        help='正規化を省いたドップラーも保存する (回帰用)。'
+                             'doppler_traces_nowinnorm/ = 窓ごとの割り算なし、'
+                             'doppler_traces_raw/ = パケットごとの割り算も窓ごとの割り算もなし。'
+                             '処理済みのファイルは、ドップラー計算だけをやり直して追加する')
     parser.add_argument('--remove_static', action='store_true',
                         help='窓内の時間平均 (静止経路) を引く。直接波が強く'
                              '動きが埋もれる場合に使う')
@@ -254,6 +310,11 @@ def main():
                         help='ログの出力先 (既定: ./batch_<日時>.log)')
     parser.add_argument('--redo', action='store_true',
                         help='完了済み (PNG がある) のファイルもやり直す')
+    parser.add_argument('--name_style', choices=['code', 'full'], default='code',
+                        help='ドップラーデータと図の名前の付け方。code (既定): '
+                             '共通語 (WAX202 など) を落とし、掛けた処理の数字を'
+                             '末尾に付ける (T0_A_R_antenna1_134)。'
+                             'full: 入力の名前のまま')
     parser.add_argument('--prefix_parent', action='store_true',
                         help='出力名に親フォルダ名を必ず前置する。'
                              '名前が重なる場合は指定がなくても前置する')
@@ -293,7 +354,7 @@ def main():
         print(f'  - {f}  ({sz:.1f} MB){tag}')
     print('=' * 68)
 
-    results, failures = [], []
+    results, failures, added = [], [], []
     for i, (f, name) in enumerate(zip(files, names), 1):
         print(f'\n[{i}/{len(files)}] {name}  '
               f'({datetime.now():%H:%M:%S})')
@@ -302,8 +363,24 @@ def main():
         # 完了済みなら飛ばす
         plot_dir = (args.plot_dir if args.label is None
                     else os.path.join(args.plot_dir, args.label))
-        done = os.path.join(plot_dir, f'{name}_stream_0.png')
+        n_tot = args.nss * args.ncore
+        done = os.path.join(
+            plot_dir,
+            _out_stem(args, f'{name}_stream_0', keep_stream=n_tot > 1) + '.png')
         if os.path.exists(done) and not args.redo:
+            vf = _variant_files(args, f'{name}_stream_0', n_tot > 1)
+            if vf and not all(os.path.exists(p) for p in vf.values()):
+                # 位相の処理は済んでいるので、ドップラー計算だけやり直して版を足す
+                try:
+                    t1 = time.time()
+                    doppler_only(name, args)
+                    print(f'  正規化を省いた版を追加しました ({(time.time() - t1):.0f} 秒)')
+                    added.append(name)
+                except Exception as e:                   # noqa: BLE001
+                    failures.append((f, str(e)))
+                    print(f'  *** 失敗: {e}')
+                    traceback.print_exc(file=sys.stdout)
+                continue
             print(f'  完了済みのため飛ばします ({done})。'
                   f'やり直すには --redo')
             continue
@@ -320,7 +397,8 @@ def main():
 
     print('\n' + '=' * 68)
     print(f'全体の所要時間: {(time.time() - t_all)/60:.1f} 分')
-    print(f'成功 {len(results)} 件 / 失敗 {len(failures)} 件')
+    print(f'成功 {len(results)} 件 / 失敗 {len(failures)} 件'
+          + (f' / 正規化を省いた版だけ追加 {len(added)} 件' if added else ''))
     if results:
         print('\n成功:')
         for r in results:

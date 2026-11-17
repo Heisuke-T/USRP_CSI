@@ -36,7 +36,35 @@ python run_har.py --train S1 --test S2,S3 --antennas antenna1,antenna2 --antenna
 - 失敗したら止まって失敗した工程を表示する。ログを読んで原因を調べてから報告する
 - ドップラー計算の設定 (`--noise_level`, `--despike`, `--remove_static` など) は
   S1〜S3 で揃える。以前の実行例は `--noise_level -3.0 --despike` (変えるならユーザーに確認する)
-- 必要なパッケージ: `pip install numpy scipy osqp h5py matplotlib tensorflow scikit-learn`
+- 受信レートの低下を模擬して欠落率ごとの正解率を比べる (`packet_loss.py`, 要 `processed_phase/`):
+  `python run_har.py --train S1 --test S2,S3 --noise_level -3.0 --despike --loss burst --loss_rate 0.1,0.2,0.4 --burst_ms 100`
+  (`--loss` は random / burst / periodic / sustained。詳細は `SHARP-USRP/README.md`)
+- 必要なパッケージ: `pip install numpy scipy osqp h5py matplotlib tensorflow scikit-learn xgboost`
+
+## ドップラー → ENMO の回帰
+
+`regress_enmo.py`: 線形回帰・ランダムフォレスト・XGBoost・MLP・SVR・ガウス過程回帰・CNN で、ドップラー (既定は特徴量 F:
+動いている速度ビン (|v| ≥ 0.65 m/s) で足したドップラーの時間微分 (Savitzky-Golay、窓 0.2 秒) の 1 秒平均。F1 / F2a / F2b。
+前に作った特徴量 A: 平均スペクトル、
+B: 物理特徴量。C: 速さの時間微分は実データで効かなかったので既定では使わない。D: 1 秒の中の時間変化、
+E: 強さをそろえたスペクトルは `--features` で指定。`B+D@1` で前後 1 区間の特徴量も並べる。
+`--importance` で決定木の特徴量の重要度) から
+腰の ENMO (加速度計算ソフトが出す max(合成加速度 − 1 g, 0)、1 秒ごと) を推定して比べる。`--target body` で
+全身の ENMO (腰・大腿・下腿・手首の 4 台の ENMO の合計、列 `ENMO_body(mG)`。4 台そろった試行だけ) を正解にする。入力は
+`regression_input/<試行名>/` (置き方は `regression_input/README.md`、データはコミットしない。
+`regression_input/その他/` はユーザーの希望で読まない: `--exclude` の既定)、
+結果は `outputs/regression_<日時>/`。評価は試行ごとに分ける (ランダムに分けない)。
+`--split A1:A2` で学習とテストを指定、`--cnn_seeds 5` で CNN を 5 回学習、`--cnn_study` で CNN が効く理由の確認
+(時間の順番の入れ替え・時間平均・1 次元 CNN・前後 1 秒・Grad-CAM)。前後 2 秒の CNN は `--models cnn5s`。
+`--features W`（腰の ENMO の 1 秒平均）・`WS`（腰の ENMO の 50 Hz の値の統計）・`R`・`RS`（手首、加速度計算ソフト v2.2 の ENMO_wrist(mG)）を `--target body` と使うと「腰の ENMO → 全身の ENMO」をドップラーと比べられる。`--models cnn_imu,cnn_imu3s`（`--imu_part waist|wrist`）で加速度計の ENMO の 50 Hz の波形の 1 次元 CNN（`--imu_input 6axis` で 3 軸加速度＋角速度、加速度計算ソフト v2.3 の `*_imu_waveform.csv`）。`--features M`（ドップラーの図そのもの）・`--pca auto`（A・M の前に PCA）・`--models pls`（PLS 回帰）でドップラーを線形モデルなどに入れる。評価は MAE・nRMSE（RMSE ÷ 正解の平均 [%]）・R²・r と MAPE（正解が `--mape_min`、既定 50 mG 未満の区間は除く）。`--gain_jitter 0,3,6` で CNN の学習のときだけ動いている速度ビンの強さを区間ごと・アンテナごとに最大 ±N dB ゆらす
+(測った回ごとの強さの違いに強くする。A1 だけ動いている成分が強く、A2〜A4 で学習すると A1 を高く出したため)
+
+`wave_video.py --trial A5_XR1 --pred <predictions.csv> [--wave <試行>_imu_waveform.csv] [--offset S] [--window 10]`: 1 試行の ENMO（実測・Wi-Fi・腰の加速度計の推定、50 Hz の各センサの ENMO）を時間に合わせて描く mp4（測定中のカメラの動画と並べて確かめる）
+
+結果の受け渡し: ユーザーはワークステーションで回したあと `python share_results.py` を実行する。
+結果の軽いファイル (log.txt・metrics*.csv・predictions.csv・comparison.png・cnn_gradcam_*.png など) が
+`SHARP-USRP/Python_code/shared_results/<結果のフォルダ名>/` に入ってこのブランチにプッシュされるので、
+「○○を見て」と言われたら `git pull` してそこを読む
 
 ## テスト
 
@@ -45,11 +73,14 @@ cd SHARP-USRP/Python_code
 python tests/test_har.py        # データセット作成〜学習〜テスト、run_har.py (合成データ)
 python tests/test_pipeline.py   # 位相サニタイゼーション
 python tests/test_doppler.py    # ドップラー計算
+python tests/test_packet_loss.py  # 受信レートの低下 (パケット欠落) の模擬
+python tests/test_doppler_variants.py  # 正規化を省いたドップラー (--save_unnormalized)
+python tests/test_regress_enmo.py      # ドップラー → ENMO の回帰 (合成データ)
 ```
 
 ## 約束
 
 - ブランチは `claude/usrp-wifi-iq-capture-ur0hq1` の 1 本だけを使う (ユーザーの希望)。
   新しいブランチを作らない
-- 測定データ・中間生成物・モデル・結果 (`.mat`, `doppler_traces/`, `*.keras`, `outputs/`)
-  はコミットしない (`.gitignore` 済み)
+- 測定データ・中間生成物・モデル・結果 (`.mat`, `doppler_traces*/`, `*.keras`, `outputs/`)
+  はコミットしない (`.gitignore` 済み)。例外は `share_results.py` が入れる `shared_results/` だけ
